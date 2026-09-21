@@ -136,8 +136,8 @@ echo "Running $TOOL on $APPDIR -> $OUT_FILE..."
 ARCH=x86_64 "$TOOL" "$APPDIR" "$OUT_FILE"
 chmod +x "$OUT_FILE"
 
-# Optional Mirror to ~/Downloads
-if [ "${MIRROR_TO_DOWNLOADS:-1}" = "1" ]; then
+# Optional Mirror to ~/Downloads (Disabled by default to preserve local testing AppImage)
+if [ "${MIRROR_TO_DOWNLOADS:-0}" = "1" ]; then
     echo "Mirroring to ~/Downloads..."
     cp -f "$OUT_FILE" /home/deck/Downloads/Nihongo_Master-x86_64.AppImage
     chmod +x /home/deck/Downloads/Nihongo_Master-x86_64.AppImage
