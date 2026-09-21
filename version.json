@@ -1,10 +1,11 @@
 {
-  "version": "1.0.0",
-  "tag_name": "v1.0.0",
-  "name": "Nihongo Master v1.0.0",
+  "version": "1.0.1",
+  "tag_name": "v1.0.1",
+  "name": "Nihongo Master v1.0.1",
   "release_date": "2026-09-21",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.0.0/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.0.0/Nihongo_Master-x86_64.AppImage",
-  "changelog": "Initial release of Nihongo Master v1.0.0: Definitive retro Japanese learning arcade racer featuring unified Hiragana & Katakana curriculum (142 Kana), 11 dynamic courses, 16:10 Steam Deck optimization, remastered audio, and built-in live auto-updater!"
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.0.1/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.0.1/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.0.1: Realistic multi-harmonic water wave effects on Stage 3 with organic swash and depth gradient, default master volume set to 20%, resilient auto-updater with SSL certificate detection and touchscreen hitboxes."
 }
+

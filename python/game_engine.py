@@ -589,7 +589,7 @@ class GameEngine:
     def open_update_dialog(self):
         self.is_update_dialog_open = True
         self.audio.play_match()
-        self.update_mgr.check_for_updates()
+        self.update_mgr.check_for_updates(force=True)
 
     def close_update_dialog(self):
         if self.update_mgr.state != UpdateManager.STATE_DOWNLOADING:
@@ -736,35 +736,59 @@ class GameEngine:
                 if self.is_update_dialog_open:
                     cx, cy = self.virtual_width // 2, self.virtual_height // 2
                     modal_rect = pygame.Rect(cx - 490, cy - 280, 980, 560)
-                    btn_rect = pygame.Rect(cx - 420, cy + 190, 840, 65)
-                    if btn_rect.collidepoint(mx, my):
-                        self.menu_confirm()
-                    elif not modal_rect.collidepoint(mx, my):
-                        self.close_update_dialog()
+                    modal_y = cy - 280
+                    modal_h = 560
+                    state = self.update_mgr.state
+                    
+                    if state == UpdateManager.STATE_UPDATE_AVAILABLE:
+                        btn_inst = pygame.Rect(cx - 390, modal_y + modal_h - 70, 360, 50)
+                        btn_canc = pygame.Rect(cx + 30, modal_y + modal_h - 70, 360, 50)
+                        if btn_inst.collidepoint(mx, my):
+                            self.menu_confirm()
+                        elif btn_canc.collidepoint(mx, my):
+                            self.close_update_dialog()
+                        elif not modal_rect.collidepoint(mx, my):
+                            self.close_update_dialog()
+                    elif state == UpdateManager.STATE_SUCCESS:
+                        btn_rst = pygame.Rect(cx - 390, modal_y + modal_h - 70, 360, 50)
+                        btn_cls = pygame.Rect(cx + 30, modal_y + modal_h - 70, 360, 50)
+                        if btn_rst.collidepoint(mx, my):
+                            self.menu_confirm()
+                        elif btn_cls.collidepoint(mx, my):
+                            self.close_update_dialog()
+                        elif not modal_rect.collidepoint(mx, my):
+                            self.close_update_dialog()
+                    elif state in (UpdateManager.STATE_UP_TO_DATE, UpdateManager.STATE_ERROR):
+                        btn_ok = pygame.Rect(cx - 240, modal_y + modal_h - 70, 480, 50)
+                        if btn_ok.collidepoint(mx, my):
+                            self.close_update_dialog()
+                        elif not modal_rect.collidepoint(mx, my):
+                            self.close_update_dialog()
                 elif self.is_title_screen and not self.is_volume_menu_open:
                     cx = self.virtual_width // 2
                     if getattr(self.hud, "spr_title_logo", None):
-                        m_start = 584
+                        m_start = 562
                         sp = 64
                     else:
                         title_y = int(self.virtual_height * 0.22)
                         sub_y = title_y + 68
                         m_start = sub_y + 148
                         sp = 68
-                    if (m_start - 24) <= my <= (m_start + 24) and (cx - 520) <= mx <= (cx + 520):
+                    pad = 28
+                    if (m_start - pad) <= my <= (m_start + pad) and (cx - 520) <= mx <= (cx + 520):
                         self.toggle_game_mode()
-                    elif (m_start + sp - 24) <= my <= (m_start + sp + 24) and (cx - 360) <= mx <= (cx + 360):
+                    elif (m_start + sp - pad) <= my <= (m_start + sp + pad) and (cx - 360) <= mx <= (cx + 360):
                         self.start_game_from_title()
-                    elif (m_start + sp * 2 - 24) <= my <= (m_start + sp * 2 + 24) and (cx - 540) <= mx <= (cx + 540):
+                    elif (m_start + sp * 2 - pad) <= my <= (m_start + sp * 2 + pad) and (cx - 540) <= mx <= (cx + 540):
                         if mx < cx:
                             self.menu_left()
                         else:
                             self.menu_right()
-                    elif (m_start + sp * 3 - 24) <= my <= (m_start + sp * 3 + 24) and (cx - 360) <= mx <= (cx + 360):
+                    elif (m_start + sp * 3 - pad) <= my <= (m_start + sp * 3 + pad) and (cx - 360) <= mx <= (cx + 360):
                         self.toggle_volume_menu()
-                    elif (m_start + sp * 4 - 24) <= my <= (m_start + sp * 4 + 24) and (cx - 360) <= mx <= (cx + 360):
+                    elif (m_start + sp * 4 - pad) <= my <= (m_start + sp * 4 + pad) and (cx - 360) <= mx <= (cx + 360):
                         self.open_update_dialog()
-                    elif (m_start + sp * 5 - 24) <= my <= (m_start + sp * 5 + 24) and (cx - 360) <= mx <= (cx + 360):
+                    elif (m_start + sp * 5 - pad) <= my <= (m_start + sp * 5 + pad) and (cx - 360) <= mx <= (cx + 360):
                         self.quit_game()
                 elif self.is_volume_menu_open:
                     cx = self.virtual_width // 2 if self.is_title_screen else 760

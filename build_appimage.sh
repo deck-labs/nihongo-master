@@ -13,11 +13,11 @@ VENV_PATH="/tmp/pygame_build_venv"
 if [ ! -d "$VENV_PATH" ]; then
     echo "Creating virtual environment at $VENV_PATH..."
     python3 -m venv "$VENV_PATH"
-    "$VENV_PATH/bin/pip" install --upgrade pip setuptools pygame pyinstaller
+    "$VENV_PATH/bin/pip" install --upgrade pip setuptools pygame pyinstaller certifi
 fi
 
 # Ensure packages are up to date
-"$VENV_PATH/bin/pip" install -q pygame pyinstaller
+"$VENV_PATH/bin/pip" install -q pygame pyinstaller certifi
 
 # 2. Compile with PyInstaller
 echo "=== 1. Compiling Standalone Python Distribution ==="

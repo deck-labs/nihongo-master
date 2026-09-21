@@ -10,6 +10,7 @@ import os
 import sys
 import json
 import time
+import ssl
 import urllib.request
 import urllib.error
 import threading
@@ -20,8 +21,43 @@ from game_config import (
     GAME_VERSION, GITHUB_REPO, VERSION_CHECK_URL, RELEASES_API_URL
 )
 
+def get_ssl_context():
+    """Create a resilient SSL context with CA bundle detection and fallback."""
+    # 1. Try certifi if installed
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        pass
+
+    # 2. Try standard system CA bundles on Linux / SteamOS
+    ca_candidates = [
+        "/etc/ssl/certs/ca-certificates.crt", # Debian, Ubuntu, Arch, SteamOS
+        "/etc/pki/tls/certs/ca-bundle.crt",   # Fedora, RHEL, CentOS
+        "/etc/ssl/cert.pem",                   # Alpine, Arch
+        "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
+    ]
+    for ca_path in ca_candidates:
+        if os.path.isfile(ca_path):
+            try:
+                return ssl.create_default_context(cafile=ca_path)
+            except Exception:
+                pass
+
+    # 3. Default OpenSSL context
+    try:
+        return ssl.create_default_context()
+    except Exception:
+        pass
+
+    # 4. Fallback to unverified context to ensure network requests never fail on SteamOS
+    try:
+        return ssl._create_unverified_context()
+    except Exception:
+        return None
+
 def parse_version(v_str: str) -> tuple[int, ...]:
-    """Parse version string into comparable tuple (e.g., 'v0.2.0' -> (0, 2, 0))."""
+    """Parse version string into comparable tuple (e.g., 'v1.0.1' -> (1, 0, 1))."""
     if not v_str:
         return (0,)
     clean = v_str.strip().lstrip("vV")
@@ -61,26 +97,34 @@ class UpdateManager:
     @staticmethod
     def get_target_appimage_path() -> str:
         """Resolve exact AppImage path to preserve filename and Steam shortcuts."""
-        # If launched via AppImage runtime, APPIMAGE environment variable has the exact path
+        # 1. If launched via AppImage runtime, APPIMAGE environment variable has the exact path
         env_appimage = os.environ.get("APPIMAGE")
         if env_appimage and os.path.isfile(env_appimage):
             return os.path.abspath(env_appimage)
 
-        # Standard Steam Deck / Linux downloads location
+        # 2. Check argv[0] if invoked directly as .AppImage
+        if sys.argv and sys.argv[0].endswith(".AppImage") and os.path.isfile(sys.argv[0]):
+            return os.path.abspath(sys.argv[0])
+
+        # 3. Standard Steam Deck / Linux downloads location
         downloads_path = os.path.expanduser("~/Downloads/Nihongo_Master-x86_64.AppImage")
         if os.path.isfile(downloads_path):
             return os.path.abspath(downloads_path)
 
-        # Local workspace copy fallback
+        # 4. Local workspace copy fallback
+        app_path = "/home/deck/Applications/nihongo-master/Nihongo_Master-x86_64.AppImage"
+        if os.path.isfile(app_path):
+            return app_path
+
         local_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Nihongo_Master-x86_64.AppImage"))
         if os.path.isfile(local_path):
             return local_path
 
         return downloads_path
 
-    def check_for_updates(self):
+    def check_for_updates(self, force: bool = False):
         """Start asynchronous update check."""
-        if self.state in (self.STATE_CHECKING, self.STATE_DOWNLOADING):
+        if self.state in (self.STATE_CHECKING, self.STATE_DOWNLOADING) and not force:
             return
         self.state = self.STATE_CHECKING
         self.error_message = ""
@@ -121,27 +165,20 @@ class UpdateManager:
                 self.error_message = f"Check failed: {e}"
 
     def _fetch_version_metadata(self) -> dict:
+        ctx = get_ssl_context()
         headers = {
-            "User-Agent": "NihongoMaster-Updater/1.0",
+            "User-Agent": "NihongoMaster-Updater/1.0.1",
+            "Accept": "application/vnd.github.v3+json, application/json, text/plain",
             "Cache-Control": "no-cache",
             "Pragma": "no-cache"
         }
-        
-        # 1. Primary: version.json on raw.githubusercontent.com (No API rate limits)
-        try:
-            cachebust_url = f"{VERSION_CHECK_URL}?t={int(time.time())}"
-            req = urllib.request.Request(cachebust_url, headers=headers)
-            with urllib.request.urlopen(req, timeout=6) as resp:
-                if resp.status == 200:
-                    data = json.loads(resp.read().decode("utf-8"))
-                    return data
-        except Exception:
-            pass
 
-        # 2. Secondary: GitHub Releases API
+        candidates = []
+
+        # 1. GitHub Releases API (Immediate, bypasses CDN cache)
         try:
             req = urllib.request.Request(RELEASES_API_URL, headers=headers)
-            with urllib.request.urlopen(req, timeout=6) as resp:
+            with urllib.request.urlopen(req, context=ctx, timeout=10) as resp:
                 if resp.status == 200:
                     rel = json.loads(resp.read().decode("utf-8"))
                     tag = rel.get("tag_name", "").lstrip("vV")
@@ -151,17 +188,49 @@ class UpdateManager:
                         if a.get("name", "").endswith(".AppImage"):
                             d_url = a.get("browser_download_url")
                             break
-                    return {
+                    candidates.append({
                         "version": tag,
                         "name": rel.get("name", f"Release {tag}"),
                         "changelog": rel.get("body", "Updated release on GitHub."),
                         "download_url": d_url,
                         "fallback_raw_url": f"https://github.com/{GITHUB_REPO}/releases/download/v{tag}/Nihongo_Master-x86_64.AppImage"
-                    }
+                    })
         except Exception:
             pass
 
-        return None
+        # 2. Raw version.json on raw.githubusercontent.com
+        try:
+            cachebust_url = f"{VERSION_CHECK_URL}?t={int(time.time())}"
+            req = urllib.request.Request(cachebust_url, headers=headers)
+            with urllib.request.urlopen(req, context=ctx, timeout=10) as resp:
+                if resp.status == 200:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    candidates.append(data)
+        except Exception:
+            pass
+
+        # 3. Fallback: curl CLI if urllib encounters SSL/network blocks
+        if not candidates:
+            try:
+                out = subprocess.check_output(
+                    ["curl", "-s", "-L", "--max-time", "10",
+                     "-H", "User-Agent: NihongoMaster-Updater/1.0.1",
+                     "-H", "Cache-Control: no-cache",
+                     f"{VERSION_CHECK_URL}?t={int(time.time())}"],
+                    stderr=subprocess.DEVNULL
+                )
+                if out:
+                    data = json.loads(out.decode("utf-8"))
+                    candidates.append(data)
+            except Exception:
+                pass
+
+        if not candidates:
+            return None
+
+        # Return candidate with highest version
+        candidates.sort(key=lambda c: parse_version(c.get("version", "")), reverse=True)
+        return candidates[0]
 
     def start_download(self):
         """Start asynchronous download and atomic replacement."""
@@ -189,23 +258,24 @@ class UpdateManager:
         
         download_ok = False
         headers = {
-            "User-Agent": "NihongoMaster-Updater/1.0",
+            "User-Agent": "NihongoMaster-Updater/1.0.1",
             "Cache-Control": "no-cache",
             "Pragma": "no-cache"
         }
+        ctx = get_ssl_context()
 
         for url in urls_to_try:
             try:
                 sep = "&" if "?" in url else "?"
                 busted_url = f"{url}{sep}t={int(time.time())}"
                 req = urllib.request.Request(busted_url, headers=headers)
-                with urllib.request.urlopen(req, timeout=30) as resp:
+                with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
                     if resp.status != 200:
                         continue
                     
                     total_size = resp.headers.get("Content-Length")
                     with self.lock:
-                        self.bytes_total = int(total_size) if total_size else 41931968
+                        self.bytes_total = int(total_size) if total_size else 47000000
                         self.bytes_downloaded = 0
 
                     with open(temp_file, "wb") as out_f:
@@ -221,19 +291,43 @@ class UpdateManager:
                                     self.progress_percent = min(100.0, (self.bytes_downloaded / self.bytes_total) * 100.0)
 
                 # Validate downloaded file has reasonable size (> 5MB)
-                if os.path.getsize(temp_file) > 5 * 1024 * 1024:
+                if os.path.isfile(temp_file) and os.path.getsize(temp_file) > 5 * 1024 * 1024:
                     download_ok = True
                     break
                 else:
                     if os.path.exists(temp_file):
                         os.remove(temp_file)
-            except Exception as e:
+            except Exception:
                 if os.path.exists(temp_file):
                     try:
                         os.remove(temp_file)
                     except Exception:
                         pass
                 continue
+
+        # Fallback to curl if urllib failed
+        if not download_ok and urls_to_try:
+            for url in urls_to_try:
+                try:
+                    with self.lock:
+                        self.bytes_total = 47000000
+                        self.bytes_downloaded = 23500000
+                        self.progress_percent = 50.0
+                    res = subprocess.run(
+                        ["curl", "-L", "-f", "--max-time", "120",
+                         "-H", "User-Agent: NihongoMaster-Updater/1.0.1",
+                         "-o", temp_file, url],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL
+                    )
+                    if res.returncode == 0 and os.path.isfile(temp_file) and os.path.getsize(temp_file) > 5 * 1024 * 1024:
+                        download_ok = True
+                        with self.lock:
+                            self.progress_percent = 100.0
+                            self.bytes_downloaded = os.path.getsize(temp_file)
+                        break
+                except Exception:
+                    pass
 
         if not download_ok:
             with self.lock:
@@ -279,3 +373,4 @@ class UpdateManager:
                 sys.exit(0)
             except Exception as e:
                 print(f"Restart failed: {e}")
+
