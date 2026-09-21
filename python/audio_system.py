@@ -10,7 +10,7 @@ from game_config import get_asset_path
 
 class AudioSystem:
     def __init__(self):
-        self.master_volume = 0.30
+        self.master_volume = 0.20
         self.engine_volume = 0.70
         self.sfx_volume = 0.90
         self.music_volume = 0.80
