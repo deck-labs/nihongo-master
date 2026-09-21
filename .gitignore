@@ -1,0 +1,16 @@
+# Python bytecode & caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.spec
+build/
+dist/
+
+# Binaries & Bundles (published via GitHub Releases)
+*.AppImage
+*.AppDir
+
+# Temporary files & OS files
+*.bmp
+/tmp/
+.DS_Store
