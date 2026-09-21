@@ -41,6 +41,9 @@ class RoadRenderer:
         self.tex_deep_ocean = None
         self.tex_caustics = None
         self.tex_foam_wake = None
+        self.tex_tropical_ocean = None
+        self.tex_foam_lace = None
+        self.tex_breaker_crest = None
         self.surf_bridge_shadow = None
         self.surf_wake = None
         self.ocean_sparkles = []
@@ -108,6 +111,9 @@ class RoadRenderer:
         self.tex_deep_ocean = load_img("textures/water_deep_ocean.png")
         self.tex_caustics = load_img("textures/water_caustics.png")
         self.tex_foam_wake = load_img("textures/water_foam_wake.png")
+        self.tex_tropical_ocean = load_img("textures/water_tropical_ocean.png")
+        self.tex_foam_lace = load_img("textures/water_foam_lace.png")
+        self.tex_breaker_crest = load_img("textures/water_breaker_crest.png")
         
         # Pre-allocated translucent bridge shadow & hydrodynamic pylon wake
         self.surf_bridge_shadow = pygame.Surface((32, 6), pygame.SRCALPHA)
@@ -116,29 +122,32 @@ class RoadRenderer:
         self.surf_wake = pygame.Surface((16, 6), pygame.SRCALPHA)
         self.surf_wake.fill((235, 250, 255, 175))
         
-        # Pre-allocated Stage 3 smooth tropical depth gradient (seamless blend into caustics & deep ocean)
-        self.stage3_grad_w = 200
+        # Pre-allocated Stage 3 smooth tropical depth gradient (crystalline shallows to deep emerald-turquoise)
+        self.stage3_grad_w = 260
         self.surf_stage3_gradient = pygame.Surface((self.stage3_grad_w, 6), pygame.SRCALPHA)
         for dx in range(self.stage3_grad_w):
             t = dx / float(self.stage3_grad_w)
-            if t < 0.25:
-                sub_t = t / 0.25
-                r = int(52 * (1.0 - sub_t) + 26 * sub_t)
-                g = int(222 * (1.0 - sub_t) + 182 * sub_t)
-                b = int(235 * (1.0 - sub_t) + 218 * sub_t)
-                a = int(195 * (1.0 - sub_t) + 235 * sub_t)
-            elif t < 0.60:
-                sub_t = (t - 0.25) / 0.35
-                r = int(26 * (1.0 - sub_t) + 10 * sub_t)
-                g = int(182 * (1.0 - sub_t) + 105 * sub_t)
-                b = int(218 * (1.0 - sub_t) + 165 * sub_t)
-                a = 245
+            if t < 0.20:
+                sub_t = t / 0.20
+                # Crystalline luminous cyan/aquamarine over pale ivory sand
+                r = int(95 * (1.0 - sub_t) + 45 * sub_t)
+                g = int(235 * (1.0 - sub_t) + 215 * sub_t)
+                b = int(228 * (1.0 - sub_t) + 205 * sub_t)
+                a = int(185 * (1.0 - sub_t) + 225 * sub_t)
+            elif t < 0.55:
+                sub_t = (t - 0.20) / 0.35
+                # Radiant emerald-turquoise shallows
+                r = int(45 * (1.0 - sub_t) + 16 * sub_t)
+                g = int(215 * (1.0 - sub_t) + 175 * sub_t)
+                b = int(205 * (1.0 - sub_t) + 165 * sub_t)
+                a = int(225 * (1.0 - sub_t) + 200 * sub_t)
             else:
-                sub_t = (t - 0.60) / 0.40
-                r = int(10 * (1.0 - sub_t) + COLOR_WATER_DEEP[0] * sub_t)
-                g = int(105 * (1.0 - sub_t) + COLOR_WATER_DEEP[1] * sub_t)
-                b = int(165 * (1.0 - sub_t) + COLOR_WATER_DEEP[2] * sub_t)
-                a = int(245 * (1.0 - sub_t))
+                sub_t = (t - 0.55) / 0.45
+                # Soft transition into deep tropical turquoise ocean
+                r = int(16 * (1.0 - sub_t) + 5 * sub_t)
+                g = int(175 * (1.0 - sub_t) + 130 * sub_t)
+                b = int(165 * (1.0 - sub_t) + 135 * sub_t)
+                a = int(200 * (1.0 - sub_t))
             pygame.draw.line(self.surf_stage3_gradient, (r, g, b, a), (dx, 0), (dx, 5), 1)
 
         # Fixed pseudo-random sparkle locations for deterministic specular glimmer
@@ -1360,170 +1369,219 @@ class RoadRenderer:
 
     def _render_stage3(self, surface: pygame.Surface):
         slice_h = 6
-        wave_time = self.frames * 0.04
+        wave_time = self.frames * 0.035
         scr_h = self.screen_height
         ply_y = self.player_screen_y
         
-        # 1. Base textured sand background across entire viewport
+        # 1. Base pale ivory beach sand background across entire viewport
         self.draw_tiled_texture(surface, self.tex_sand, (GAME_X, 0, GAME_W, scr_h))
         
-        tw = self.tex_deep_ocean.get_width() if self.tex_deep_ocean else 256
-        th = self.tex_deep_ocean.get_height() if self.tex_deep_ocean else 256
-        cw = self.tex_caustics.get_width() if self.tex_caustics else 256
-        ch = self.tex_caustics.get_height() if self.tex_caustics else 256
+        ocean_tex = self.tex_tropical_ocean or self.tex_deep_ocean or self.tex_water
+        tw = ocean_tex.get_width() if ocean_tex else 512
+        th = ocean_tex.get_height() if ocean_tex else 512
         
-        base_ox = int(math.sin(wave_time * 0.35) * 32.0)
-        base_oy = int(self.track_distance * 0.38 + self.frames * 1.2)
-        caustic_ox = int(math.cos(wave_time * 0.45) * 42.0 + self.frames * 0.8)
-        caustic_oy = int(-self.track_distance * 0.22 - self.frames * 1.0)
+        lace_tex = self.tex_foam_lace
+        lw = lace_tex.get_width() if lace_tex else 512
+        lh = lace_tex.get_height() if lace_tex else 512
 
-        # Wave cadence: 4.8-second natural ocean swell cycle
-        cycle_base = wave_time * 0.42
+        crest_tex = self.tex_breaker_crest
+        cw = crest_tex.get_width() if crest_tex else 90
+        ch = crest_tex.get_height() if crest_tex else 512
+
+        base_ox = int(math.sin(wave_time * 0.25) * 25.0)
+        base_oy = int(self.track_distance * 0.35 + self.frames * 1.0)
+        
+        lace_ox = int(math.cos(wave_time * 0.3) * 18.0 + self.frames * 0.6)
+        lace_oy = int(-self.track_distance * 0.20 - self.frames * 0.8)
+
+        def blit_w_y(dest_surf, src_surf, dx, dy, sx, sy, w, h, sh):
+            if sy + h <= sh:
+                dest_surf.blit(src_surf, (dx, dy), (sx, sy, w, h))
+            else:
+                h1 = sh - sy
+                dest_surf.blit(src_surf, (dx, dy), (sx, sy, w, h1))
+                dest_surf.blit(src_surf, (dx, dy + h1), (sx, 0, w, h - h1))
+
+        # Wave swell cycle (~4.8 seconds per full cycle)
+        cycle_base = wave_time * 0.28
+        cycle_t = cycle_base % 1.0
+
+        # Hydrodynamic swash / recession kinematics:
+        # Phase [0.00, 0.28]: Rapid breaker crash and surge rushing up the sand (28% of cycle)
+        # Phase [0.28, 0.35]: High-water mark apex pause & sheet spread (7% of cycle)
+        # Phase [0.35, 1.00]: Slow reluctant backwash recession dragging back to sea (65% of cycle!)
+        if cycle_t < 0.28:
+            u = cycle_t / 0.28
+            surge_ease = math.sin(u * math.pi * 0.5)
+            tide_factor = 1.0 - surge_ease
+            is_surging = True
+            is_receding = False
+        elif cycle_t < 0.35:
+            tide_factor = 0.0
+            is_surging = False
+            is_receding = False
+        else:
+            v = (cycle_t - 0.35) / 0.65
+            recede_ease = math.pow(v, 1.35)
+            tide_factor = recede_ease
+            is_surging = False
+            is_receding = True
+
+        # Multi-tiered wave phases & travel positions
+        p1 = (cycle_base + 0.38) % 1.0
+        roller1_dist = (1.0 - p1) * 135.0 + 28.0
+
+        p2 = (cycle_base + 0.72) % 1.0
+        roller2_dist = (1.0 - p2) * 180.0 + 135.0
 
         for y in range(0, scr_h, slice_h):
             world_y = self.track_distance + (ply_y - y)
             r_left, r_right = self.get_road_edges(3, world_y)
             r_w = r_right - r_left
+
+            # Continuous organic coastal shoreline curve (zero tears/cuts across scanlines)
+            scallop = (
+                math.sin(world_y * 0.0032 + wave_time * 0.20) * 15.0 +
+                math.cos(world_y * 0.0075) * 8.0 +
+                math.sin(world_y * 0.016 - wave_time * 0.12) * 3.5
+            )
             
-            coast_base = r_right + 118.0
-            high_wash_x = max(r_right + 26.0, coast_base - 88.0)  # Maximum reach onto sand near road
-            low_wash_x = min(GAME_X + GAME_W - 60.0, coast_base + 14.0)  # Receded tide line back in sea
+            # Maintain visible ocean expanse across all road bends
+            max_coast = (GAME_X + GAME_W) - 155.0
+            coast_base = min(max_coast, r_right + 72.0) + scallop
 
-            # Asymmetric coastal wave cycle (with slight lateral angle along shoreline)
-            cycle_t = (cycle_base + world_y * 0.0032 + math.sin(world_y * 0.007) * 0.05) % 1.0
+            high_wash_x = max(r_right + 22.0, coast_base - 65.0)
+            low_wash_x = coast_base + 30.0
 
-            # 1. Hydrodynamic Swash & Recession Motion:
-            # - Phase [0.00, 0.28]: Rapid breaker crash and surge rushing up the sand (28% of time)
-            # - Phase [0.28, 0.35]: High-water mark apex pause & sheet glass spread (7% of time)
-            # - Phase [0.35, 1.00]: Slow reluctant backwash recession dragging back to sea (65% of time!)
-            if cycle_t < 0.28:
-                u = cycle_t / 0.28
-                surge_ease = math.sin(u * math.pi * 0.5)
-                water_edge_x = low_wash_x - (low_wash_x - high_wash_x) * surge_ease
-                is_surging = True
-                is_receding = False
-            elif cycle_t < 0.35:
-                water_edge_x = high_wash_x
-                is_surging = False
-                is_receding = False
-            else:
-                v = (cycle_t - 0.35) / 0.65
-                recede_ease = math.pow(v, 1.35)
-                water_edge_x = high_wash_x + (low_wash_x - high_wash_x) * recede_ease
-                is_surging = False
-                is_receding = True
+            water_edge_x = high_wash_x + (low_wash_x - high_wash_x) * tide_factor
 
-            # 2. Exposed Saturated Wet Sand Zone (with tideline and stranded foam lace)
+            # -------------------------------------------------------------
+            # 2. Exposed Saturated Wet Sand (Swash Zone)
+            # -------------------------------------------------------------
             if water_edge_x > high_wash_x:
                 wet_len = water_edge_x - high_wash_x
-                # Saturated wet sand (dark, damp golden brown)
-                pygame.draw.rect(surface, (118, 94, 60), (high_wash_x, y, wet_len, slice_h))
-                # Distinct high-tide watermark line where waves reached peak climb
-                pygame.draw.rect(surface, (92, 72, 44), (high_wash_x - 2, y, 4, slice_h))
-                # Waterlogged transition band right next to receding water edge
-                moist_w = min(16.0, wet_len)
-                pygame.draw.rect(surface, (100, 78, 48), (water_edge_x - moist_w, y, moist_w, slice_h))
+                # Saturated damp taupe sand matching photo
+                pygame.draw.rect(surface, (162, 154, 144), (high_wash_x, y, wet_len, slice_h))
+                # Delicate high-tide watermark line where waves reached peak climb
+                pygame.draw.rect(surface, (132, 124, 114), (high_wash_x - 1, y, 3, slice_h))
+                # Darker moist transition band immediately adjacent to receding water edge
+                moist_w = min(15.0, wet_len)
+                pygame.draw.rect(surface, (146, 138, 128), (water_edge_x - moist_w, y, moist_w, slice_h))
 
-                # Glistening water sheen (sunlight reflecting off receding water film)
+                # Specular light sheen on receding water film
                 if is_receding and wet_len > 12.0:
-                    sheen_w = min(28.0, wet_len * 0.45)
-                    sheen_x = high_wash_x + wet_len * 0.4
-                    pygame.draw.rect(surface, (196, 182, 146), (sheen_x, y, sheen_w, slice_h))
+                    sheen_w = min(26.0, wet_len * 0.45)
+                    sheen_x = high_wash_x + wet_len * 0.38
+                    pygame.draw.rect(surface, (206, 200, 192), (sheen_x, y, sheen_w, slice_h))
 
-                # Stranded foam lace (delicate ribbons of bubbles left behind by the retreating water)
-                if wet_len > 18.0:
-                    # Lace ribbon 1 near high tide mark
-                    l1_x = high_wash_x + 6.0 + (int(world_y * 0.12) % 10)
-                    if (int(world_y * 0.09) % 3) != 0:
-                        pygame.draw.rect(surface, (245, 252, 255), (l1_x, y, 4, slice_h))
-                    # Lace ribbon 2 across mid-swash zone
-                    if wet_len > 38.0:
-                        l2_x = high_wash_x + wet_len * 0.58 + math.sin(world_y * 0.05 + wave_time) * 5.0
-                        if (int(world_y * 0.07 + wave_time * 0.8) % 4) != 0:
-                            pygame.draw.rect(surface, (232, 246, 255), (l2_x, y, 5, slice_h))
+                # Stranded foam lace left behind on wet sand by retreating backwash
+                if lace_tex and wet_len > 14.0:
+                    lace_w = min(wet_len - 2.0, 95.0)
+                    lx_start = high_wash_x + 1.0
+                    sub_lx = int(lx_start + lace_ox) % lw
+                    sub_ly = (y + lace_oy) % lh
+                    blit_w_y(surface, lace_tex, lx_start, y, sub_lx, sub_ly, lace_w, slice_h, lh)
 
-            # 3. Ocean Water Body (from water_edge_x to right edge of screen)
+            # -------------------------------------------------------------
+            # 3. Ocean Water Body
+            # -------------------------------------------------------------
             ocean_w = (GAME_X + GAME_W) - water_edge_x
             if ocean_w > 0:
-                # A. Base Deep Ocean color
-                pygame.draw.rect(surface, COLOR_WATER_DEEP, (water_edge_x, y, ocean_w, slice_h))
+                # Base rich tropical turquoise
+                pygame.draw.rect(surface, (0, 142, 136), (water_edge_x, y, ocean_w, slice_h))
 
-                # B. Scrolling Deep Ocean Texture
-                if self.tex_deep_ocean:
+                # Tiled scrolling tropical ocean texture
+                if ocean_tex:
                     tex_y = (y + base_oy) % th
                     for ox_start in range(int(water_edge_x), int(GAME_X + GAME_W), tw):
                         sub_w = min(tw, int(GAME_X + GAME_W) - ox_start)
                         tex_x = (ox_start + base_ox) % tw
                         if tex_x + sub_w <= tw:
-                            surface.blit(self.tex_deep_ocean, (ox_start, y), (tex_x, tex_y, sub_w, slice_h))
+                            blit_w_y(surface, ocean_tex, ox_start, y, tex_x, tex_y, sub_w, slice_h, th)
                         else:
                             w1 = tw - tex_x
-                            surface.blit(self.tex_deep_ocean, (ox_start, y), (tex_x, tex_y, w1, slice_h))
-                            surface.blit(self.tex_deep_ocean, (ox_start + w1, y), (0, tex_y, sub_w - w1, slice_h))
+                            blit_w_y(surface, ocean_tex, ox_start, y, tex_x, tex_y, w1, slice_h, th)
+                            blit_w_y(surface, ocean_tex, ox_start + w1, y, 0, tex_y, sub_w - w1, slice_h, th)
 
-                # C. Shimmering Caustics
-                if self.tex_caustics:
-                    c_y = (y + caustic_oy) % ch
-                    for cx_start in range(int(water_edge_x), int(GAME_X + GAME_W), cw):
-                        sub_w = min(cw, int(GAME_X + GAME_W) - cx_start)
-                        c_x = (cx_start + caustic_ox) % cw
-                        surface.blit(self.tex_caustics, (cx_start, y), (c_x, c_y, sub_w, slice_h))
+            # Shimmering caustics in nearshore shallows
+            if self.tex_caustics:
+                cw_sub = min(280.0, ocean_w)
+                c_y = (y + lace_oy) % self.tex_caustics.get_height()
+                for cx_start in range(int(water_edge_x), int(water_edge_x + cw_sub), self.tex_caustics.get_width()):
+                    sub_w = min(self.tex_caustics.get_width(), int(water_edge_x + cw_sub) - cx_start)
+                    c_x = (cx_start + lace_ox) % self.tex_caustics.get_width()
+                    blit_w_y(surface, self.tex_caustics, cx_start, y, c_x, c_y, sub_w, slice_h, self.tex_caustics.get_height())
 
-                # D. Smooth depth gradient blit (crystal shallows to deep navy)
-                grad_draw_w = min(self.stage3_grad_w, int(ocean_w))
-                surface.blit(self.surf_stage3_gradient, (water_edge_x, y), (0, 0, grad_draw_w, slice_h))
+            # Radiant crystal aqua gradient from shallows to mid ocean
+            grad_draw_w = min(self.stage3_grad_w, int(ocean_w))
+            surface.blit(self.surf_stage3_gradient, (water_edge_x, y), (0, 0, grad_draw_w, slice_h))
 
-                # E. Shoreline Wave Edge: Crashing Breaker vs Receding Backwash
-                if is_surging:
-                    # CRASHING SURGE: Thick, boiling white-water foam bore pounding up the sand
-                    surf_pulse = math.sin(wave_time * 5.0 + world_y * 0.06) * 3.0
-                    crash_w = max(11.0, 16.0 + surf_pulse)
-                    # Churning aqua aerated water under foam
-                    pygame.draw.rect(surface, (145, 222, 245), (water_edge_x - 4.0, y, crash_w + 8, slice_h))
-                    # Pure white collapsing foam crest
-                    pygame.draw.rect(surface, (255, 255, 255), (water_edge_x - crash_w * 0.5, y, crash_w, slice_h))
-                    # Forward spray droplets thrown onto sand
-                    if (int(world_y * 0.14 + wave_time * 2.8) % 4) == 0:
-                        spray_x = water_edge_x - crash_w * 0.5 - 6.0
-                        pygame.draw.rect(surface, (255, 255, 255), (spray_x, y, 4, slice_h))
-                else:
-                    # GENTLE SLOW RECESSION: Thin backwash foam lip dragging back out to sea
-                    backwash_w = 5.0 + math.sin(wave_time * 2.0 + world_y * 0.04) * 2.0
-                    pygame.draw.rect(surface, (240, 252, 255), (water_edge_x - 2.0, y, backwash_w, slice_h))
-                    pygame.draw.rect(surface, (185, 235, 250), (water_edge_x + backwash_w - 2.0, y, 4, slice_h))
+            # Reticulated cellular foam lace webbing across shallows
+            if lace_tex:
+                lace_zone_w = min(240.0, ocean_w)
+                sub_ly = (y + lace_oy) % lh
+                for lx_start in range(int(water_edge_x), int(water_edge_x + lace_zone_w), lw):
+                    sub_w = min(lw, int(water_edge_x + lace_zone_w) - lx_start)
+                    sub_lx = (lx_start + lace_ox) % lw
+                    if sub_lx + sub_w <= lw:
+                        blit_w_y(surface, lace_tex, lx_start, y, sub_lx, sub_ly, sub_w, slice_h, lh)
+                    else:
+                        w1 = lw - sub_lx
+                        blit_w_y(surface, lace_tex, lx_start, y, sub_lx, sub_ly, w1, slice_h, lh)
+                        blit_w_y(surface, lace_tex, lx_start + w1, y, 0, sub_ly, sub_w - w1, slice_h, lh)
 
-                # F. Incoming Ocean Roller (The Next Wave rolling in towards shore while water recedes)
-                if cycle_t >= 0.20:
-                    roller_progress = (cycle_t - 0.20) / 0.80 # 0.0 to 1.0 as it rolls in
-                    # Swell moves from deep water (~130px out) in toward water_edge_x
-                    roller_rel = (1.0 - roller_progress) * 125.0 + 35.0
-                    roller_x = water_edge_x + roller_rel
-                    if roller_x < (GAME_X + GAME_W) - 15.0:
-                        # Wave trough shadow in front
-                        pygame.draw.rect(surface, (8, 48, 88), (roller_x - 12, y, 12, slice_h))
-                        # Rising swell face (bright cyan)
-                        pygame.draw.rect(surface, (45, 182, 222), (roller_x, y, 16, slice_h))
-                        # Wave crest
-                        pygame.draw.rect(surface, (160, 240, 255), (roller_x + 3, y, 7, slice_h))
-                        # Whitecap foam building on crest as it nears the beach
-                        if roller_progress > 0.55:
-                            foam_w = int((roller_progress - 0.55) * 16.0) + 3
-                            pygame.draw.rect(surface, (255, 255, 255), (roller_x + 5, y, foam_w, slice_h))
+            # ---------------------------------------------------------
+            # Shoreline Wave Lip (Surge vs Recede)
+            # ---------------------------------------------------------
+            if is_surging:
+                # Crashing surge white-water bore
+                surf_pulse = math.sin(wave_time * 4.8 + world_y * 0.05) * 3.0
+                crash_w = max(13.0, 18.0 + surf_pulse)
+                # Churning aqua aerated water under foam
+                pygame.draw.rect(surface, (160, 240, 245), (water_edge_x - 4.0, y, crash_w + 8, slice_h))
+                # Pure white frothy crest
+                pygame.draw.rect(surface, (255, 255, 255), (water_edge_x - crash_w * 0.45, y, crash_w, slice_h))
+                # Forward spray droplets thrown onto sand
+                if (int(world_y * 0.12 + wave_time * 2.4) % 4) == 0:
+                    spray_x = water_edge_x - crash_w * 0.5 - 5.0
+                    pygame.draw.rect(surface, (255, 255, 255), (spray_x, y, 4, slice_h))
+            else:
+                # Delicate receding backwash foam lip
+                backwash_w = 6.0 + math.sin(wave_time * 2.0 + world_y * 0.04) * 2.0
+                pygame.draw.rect(surface, (248, 253, 255), (water_edge_x - 2.0, y, backwash_w, slice_h))
+                pygame.draw.rect(surface, (175, 235, 242), (water_edge_x + backwash_w - 2.0, y, 4, slice_h))
 
-                # G. Mid-Ocean Rolling Swell 2 (farther out in open water)
-                s2_rel = 180.0 + math.sin(wave_time * 1.5 + world_y * 0.011 + 2.4) * 22.0
-                s2_x = water_edge_x + s2_rel
-                if s2_x < (GAME_X + GAME_W) - 18.0:
-                    pygame.draw.rect(surface, (6, 36, 72), (s2_x - 14, y, 14, slice_h))
-                    pygame.draw.rect(surface, (28, 130, 180), (s2_x, y, 18, slice_h))
-                    pygame.draw.rect(surface, (98, 215, 242), (s2_x + 4, y, 8, slice_h))
-                    if (int(world_y * 0.04 + wave_time * 1.5) % 6 == 0):
-                        pygame.draw.rect(surface, (240, 252, 255), (s2_x + 6, y, 5, slice_h))
+            # ---------------------------------------------------------
+            # Tier 1 Curved Breaker (Nearshore Roller using breaker crest texture)
+            # ---------------------------------------------------------
+            b1_curve = math.sin(world_y * 0.005 + 1.2) * 16.0 + math.cos(world_y * 0.012) * 7.0
+            b1_x = water_edge_x + roller1_dist + b1_curve
+            if b1_x < (GAME_X + GAME_W) - 15.0:
+                if crest_tex:
+                    sub_cy = (y + int(self.track_distance * 0.3 + self.frames * 0.6)) % ch
+                    draw_x = int(b1_x - 45.0)
+                    draw_w = min(cw, int(GAME_X + GAME_W) - draw_x)
+                    if draw_w > 0:
+                        blit_w_y(surface, crest_tex, draw_x, y, 0, sub_cy, draw_w, slice_h, ch)
 
-            # Road Asphalt
+            # ---------------------------------------------------------
+            # Tier 2 Outer Swell (Mid/Deep Sea Crescent Breaker)
+            # ---------------------------------------------------------
+            b2_curve = math.sin(world_y * 0.0042 + 3.2) * 18.0 + math.cos(world_y * 0.009) * 8.0
+            b2_x = water_edge_x + roller2_dist + b2_curve
+            if b2_x < (GAME_X + GAME_W) - 15.0:
+                if crest_tex:
+                    sub_cy2 = (y + int(self.track_distance * 0.25 + self.frames * 0.4) + 256) % ch
+                    draw_x2 = int(b2_x - 45.0)
+                    draw_w2 = min(cw, int(GAME_X + GAME_W) - draw_x2)
+                    if draw_w2 > 0:
+                        blit_w_y(surface, crest_tex, draw_x2, y, 0, sub_cy2, draw_w2, slice_h, ch)
+
+            # -------------------------------------------------------------
+            # Road Asphalt, Dashed Lanes, and Curbs
+            # -------------------------------------------------------------
             pygame.draw.rect(surface, (61, 64, 69), (r_left, y, r_w, slice_h))
             
-            # Dashed lanes
             lane_w = r_w / 4.0
             dash_cycle = (int(y + self.track_distance)) % 60
             if dash_cycle < 30:
@@ -1531,7 +1589,6 @@ class RoadRenderer:
                 pygame.draw.rect(surface, (240, 240, 240), (r_left + lane_w * 3.0 - 1.5, y, 3, slice_h))
                 pygame.draw.rect(surface, (255, 215, 30), (r_left + lane_w * 2.0 - 2.0, y, 4, slice_h))
                 
-            # Curbs
             is_red = ((int(y + self.track_distance) // 16) % 2 == 0)
             curb_col = COLOR_BARRIER_RED if is_red else COLOR_WHITE
             pygame.draw.rect(surface, curb_col, (r_left - 8, y, 8, slice_h))
@@ -1541,17 +1598,16 @@ class RoadRenderer:
         for sx, sy, phase, spd in self.ocean_sparkles:
             world_sy = self.track_distance + (ply_y - sy)
             sl, sr = self.get_road_edges(3, world_sy)
-            c_base = sr + 118.0
-            h_wash = sr + 26.0
-            if sx > h_wash + 8.0:
+            h_wash = sr + 22.0
+            if sx > h_wash + 10.0:
                 twinkle = math.sin(wave_time * spd + phase)
-                if twinkle > 0.60:
-                    sz = int((twinkle - 0.60) * 7.5) + 1
+                if twinkle > 0.62:
+                    sz = int((twinkle - 0.62) * 7.0) + 1
                     col = (255, 255, 255)
                     pygame.draw.circle(surface, col, (int(sx), int(sy)), max(1, sz - 1))
                     if sz >= 3:
-                        pygame.draw.line(surface, (220, 245, 255), (sx - sz, sy), (sx + sz, sy), 1)
-                        pygame.draw.line(surface, (220, 245, 255), (sx, sy - sz), (sx, sy + sz), 1)
+                        pygame.draw.line(surface, (225, 248, 255), (sx - sz, sy), (sx + sz, sy), 1)
+                        pygame.draw.line(surface, (225, 248, 255), (sx, sy - sz), (sx, sy + sz), 1)
 
         # Palm Trees on Dry Beach Sand with 3D Drop Shadows
         for px, py in self.stage3_palms:
