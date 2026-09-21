@@ -839,7 +839,13 @@ class HudRenderer:
             surface.blit(t_ch_h, (c_box.left + 16, c_box.top + 10))
             
             ch_text = update_mgr.changelog or "Bug fixes, performance enhancements, and new content."
-            wrapped_lines = wrap_text(self.font_caption, ch_text, c_box.width - 32)
+            clean_lines = []
+            for raw_l in ch_text.splitlines():
+                cl = raw_l.strip().lstrip("#*- ").strip()
+                if cl and not cl.startswith("Download"):
+                    clean_lines.append(cl)
+            ch_summary = "   •   ".join(clean_lines[:3]) if clean_lines else ch_text
+            wrapped_lines = wrap_text(self.font_caption, ch_summary, c_box.width - 32)
             for idx, line in enumerate(wrapped_lines[:2]):
                 t_line = self.font_caption.render(line, True, COLOR_WHITE)
                 surface.blit(t_line, (c_box.left + 16, c_box.top + 36 + idx * 22))
