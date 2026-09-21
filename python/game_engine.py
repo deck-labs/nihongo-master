@@ -148,8 +148,8 @@ class GameEngine:
                 self.track_distance = custom_dist
                 self.road.track_distance = custom_dist
                 self.traffic_cars.clear()
-                for idx in range(3):
-                    self._spawn_traffic_car(self.track_distance + 240.0 + (idx * 220.0))
+                self._spawn_traffic_car(self.track_distance + 700.0, exclude_lanes=[1])
+                self._spawn_traffic_car(self.track_distance + 1300.0)
             if start_stageclear:
                 self.is_stage_clear = True
             if start_paused:
@@ -312,9 +312,11 @@ class GameEngine:
         
         self.pick_new_target_kana()
         
-        # Spawn initial traffic ahead
-        for idx in range(3):
-            self._spawn_traffic_car(self.track_distance + 280.0 + (idx * 240.0))
+        # Spawn initial traffic with safe distance and clear acceleration runway
+        # Player starts in Lane 1 (x=680.0); ensure opening runway is completely clear
+        self.spawn_timer = -1.5
+        self._spawn_traffic_car(self.track_distance + 850.0, exclude_lanes=[1])
+        self._spawn_traffic_car(self.track_distance + 1550.0)
             
         self.player.x = 680.0
         self.player.y = self.player_screen_y
@@ -411,7 +413,7 @@ class GameEngine:
             self.audio.set_sfx_volume(self.audio.sfx_volume + step)
             self.audio.play_match()
 
-    def _spawn_traffic_car(self, custom_y: float = -1.0):
+    def _spawn_traffic_car(self, custom_y: float = -1.0, exclude_lanes: list[int] = None):
         if self.current_stage == 11:
             pool = get_gauntlet_kana(self.game_mode)
             if random.random() < 0.50:
@@ -427,8 +429,22 @@ class GameEngine:
             
         spawn_world_y = custom_y if custom_y > 0.0 else (self.track_distance + 1050.0)
         
+        # Determine available lanes based on active road width at spawn location
+        edges = self.road.get_road_edges(self.current_stage, spawn_world_y)
+        road_w = edges[1] - edges[0]
+        if road_w < 400.0:
+            available_lanes = [1, 2]
+        elif road_w < 560.0:
+            available_lanes = [0, 1, 2]
+        else:
+            available_lanes = [0, 1, 2, 3]
+
+        if exclude_lanes:
+            available_lanes = [l for l in available_lanes if l not in exclude_lanes]
+            if not available_lanes:
+                available_lanes = [0, 2]
+
         # Check occupied lanes near spawn_world_y to avoid overlap
-        available_lanes = [0, 1, 2, 3]
         for car in self.traffic_cars:
             if car.is_active and abs(car.world_y - spawn_world_y) < 220.0:
                 if car.lane_idx in available_lanes:
@@ -438,7 +454,8 @@ class GameEngine:
             lane_idx = random.choice(available_lanes)
         else:
             spawn_world_y += 240.0
-            lane_idx = random.randint(0, 3)
+            fallback_pool = [l for l in [0, 2] if (not exclude_lanes or l not in exclude_lanes)]
+            lane_idx = random.choice(fallback_pool) if fallback_pool else 0
             
         spd = random.uniform(70.0, 130.0)
         col = random.choice(TRAFFIC_COLORS)

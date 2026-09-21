@@ -1,11 +1,11 @@
 {
-  "version": "1.0.4",
-  "tag_name": "v1.0.4",
-  "name": "Nihongo Master v1.0.4",
-  "release_date": "2026-09-21",
+  "version": "1.0.5",
+  "tag_name": "v1.0.5",
+  "name": "Nihongo Master v1.0.5",
+  "release_date": "2026-09-22",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.0.4/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.0.4/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.0.4: Authentic NES Road Fighter Stage 3 aesthetic and straight-line lane transitions. Features 3-lane to 2-lane straight diagonal taper bottlenecks, authentic warm golden sand, scalloped mint-cyan shallows, frothing white breaker crests, deep cobalt ocean with animated wave ripples, diagonal striped guardrails (/ / / /), and continuous lane markings."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.0.5/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.0.5/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.0.5: Adjusted stage opening traffic pacing. Eliminates immediate car collisions at stage start by providing an 850px clear acceleration runway, guaranteeing the player's opening lane is unobstructed, and adding an initial spawn timer buffer."
 }
 
