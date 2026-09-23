@@ -10,7 +10,7 @@ var select_order: int = 0
 var is_hovered: bool = false
 
 var base_pos: Vector3 = Vector3.ZERO
-var base_rot: Vector3 = Vector3.ZERO
+var base_rot: Vector3 = Vector3(24.0, 0, 0)
 var current_tween: Tween = null
 
 var mesh_inst: MeshInstance3D = null

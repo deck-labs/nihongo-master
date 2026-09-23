@@ -19,27 +19,23 @@ def create_playing_card():
     # 1. Base Dimensions (1.0 wide, 1.4 tall, 0.02 thick)
     width = 1.0
     height = 1.4
-    thickness = 0.018
+    thickness = 0.02
 
-    # Create base cube
+    # Create base cube lying flat on table (Z is thickness/up in Blender)
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0, 0, 0))
     card = bpy.context.active_object
     card.name = "PlayingCard"
-    card.scale = (width, thickness, height)
+    card.scale = (width, height, thickness)
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
     # 2. Add Bevel Modifier for rounded corners and smooth tactile edges
     bevel = card.modifiers.new(name="Bevel", type='BEVEL')
-    bevel.width = 0.06
-    bevel.segments = 6
-    bevel.limit_method = 'NONE'
+    bevel.width = 0.05
+    bevel.segments = 4
     bpy.ops.object.modifier_apply(modifier="Bevel")
-
-    # Smooth shading
     bpy.ops.object.shade_smooth()
 
     # 3. Materials
-    # Face Material
     mat_face = bpy.data.materials.new(name="CardFace")
     mat_face.use_nodes = True
     bsdf_f = mat_face.node_tree.nodes.get("Principled BSDF")
@@ -47,7 +43,6 @@ def create_playing_card():
         bsdf_f.inputs["Base Color"].default_value = (0.97, 0.95, 0.91, 1.0)
         bsdf_f.inputs["Roughness"].default_value = 0.32
 
-    # Back Material
     mat_back = bpy.data.materials.new(name="CardBack")
     mat_back.use_nodes = True
     bsdf_b = mat_back.node_tree.nodes.get("Principled BSDF")
@@ -55,7 +50,6 @@ def create_playing_card():
         bsdf_b.inputs["Base Color"].default_value = (0.15, 0.28, 0.45, 1.0)
         bsdf_b.inputs["Roughness"].default_value = 0.38
 
-    # Edge Material
     mat_edge = bpy.data.materials.new(name="CardEdge")
     mat_edge.use_nodes = True
     bsdf_e = mat_edge.node_tree.nodes.get("Principled BSDF")
@@ -67,23 +61,32 @@ def create_playing_card():
     card.data.materials.append(mat_back) # index 1
     card.data.materials.append(mat_edge) # index 2
 
-    # 4. Assign Material Slots based on normal direction
-    # Y+ is Face, Y- is Back, sides are Edge
-    mesh = card.data
-    for poly in mesh.polygons:
-        ny = poly.normal.y
-        if ny > 0.6:
-            poly.material_index = 0 # Face
-        elif ny < -0.6:
-            poly.material_index = 1 # Back
-        else:
-            poly.material_index = 2 # Edge
+    # 4. Assign Material Slots and Exact Flat UV Mapping
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(card.data)
+    uv_layer = bm.loops.layers.uv.verify()
 
-    # 5. UV Unwrap
-    bpy.ops.object.mode_set(mode='EDIT')
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.uv.smart_project(island_margin=0.02)
-    bpy.ops.object.mode_set(mode='OBJECT')
+    for face in bm.faces:
+        if face.normal.z > 0.6:
+            face.material_index = 0
+            for loop in face.loops:
+                u = (loop.vert.co.x + width / 2.0) / width
+                v = (loop.vert.co.y + height / 2.0) / height
+                loop[uv_layer].uv = (u, v)
+        elif face.normal.z < -0.6:
+            face.material_index = 1
+            for loop in face.loops:
+                u = (loop.vert.co.x + width / 2.0) / width
+                v = (loop.vert.co.y + height / 2.0) / height
+                loop[uv_layer].uv = (u, v)
+        else:
+            face.material_index = 2
+            for loop in face.loops:
+                loop[uv_layer].uv = (0.5, 0.5)
+
+    bm.to_mesh(card.data)
+    bm.free()
 
     # Export GLB
     out_path = os.path.join(OUTPUT_DIR, "playing_card.glb")

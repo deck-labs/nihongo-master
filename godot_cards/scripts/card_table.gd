@@ -124,21 +124,22 @@ func _deal_8_card_hand():
 		card.set_order(0)
 		var hand_pos = _get_hand_position(i)
 		# Start slightly offscreen, glide to position
-		card.position = hand_pos + Vector3(0, 0.4, 1.2)
-		card.glide_to(hand_pos, Vector3.ZERO, 0.32 + i * 0.03)
+		card.position = hand_pos + Vector3(0, 0.4, 0.8)
+		card.rotation_degrees = Vector3(24.0, 0, 0)
+		card.glide_to(hand_pos, Vector3(24.0, 0, 0), 0.32 + i * 0.03)
 
 func _get_hand_position(idx: int) -> Vector3:
 	var col = idx % 4
 	var row = idx / 4
 	var x = -2.25 + col * 1.5
-	var z = 0.85 if row == 0 else 2.35
-	return Vector3(x, 0.05, z)
+	var z = 0.15 if row == 0 else 1.35
+	return Vector3(x, 0.32, z)
 
 func _get_tray_position(order_idx: int, total_selected: int) -> Vector3:
 	var spacing = 1.3
 	var start_x = -((total_selected - 1) * spacing) / 2.0
 	var x = start_x + (order_idx - 1) * spacing
-	return Vector3(x, 0.08, -1.25)
+	return Vector3(x, 0.34, -0.95)
 
 func _update_cursor_hover():
 	for i in range(8):
@@ -150,7 +151,7 @@ func _update_card_tray_positions():
 		var c = selected_cards[i]
 		c.set_order(i + 1)
 		var t_pos = _get_tray_position(i + 1, total)
-		c.glide_to(t_pos, Vector3.ZERO, 0.22)
+		c.glide_to(t_pos, Vector3(24.0, 0, 0), 0.22)
 
 func _input(event: InputEvent):
 	if current_state == State.PAUSED:
