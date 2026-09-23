@@ -46,6 +46,15 @@ mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/icons/hicolor/256x256/apps" "$APPD
 # Copy PyInstaller bundle into AppDir
 cp -r "$BUILD_DIR/dist/nihongo_master/"* "$APPDIR/usr/bin/"
 
+# Copy Godot 3D Hiragana Cards binary & pack into AppDir
+echo "=== Bundling Godot 3D Hiragana Cards ==="
+"$DIR/godot_cards/build_godot_cards.sh"
+cp "$DIR/godot_cards/build/hiragana_cards.x86_64" "$APPDIR/usr/bin/hiragana_cards.x86_64"
+cp "$DIR/godot_cards/build/hiragana_cards.x86_64" "$APPDIR/usr/bin/hiragana_cards"
+cp "$DIR/godot_cards/build/hiragana_cards.pck" "$APPDIR/usr/bin/hiragana_cards.pck"
+cp "$DIR/godot_cards/build/hiragana_cards.pck" "$APPDIR/usr/bin/hiragana_cards.x86_64.pck"
+chmod +x "$APPDIR/usr/bin/hiragana_cards.x86_64" "$APPDIR/usr/bin/hiragana_cards"
+
 # Generate High-Res 256x256 Icon
 "$VENV_PATH/bin/python" -c "
 import pygame

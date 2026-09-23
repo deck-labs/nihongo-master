@@ -391,9 +391,22 @@ class HudRenderer:
             spacing = 68
 
         # Active Mode Banner Pill
-        is_hiragana = (game_mode == "hiragana")
-        mode_tag = "★ HIRAGANA MASTER MODE ★" if is_hiragana else "★ KATAKANA MASTER MODE ★"
-        mode_col = (0, 225, 255) if is_hiragana else (255, 175, 45)
+        if game_mode == "cards":
+            mode_tag = "★ 3D HIRAGANA CARDS (STAGE 1) ★"
+            mode_col = COLOR_GOLD
+            cur_mode_str = "HIRAGANA CARDS"
+            start_lbl = "START CARDS GAME"
+        elif game_mode == "katakana":
+            mode_tag = "★ KATAKANA MASTER MODE ★"
+            mode_col = (255, 175, 45)
+            cur_mode_str = "KATAKANA MASTER"
+            start_lbl = "START KATAKANA"
+        else:
+            mode_tag = "★ HIRAGANA MASTER MODE ★"
+            mode_col = (0, 225, 255)
+            cur_mode_str = "HIRAGANA MASTER"
+            start_lbl = "START HIRAGANA"
+
         txt_m_tag = self.font_sub.render(mode_tag, True, mode_col)
         pill_w = txt_m_tag.get_width() + 40
         pill_h = 36
@@ -411,7 +424,6 @@ class HudRenderer:
         # Item 0: GAME MODE
         is_sel_0 = (menu_index == 0)
         col0 = COLOR_WHITE if (is_sel_0 and is_blink) else (COLOR_GOLD if is_sel_0 else (210, 230, 250))
-        cur_mode_str = "HIRAGANA MASTER" if is_hiragana else "KATAKANA MASTER"
         txt_0 = self.font_menu.render(f"GAME MODE   ◄  {cur_mode_str}  ►", True, col0)
         r0 = txt_0.get_rect(center=(cx, menu_y_start))
         if is_sel_0 and is_blink:
@@ -422,7 +434,6 @@ class HudRenderer:
         # Item 1: START
         is_sel_1 = (menu_index == 1)
         col1 = COLOR_WHITE if (is_sel_1 and is_blink) else (COLOR_GOLD if is_sel_1 else (210, 230, 250))
-        start_lbl = "START HIRAGANA" if is_hiragana else "START KATAKANA"
         txt_1 = self.font_menu.render(start_lbl, True, col1)
         r1 = txt_1.get_rect(center=(cx, menu_y_start + spacing))
         if is_sel_1 and is_blink:
@@ -433,7 +444,9 @@ class HudRenderer:
         # Item 2: STAGE SELECT
         is_sel_2 = (menu_index == 2)
         col2 = COLOR_WHITE if (is_sel_2 and is_blink) else (COLOR_GOLD if is_sel_2 else (210, 230, 250))
-        if selected_stage == 11:
+        if game_mode == "cards":
+            st_str = "STAGE SELECT   ◄  STAGE 01 : 3-SET GAUNTLET  ►" if is_sel_2 else "STAGE SELECT   < STAGE 01 : 3-SET GAUNTLET >"
+        elif selected_stage == 11:
             st_name = "★ RAINBOW SKYWAY ★"
             st_str = f"STAGE SELECT   ◄  BONUS TRIAL : {st_name}  ►" if is_sel_2 else "STAGE SELECT   < BONUS TRIAL : ★ SECRET ★ >"
         else:

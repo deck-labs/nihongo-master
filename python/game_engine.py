@@ -217,11 +217,14 @@ class GameEngine:
             print(f"Note: Could not save unlocks: {e}")
 
     def toggle_game_mode(self):
-        self.game_mode = "katakana" if self.game_mode == "hiragana" else "hiragana"
+        modes = ["hiragana", "katakana", "cards"]
+        cur_idx = modes.index(self.game_mode) if self.game_mode in modes else 0
+        self.game_mode = modes[(cur_idx + 1) % len(modes)]
         self.audio.play_match()
-        init_k = "ア" if self.game_mode == "katakana" else "あ"
-        self.player.update_kana(init_k)
-        self.road.rebuild_stage11_gantries(self.game_mode)
+        if self.game_mode in ("hiragana", "katakana"):
+            init_k = "ア" if self.game_mode == "katakana" else "あ"
+            self.player.update_kana(init_k)
+            self.road.rebuild_stage11_gantries(self.game_mode)
         if self.selected_stage == 11 and not self.secret_stage_unlocked:
             self.selected_stage = 1
             self.current_stage = 1
@@ -324,6 +327,9 @@ class GameEngine:
         self.player.wobble_timer = 0.0
 
     def start_game_from_title(self):
+        if self.game_mode == "cards":
+            self.launch_card_game()
+            return
         self.is_title_screen = False
         self.current_stage = self.selected_stage
         self.run_started_from_stage_1 = (self.selected_stage == 1)
@@ -334,6 +340,46 @@ class GameEngine:
         self.audio.play_fanfare()
         self.start_stage(self.selected_stage, keep_fuel=False)
         self.audio.start_engine()
+
+    def launch_card_game(self):
+        """Seamlessly launch Godot 3D Hiragana Card Game."""
+        self.audio.stop_title_music(fade_ms=300)
+        self.audio.play_fanfare()
+
+        candidates = [
+            os.path.join(os.environ.get("APPDIR", ""), "usr/bin/hiragana_cards"),
+            os.path.join(os.environ.get("APPDIR", ""), "usr/bin/hiragana_cards.x86_64"),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "godot_cards/build/hiragana_cards.x86_64")),
+            "godot"
+        ]
+
+        cmd = None
+        for cand in candidates:
+            if cand == "godot":
+                proj_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "godot_cards"))
+                if os.path.isdir(proj_path):
+                    cmd = ["godot", "--path", proj_path]
+                    break
+            elif os.path.isfile(cand) and os.access(cand, os.X_OK):
+                cmd = [cand]
+                break
+
+        if not cmd:
+            print("[NihongoMaster] Error: Godot Hiragana Cards binary not found.")
+            self.return_to_title()
+            self.audio.play_title_music()
+            return
+
+        print(f"[NihongoMaster] Launching Godot 3D Hiragana Cards: {cmd}")
+        try:
+            import subprocess
+            subprocess.run(cmd)
+        except Exception as e:
+            print(f"[NihongoMaster] Error launching card game: {e}")
+
+        # Return to title screen and resume music
+        self.return_to_title()
+        self.audio.play_title_music()
 
     def return_to_title(self):
         self.is_title_screen = True

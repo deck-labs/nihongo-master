@@ -1,0 +1,423 @@
+[gd_scene load_steps=18 format=3 uid="uid://b82j3q9v8k1m"]
+
+[ext_resource type="Script" path="res://scripts/card_table.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/models/felt_table.glb" id="2_table_mesh"]
+[ext_resource type="FontFile" path="res://assets/fonts/NotoSansCJK-Bold.ttc" id="3_font"]
+[ext_resource type="AudioStream" path="res://assets/audio/deal.wav" id="4_sfx_deal"]
+[ext_resource type="AudioStream" path="res://assets/audio/select.wav" id="5_sfx_select"]
+[ext_resource type="AudioStream" path="res://assets/audio/deselect.wav" id="6_sfx_deselect"]
+[ext_resource type="AudioStream" path="res://assets/audio/reset.wav" id="7_sfx_reset"]
+[ext_resource type="AudioStream" path="res://assets/audio/cursor.wav" id="8_sfx_cursor"]
+[ext_resource type="AudioStream" path="res://assets/audio/correct.wav" id="9_sfx_correct"]
+[ext_resource type="AudioStream" path="res://assets/audio/incorrect.wav" id="10_sfx_incorrect"]
+[ext_resource type="AudioStream" path="res://assets/audio/fanfare.wav" id="11_sfx_fanfare"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_confetti"]
+shading_mode = 0
+vertex_color_use_as_albedo = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_confetti"]
+material = SubResource("StandardMaterial3D_confetti")
+size = Vector3(0.08, 0.08, 0.08)
+
+[sub_resource type="Curve" id="Curve_confetti"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_confetti"]
+offsets = PackedFloat32Array(0, 0.25, 0.5, 0.75, 1)
+colors = PackedColorArray(1, 0.8, 0.2, 1, 0.1, 0.8, 1, 1, 1, 0.3, 0.3, 1, 0.2, 0.9, 0.4, 1, 1, 1, 1, 1)
+
+[node name="CardTable" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.615661, 0.788011, 0, -0.788011, 0.615661, 0, 4.8, 3.8)
+fov = 48.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 3, 7, 5)
+light_color = Color(1, 0.98, 0.94, 1)
+light_energy = 0.8
+shadow_enabled = true
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, 0.6)
+light_color = Color(1, 0.92, 0.82, 1)
+light_energy = 1.6
+omni_range = 8.0
+omni_attenuation = 1.2
+
+[node name="FeltTable" parent="." instance=ExtResource("2_table_mesh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Cards" type="Node3D" parent="."]
+
+[node name="ConfettiParticles" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -0.5)
+emitting = false
+amount = 64
+lifetime = 1.8
+one_shot = true
+explosiveness = 0.9
+mesh = SubResource("BoxMesh_confetti")
+emission_shape = 3
+emission_box_extents = Vector3(1.5, 0.5, 1.5)
+direction = Vector3(0, 1, 0)
+spread = 60.0
+gravity = Vector3(0, -6, 0)
+initial_velocity_min = 4.0
+initial_velocity_max = 8.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
+scale_amount_curve = SubResource("Curve_confetti")
+color_initial_ramp = SubResource("Gradient_confetti")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="TopBar" type="PanelContainer" parent="HUD"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 32.0
+offset_top = 16.0
+offset_right = -32.0
+offset_bottom = 68.0
+grow_horizontal = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+
+[node name="HBox" type="HBoxContainer" parent="HUD/TopBar/Margin"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="HUD/TopBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 22
+text = "HIRAGANA CARDS"
+
+[node name="Spacer1" type="Control" parent="HUD/TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxCenter" type="VBoxContainer" parent="HUD/TopBar/Margin/HBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="SetTitle" type="Label" parent="HUD/TopBar/Margin/HBox/VBoxCenter"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.98, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "SET 1/3 — HIRAGANA INTRODUCTION"
+horizontal_alignment = 1
+
+[node name="Pips" type="HBoxContainer" parent="HUD/TopBar/Margin/HBox/VBoxCenter"]
+layout_mode = 2
+alignment = 1
+
+[node name="Spacer2" type="Control" parent="HUD/TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="WordsCount" type="Label" parent="HUD/TopBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.85, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+text = "WORDS: 0/3"
+
+[node name="Plaque" type="PanelContainer" parent="HUD"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 80.0
+offset_right = 220.0
+offset_bottom = 188.0
+grow_horizontal = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/Plaque"]
+layout_mode = 2
+alignment = 1
+
+[node name="TargetLabel" type="Label" parent="HUD/Plaque/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.7, 0.8, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 14
+text = "TARGET WORD"
+horizontal_alignment = 1
+
+[node name="Romaji" type="Label" parent="HUD/Plaque/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 46
+text = "N  E  K  O"
+horizontal_alignment = 1
+
+[node name="Meaning" type="Label" parent="HUD/Plaque/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.3, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+text = "“ cat ”"
+horizontal_alignment = 1
+
+[node name="ControlsFooter" type="PanelContainer" parent="HUD"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -48.0
+offset_right = -32.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="HBox" type="HBoxContainer" parent="HUD/ControlsFooter"]
+layout_mode = 2
+alignment = 1
+
+[node name="Lbl" type="Label" parent="HUD/ControlsFooter/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 15
+text = "[D-Pad / Stick] Move   •   (A) Select/Deselect   •   (B) Reset All   •   (X) Submit Word   •   [Start] Pause"
+
+[node name="Toast" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -10.0
+offset_right = 200.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/Toast"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="ToastLabel" type="Label" parent="HUD/Toast/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.25, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "PLEASE SELECT CARDS FIRST!"
+horizontal_alignment = 1
+
+[node name="BannerCorrect" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -40.0
+offset_right = 260.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="HUD/BannerCorrect"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.5, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 36
+text = "CORRECT! / せいかい!"
+horizontal_alignment = 1
+
+[node name="BannerIncorrect" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -40.0
+offset_right = 280.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="HUD/BannerIncorrect"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 34
+text = "WRONG ORDER! TRY AGAIN"
+horizontal_alignment = 1
+
+[node name="ModalSetClear" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -120.0
+offset_right = 280.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/ModalSetClear"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="HUD/ModalSetClear/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="HUD/ModalSetClear/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 36
+text = "SET 1 COMPLETE!"
+horizontal_alignment = 1
+
+[node name="Sub" type="Label" parent="HUD/ModalSetClear/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.95, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+text = "Next set starting shortly..."
+horizontal_alignment = 1
+
+[node name="ModalStageClear" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -160.0
+offset_right = 340.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/ModalStageClear"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="HUD/ModalStageClear/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="HUD/ModalStageClear/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 40
+text = "STAGE 1 CLEARED!  |  全クリア"
+horizontal_alignment = 1
+
+[node name="Stats" type="Label" parent="HUD/ModalStageClear/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 0.5, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+text = "Words Solved: 15  |  Accuracy: 100%"
+horizontal_alignment = 1
+
+[node name="Prompt" type="Label" parent="HUD/ModalStageClear/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.85, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 22
+text = "Press (A) to Play Again  •  [Start] to Exit"
+horizontal_alignment = 1
+
+[node name="ModalPaused" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -100.0
+offset_right = 220.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/ModalPaused"]
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="HUD/ModalPaused/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 32
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="Prompt1" type="Label" parent="HUD/ModalPaused/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "Press (A) or [Start] to Resume"
+horizontal_alignment = 1
+
+[node name="Prompt2" type="Label" parent="HUD/ModalPaused/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 16
+text = "Press (B) to Restart Set  •  (X) to Exit"
+horizontal_alignment = 1
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="SfxDeal" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("4_sfx_deal")
+
+[node name="SfxSelect" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("5_sfx_select")
+
+[node name="SfxDeselect" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("6_sfx_deselect")
+
+[node name="SfxReset" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("7_sfx_reset")
+
+[node name="SfxCursor" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("8_sfx_cursor")
+
+[node name="SfxCorrect" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("9_sfx_correct")
+
+[node name="SfxIncorrect" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("10_sfx_incorrect")
+
+[node name="SfxFanfare" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("11_sfx_fanfare")
