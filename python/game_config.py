@@ -22,7 +22,7 @@ ROAD_WIDTH = GAME_W - (ROAD_MARGIN * 2.0)  # 640.0 px wide 4-lane highway
 PLAYER_SCREEN_Y = 960.0  # 1200 - 240.0
 
 # Version & Release Metadata
-GAME_VERSION = "1.1.3"
+GAME_VERSION = "1.1.4"
 GITHUB_REPO = "deck-labs/nihongo-master"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/deck-labs/nihongo-master/main/version.json"
 RELEASES_API_URL = "https://api.github.com/repos/deck-labs/nihongo-master/releases/latest"

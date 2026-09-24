@@ -52,6 +52,8 @@ class HudRenderer:
         self.font_kana_sub = pygame.font.Font(get_asset_path("fonts/NotoSansCJK-Bold.ttc"), 18)
         self.font_kana_body = pygame.font.Font(get_asset_path("fonts/NotoSansCJK-Bold.ttc"), 18)
         self.font_desc = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 15)
+        self.font_btn = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 26)
+        self.font_sub_btn = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 20)
         self.font_tiny = self.font_caption  # High-contrast 18pt font alias for handheld readability
 
     def draw_tiled_carbon(self, surface: pygame.Surface, rect: tuple[int, int, int, int]):
@@ -652,10 +654,10 @@ class HudRenderer:
             # Action Buttons
             btn_y = 758
             # Prev Button
-            btn_prev = pygame.Rect(cx - 520, btn_y, 200, 56)
+            btn_prev = pygame.Rect(cx - 530, btn_y, 220, 56)
             pygame.draw.rect(surface, (16, 25, 40), btn_prev, border_radius=10)
             pygame.draw.rect(surface, (0, 140, 220), btn_prev, 1, border_radius=10)
-            txt_pv = self.font_sub.render("◄ PREV STAGE", True, (180, 220, 255))
+            txt_pv = self.font_sub_btn.render("◄ PREV STAGE", True, (180, 220, 255))
             surface.blit(txt_pv, txt_pv.get_rect(center=btn_prev.center))
 
             # Start Mission Button (Highlighted)
@@ -663,14 +665,14 @@ class HudRenderer:
             pygame.draw.rect(surface, (22, 38, 62), btn_start, border_radius=10)
             st_bcol = COLOR_WHITE if is_blink else COLOR_GOLD
             pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
-            txt_st = self.font_menu.render("► START STAGE (A / ENTER) ◄", True, st_bcol)
+            txt_st = self.font_btn.render("► START STAGE (A / ENTER) ◄", True, st_bcol)
             surface.blit(txt_st, txt_st.get_rect(center=btn_start.center))
 
             # Next Button
-            btn_next = pygame.Rect(cx + 320, btn_y, 200, 56)
+            btn_next = pygame.Rect(cx + 310, btn_y, 220, 56)
             pygame.draw.rect(surface, (16, 25, 40), btn_next, border_radius=10)
             pygame.draw.rect(surface, (0, 140, 220), btn_next, 1, border_radius=10)
-            txt_nx = self.font_sub.render("NEXT STAGE ►", True, (180, 220, 255))
+            txt_nx = self.font_sub_btn.render("NEXT STAGE ►", True, (180, 220, 255))
             surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
 
         else:
@@ -763,10 +765,10 @@ class HudRenderer:
             # Action Buttons
             btn_y = 758
             # Prev Button
-            btn_prev = pygame.Rect(cx - 520, btn_y, 200, 56)
+            btn_prev = pygame.Rect(cx - 530, btn_y, 220, 56)
             pygame.draw.rect(surface, (16, 25, 40), btn_prev, border_radius=10)
             pygame.draw.rect(surface, (0, 140, 220), btn_prev, 1, border_radius=10)
-            txt_pv = self.font_sub.render("◄ PREV STAGE", True, (180, 220, 255))
+            txt_pv = self.font_sub_btn.render("◄ PREV STAGE", True, (180, 220, 255))
             surface.blit(txt_pv, txt_pv.get_rect(center=btn_prev.center))
 
             # Start Battle Button (Highlighted)
@@ -774,22 +776,22 @@ class HudRenderer:
             pygame.draw.rect(surface, (22, 38, 62), btn_start, border_radius=10)
             st_bcol = COLOR_WHITE if is_blink else COLOR_GOLD
             pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
-            txt_st = self.font_menu.render("► START BATTLE (A / ENTER) ◄", True, st_bcol)
+            txt_st = self.font_btn.render("► START BATTLE (A / ENTER) ◄", True, st_bcol)
             surface.blit(txt_st, txt_st.get_rect(center=btn_start.center))
 
             # Next Button
-            btn_next = pygame.Rect(cx + 320, btn_y, 200, 56)
+            btn_next = pygame.Rect(cx + 310, btn_y, 220, 56)
             pygame.draw.rect(surface, (16, 25, 40), btn_next, border_radius=10)
             pygame.draw.rect(surface, (0, 140, 220), btn_next, 1, border_radius=10)
-            txt_nx = self.font_sub.render("NEXT STAGE ►", True, (180, 220, 255))
+            txt_nx = self.font_sub_btn.render("NEXT STAGE ►", True, (180, 220, 255))
             surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
 
         # Back to Title Button
         back_y = 838
-        btn_back = pygame.Rect(cx - 190, back_y, 380, 48)
+        btn_back = pygame.Rect(cx - 200, back_y, 400, 48)
         pygame.draw.rect(surface, (16, 22, 34), btn_back, border_radius=10)
         pygame.draw.rect(surface, (0, 140, 220), btn_back, 1, border_radius=10)
-        txt_bk = self.font_sub.render("◄ BACK TO TITLE (B / ESC)", True, (180, 215, 245))
+        txt_bk = self.font_sub_btn.render("◄ BACK TO TITLE (B / ESC)", True, (180, 215, 245))
         surface.blit(txt_bk, txt_bk.get_rect(center=btn_back.center))
 
         # Footer

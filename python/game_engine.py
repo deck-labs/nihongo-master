@@ -940,9 +940,9 @@ class GameEngine:
                                     self.current_stage = st
                                     self.road.current_stage = st
                                     self.audio.play_pause()
-                            if pygame.Rect(cx - 520, 758, 200, 56).collidepoint(mx, my):
+                            if pygame.Rect(cx - 530, 758, 220, 56).collidepoint(mx, my):
                                 self.menu_left()
-                            elif pygame.Rect(cx + 320, 758, 200, 56).collidepoint(mx, my):
+                            elif pygame.Rect(cx + 310, 758, 220, 56).collidepoint(mx, my):
                                 self.menu_right()
                         elif self.game_mode == "cards":
                             n_stages = CARD_TOTAL_STAGES
@@ -956,16 +956,16 @@ class GameEngine:
                                     self.selected_stage = st
                                     self.current_stage = st
                                     self.audio.play_pause()
-                            if pygame.Rect(cx - 520, 758, 200, 56).collidepoint(mx, my):
+                            if pygame.Rect(cx - 530, 758, 220, 56).collidepoint(mx, my):
                                 self.menu_left()
-                            elif pygame.Rect(cx + 320, 758, 200, 56).collidepoint(mx, my):
+                            elif pygame.Rect(cx + 310, 758, 220, 56).collidepoint(mx, my):
                                 self.menu_right()
 
                         # Start button
                         if pygame.Rect(cx - 280, 758, 560, 56).collidepoint(mx, my):
                             self.menu_confirm()
                         # Back button
-                        elif pygame.Rect(cx - 190, 838, 380, 48).collidepoint(mx, my):
+                        elif pygame.Rect(cx - 200, 838, 400, 48).collidepoint(mx, my):
                             self.menu_back()
                     else:
                         # Title screen mouse clicks
