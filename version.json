@@ -1,11 +1,11 @@
 {
-  "version": "1.1.4",
-  "tag_name": "v1.1.4",
-  "name": "Nihongo Master v1.1.4",
+  "version": "1.1.5",
+  "tag_name": "v1.1.5",
+  "name": "Nihongo Master v1.1.5",
   "release_date": "2026-09-24",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.4/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.4/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.1.4: Fixed stage select action button margins and typography. Start Battle / Start Stage button now has generous interior padding ensuring control glyphs and text no longer crowd or touch the borders, with balanced button widths and pixel-perfect centering."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.5/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.5/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.1.5: Fixed cut-off and missing borders across all UI boxes on Title Screen and Stage Select. Implemented smooth bilinear area-averaging downscaling to eliminate downscale column subsampling on 1280x800 handheld displays, and reinforced all card, pill, and button outlines with high-contrast minimum 2px/3px borders."
 }
 

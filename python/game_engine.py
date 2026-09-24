@@ -721,7 +721,7 @@ class GameEngine:
                 self.screen.fill(COLOR_BEZEL)
             if self.scaled_surf is None or self.scaled_surf.get_size() != (self.dst_rect.w, self.dst_rect.h):
                 self.scaled_surf = pygame.Surface((self.dst_rect.w, self.dst_rect.h))
-            pygame.transform.scale(self.virtual_screen, (self.dst_rect.w, self.dst_rect.h), self.scaled_surf)
+            pygame.transform.smoothscale(self.virtual_screen, (self.dst_rect.w, self.dst_rect.h), self.scaled_surf)
             self.screen.blit(self.scaled_surf, (self.dst_rect.x, self.dst_rect.y))
 
     def window_to_virtual_coords(self, mx: int, my: int) -> tuple[int, int]:

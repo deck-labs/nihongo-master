@@ -110,7 +110,7 @@ class HudRenderer:
         # Goal Badge
         goal_rect = pygame.Rect(95, track_top - 30, 120, 26)
         pygame.draw.rect(surface, (10, 20, 36), goal_rect, border_radius=4)
-        pygame.draw.rect(surface, COLOR_GOLD, goal_rect, 1, border_radius=4)
+        pygame.draw.rect(surface, COLOR_GOLD, goal_rect, 2, border_radius=4)
         txt_goal = self.font_caption.render("★ GOAL ★", True, COLOR_GOLD)
         surface.blit(txt_goal, txt_goal.get_rect(center=goal_rect.center))
         
@@ -130,7 +130,7 @@ class HudRenderer:
         # Start Badge
         start_rect = pygame.Rect(105, track_bot + 8, 100, 28)
         pygame.draw.rect(surface, (10, 20, 36), start_rect, border_radius=4)
-        pygame.draw.rect(surface, COLOR_CYAN, start_rect, 1, border_radius=4)
+        pygame.draw.rect(surface, COLOR_CYAN, start_rect, 2, border_radius=4)
         txt_start = self.font_caption.render("START", True, COLOR_CYAN)
         surface.blit(txt_start, txt_start.get_rect(center=start_rect.center))
         
@@ -138,7 +138,7 @@ class HudRenderer:
         progress = max(0.0, min(1.0, track_dist / max_dist))
         cur_y = int(track_bot - (track_len * progress))
         # Beacon pulse ring
-        pygame.draw.rect(surface, (0, 200, 255), (track_x - 12, cur_y - 12, 24, 24), 1, border_radius=3)
+        pygame.draw.rect(surface, (0, 200, 255), (track_x - 12, cur_y - 12, 24, 24), 2, border_radius=3)
         # Car icon
         pygame.draw.rect(surface, (220, 35, 35), (track_x - 7, cur_y - 9, 14, 18), border_radius=3)
         pygame.draw.rect(surface, (255, 255, 255), (track_x - 4, cur_y - 6, 8, 8), border_radius=2)
@@ -168,7 +168,7 @@ class HudRenderer:
         p_fill = int(bar_bw * progress)
         if p_fill > 0:
             pygame.draw.rect(surface, (0, 217, 255), (bar_bx, bar_by, p_fill, bar_bh), border_radius=4)
-        pygame.draw.rect(surface, (60, 90, 130), (bar_bx, bar_by, bar_bw, bar_bh), 1, border_radius=4)
+        pygame.draw.rect(surface, (70, 100, 140), (bar_bx, bar_by, bar_bw, bar_bh), 2, border_radius=4)
 
     def render_right_panel(self, surface: pygame.Surface, stage: int, target_kana: str, target_romaji: str,
                            speed_kmh: float, is_turbo: bool, is_braking: bool, fuel: float, score: float, match_timer: float,
@@ -222,7 +222,7 @@ class HudRenderer:
         spd_y = 285
         spd_rect = pygame.Rect(rx, spd_y, rw, 150)
         pygame.draw.rect(surface, (8, 16, 28), spd_rect)
-        pygame.draw.rect(surface, COLOR_PANEL_BORDER, spd_rect, 1)
+        pygame.draw.rect(surface, COLOR_PANEL_BORDER, spd_rect, 2)
         
         txt_spd_h = self.font_sub.render("VELOCITY TELEMETRY", True, (200, 225, 250))
         surface.blit(txt_spd_h, (rx + 20, spd_y + 12))
@@ -260,13 +260,13 @@ class HudRenderer:
         if fill_w > 0:
             b_col = COLOR_GOLD if is_turbo else (0, 210, 255)
             pygame.draw.rect(surface, b_col, (bar_x, bar_y, fill_w, bar_h))
-        pygame.draw.rect(surface, (80, 120, 160), (bar_x, bar_y, bar_w, bar_h), 1)
+        pygame.draw.rect(surface, (80, 120, 160), (bar_x, bar_y, bar_w, bar_h), 2)
         
         # 3. Battery / Fuel Level
         fuel_y = 455
         fuel_rect = pygame.Rect(rx, fuel_y, rw, 150)
         pygame.draw.rect(surface, (8, 16, 28), fuel_rect)
-        pygame.draw.rect(surface, COLOR_PANEL_BORDER, fuel_rect, 1)
+        pygame.draw.rect(surface, COLOR_PANEL_BORDER, fuel_rect, 2)
         
         txt_f_h = self.font_sub.render("FUEL ENERGY CELL (WRONG CAR: -15%)", True, (200, 225, 250))
         surface.blit(txt_f_h, (rx + 20, fuel_y + 12))
@@ -296,13 +296,13 @@ class HudRenderer:
             is_active = (c < active_cells)
             cell_col = f_col if is_active else (25, 35, 50)
             pygame.draw.rect(surface, cell_col, (cx, by, cell_w, 26), border_radius=3)
-            pygame.draw.rect(surface, (70, 100, 135), (cx, by, cell_w, 26), 1, border_radius=3)
+            pygame.draw.rect(surface, (70, 100, 135), (cx, by, cell_w, 26), 2, border_radius=3)
             
         # 4. Mission Telemetry / Score
         score_y = 625
         sc_rect = pygame.Rect(rx, score_y, rw, 140)
         pygame.draw.rect(surface, (8, 16, 28), sc_rect)
-        pygame.draw.rect(surface, COLOR_PANEL_BORDER, sc_rect, 1)
+        pygame.draw.rect(surface, COLOR_PANEL_BORDER, sc_rect, 2)
         
         txt_sc_h = self.font_sub.render("TACTICAL SCORE TELEMETRY", True, (200, 225, 250))
         surface.blit(txt_sc_h, (rx + 20, score_y + 12))
@@ -327,7 +327,7 @@ class HudRenderer:
         ctrl_h = max(285, scr_h - ctrl_y - 20)
         c_rect = pygame.Rect(rx, ctrl_y, rw, ctrl_h)
         pygame.draw.rect(surface, (8, 16, 28), c_rect)
-        pygame.draw.rect(surface, COLOR_PANEL_BORDER, c_rect, 1)
+        pygame.draw.rect(surface, COLOR_PANEL_BORDER, c_rect, 2)
         
         txt_c_h = self.font_sub.render("FLIGHT CONTROLS & COMMANDS", True, COLOR_CYAN)
         surface.blit(txt_c_h, (rx + 20, ctrl_y + 16))
@@ -432,9 +432,9 @@ class HudRenderer:
                 b_col = COLOR_WHITE if is_blink else COLOR_GOLD
                 pygame.draw.rect(surface, b_col, c_rect, 4, border_radius=14)
             elif is_active_game:
-                pygame.draw.rect(surface, g["col"], c_rect, 2, border_radius=14)
+                pygame.draw.rect(surface, g["col"], c_rect, 3, border_radius=14)
             else:
-                pygame.draw.rect(surface, (40, 56, 80), c_rect, 1, border_radius=14)
+                pygame.draw.rect(surface, (70, 95, 130), c_rect, 2, border_radius=14)
 
             # Status Pill at top
             if is_active_game or is_focused:
@@ -575,7 +575,7 @@ class HudRenderer:
                     txt_p = self.font_sub.render(lbl, True, COLOR_GOLD)
                 else:
                     pygame.draw.rect(surface, (14, 20, 32), p_rect, border_radius=8)
-                    pygame.draw.rect(surface, (40, 56, 80), p_rect, 1, border_radius=8)
+                    pygame.draw.rect(surface, (70, 95, 130), p_rect, 2, border_radius=8)
                     lbl = "★" if st == 11 else f"{st:02d}"
                     txt_p = self.font_sub.render(lbl, True, (130, 155, 180))
 
@@ -589,7 +589,7 @@ class HudRenderer:
             c_rect = pygame.Rect(card_x, card_y, card_w, card_h)
 
             pygame.draw.rect(surface, (12, 18, 30), c_rect, border_radius=14)
-            pygame.draw.rect(surface, theme_col, c_rect, 2, border_radius=14)
+            pygame.draw.rect(surface, theme_col, c_rect, 3, border_radius=14)
 
             # Stage Name & Environment
             if selected_stage == 11:
@@ -656,7 +656,7 @@ class HudRenderer:
             # Prev Button
             btn_prev = pygame.Rect(cx - 530, btn_y, 220, 56)
             pygame.draw.rect(surface, (16, 25, 40), btn_prev, border_radius=10)
-            pygame.draw.rect(surface, (0, 140, 220), btn_prev, 1, border_radius=10)
+            pygame.draw.rect(surface, (0, 160, 240), btn_prev, 2, border_radius=10)
             txt_pv = self.font_sub_btn.render("◄ PREV STAGE", True, (180, 220, 255))
             surface.blit(txt_pv, txt_pv.get_rect(center=btn_prev.center))
 
@@ -671,7 +671,7 @@ class HudRenderer:
             # Next Button
             btn_next = pygame.Rect(cx + 310, btn_y, 220, 56)
             pygame.draw.rect(surface, (16, 25, 40), btn_next, border_radius=10)
-            pygame.draw.rect(surface, (0, 140, 220), btn_next, 1, border_radius=10)
+            pygame.draw.rect(surface, (0, 160, 240), btn_next, 2, border_radius=10)
             txt_nx = self.font_sub_btn.render("NEXT STAGE ►", True, (180, 220, 255))
             surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
 
@@ -698,7 +698,7 @@ class HudRenderer:
                     txt_p = self.font_sub.render(lbl, True, COLOR_GOLD)
                 else:
                     pygame.draw.rect(surface, (14, 20, 32), p_rect, border_radius=8)
-                    pygame.draw.rect(surface, (40, 56, 80), p_rect, 1, border_radius=8)
+                    pygame.draw.rect(surface, (70, 95, 130), p_rect, 2, border_radius=8)
                     lbl = f"{st:02d}"
                     txt_p = self.font_sub.render(lbl, True, (130, 155, 180))
 
@@ -712,7 +712,7 @@ class HudRenderer:
             c_rect = pygame.Rect(card_x, card_y, card_w, card_h)
 
             pygame.draw.rect(surface, (12, 18, 30), c_rect, border_radius=14)
-            pygame.draw.rect(surface, COLOR_GOLD, c_rect, 2, border_radius=14)
+            pygame.draw.rect(surface, COLOR_GOLD, c_rect, 3, border_radius=14)
 
             # Retrieve stage configuration
             info = CARD_STAGE_INFO.get(selected_stage, CARD_STAGE_INFO[1])
@@ -767,7 +767,7 @@ class HudRenderer:
             # Prev Button
             btn_prev = pygame.Rect(cx - 530, btn_y, 220, 56)
             pygame.draw.rect(surface, (16, 25, 40), btn_prev, border_radius=10)
-            pygame.draw.rect(surface, (0, 140, 220), btn_prev, 1, border_radius=10)
+            pygame.draw.rect(surface, (0, 160, 240), btn_prev, 2, border_radius=10)
             txt_pv = self.font_sub_btn.render("◄ PREV STAGE", True, (180, 220, 255))
             surface.blit(txt_pv, txt_pv.get_rect(center=btn_prev.center))
 
@@ -782,7 +782,7 @@ class HudRenderer:
             # Next Button
             btn_next = pygame.Rect(cx + 310, btn_y, 220, 56)
             pygame.draw.rect(surface, (16, 25, 40), btn_next, border_radius=10)
-            pygame.draw.rect(surface, (0, 140, 220), btn_next, 1, border_radius=10)
+            pygame.draw.rect(surface, (0, 160, 240), btn_next, 2, border_radius=10)
             txt_nx = self.font_sub_btn.render("NEXT STAGE ►", True, (180, 220, 255))
             surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
 
@@ -790,7 +790,7 @@ class HudRenderer:
         back_y = 838
         btn_back = pygame.Rect(cx - 200, back_y, 400, 48)
         pygame.draw.rect(surface, (16, 22, 34), btn_back, border_radius=10)
-        pygame.draw.rect(surface, (0, 140, 220), btn_back, 1, border_radius=10)
+        pygame.draw.rect(surface, (0, 160, 240), btn_back, 2, border_radius=10)
         txt_bk = self.font_sub_btn.render("◄ BACK TO TITLE (B / ESC)", True, (180, 215, 245))
         surface.blit(txt_bk, txt_bk.get_rect(center=btn_back.center))
 
@@ -824,7 +824,7 @@ class HudRenderer:
         
         # Cyber gold/cyan border
         pygame.draw.rect(surface, (0, 180, 240), (x, y, w, h), 3, border_radius=12)
-        pygame.draw.rect(surface, (15, 30, 50), (x + 3, y + 3, w - 6, h - 6), 1, border_radius=10)
+        pygame.draw.rect(surface, (25, 45, 75), (x + 3, y + 3, w - 6, h - 6), 2, border_radius=10)
         
         # Header title
         title_str = "GAME OPTIONS & CONFIGURATION"
@@ -867,7 +867,7 @@ class HudRenderer:
             if fill_w > 0:
                 bar_col = (0, 220, 255) if is_sel else (0, 150, 200)
                 pygame.draw.rect(surface, bar_col, (bx, by, fill_w, bh), border_radius=4)
-            pygame.draw.rect(surface, (60, 100, 140), (bx, by, bw, bh), 1, border_radius=4)
+            pygame.draw.rect(surface, (70, 110, 150), (bx, by, bw, bh), 2, border_radius=4)
             
             # Slider thumb knob
             kx = bx + fill_w
@@ -884,7 +884,7 @@ class HudRenderer:
 
         ar_box = pygame.Rect(x + 45, ar_y + 28, w - 90, 36)
         pygame.draw.rect(surface, (15, 25, 42), ar_box, border_radius=6)
-        pygame.draw.rect(surface, COLOR_GOLD if is_sel_ar else (60, 100, 140), ar_box, 1, border_radius=6)
+        pygame.draw.rect(surface, COLOR_GOLD if is_sel_ar else (70, 110, 150), ar_box, 2, border_radius=6)
 
         mode_str = f"◄  {aspect_ratio_label}  ►" if is_sel_ar else aspect_ratio_label
         txt_mode = self.font_sub.render(mode_str, True, COLOR_CYAN if is_sel_ar else COLOR_WHITE)
@@ -965,7 +965,7 @@ class HudRenderer:
             r_box = pygame.Rect(cx - box_w // 2, cy - box_h // 2, box_w, box_h)
             pygame.draw.rect(surface, (14, 10, 32), r_box, border_radius=14)
             pygame.draw.rect(surface, (255, 215, 0), r_box, 3, border_radius=14)
-            pygame.draw.rect(surface, (0, 220, 255), r_box.inflate(-8, -8), 1, border_radius=10)
+            pygame.draw.rect(surface, (0, 220, 255), r_box.inflate(-8, -8), 2, border_radius=10)
 
             mode_str = "HIRAGANA" if game_mode == "hiragana" else "KATAKANA"
             txt_h = self.font_menu.render(f"★ ULTIMATE {mode_str} MASTER! ★", True, COLOR_GOLD)
@@ -987,7 +987,7 @@ class HudRenderer:
             r_box = pygame.Rect(cx - box_w // 2, cy - box_h // 2, box_w, box_h)
             pygame.draw.rect(surface, (10, 22, 38), r_box, border_radius=14)
             pygame.draw.rect(surface, (255, 215, 0), r_box, 3, border_radius=14)
-            pygame.draw.rect(surface, (46, 224, 125), r_box.inflate(-8, -8), 1, border_radius=10)
+            pygame.draw.rect(surface, (46, 224, 125), r_box.inflate(-8, -8), 2, border_radius=10)
 
             txt_h = self.font_menu.render("★ FLAWLESS RUN ACCOMPLISHED! ★", True, (46, 224, 125))
             surface.blit(txt_h, txt_h.get_rect(center=(cx, cy - 65)))
@@ -1072,7 +1072,7 @@ class HudRenderer:
         
         # Double border
         pygame.draw.rect(surface, (0, 180, 240), (x, y, w, h), 3, border_radius=12)
-        pygame.draw.rect(surface, (15, 35, 55), (x + 3, y + 3, w - 6, h - 6), 1, border_radius=10)
+        pygame.draw.rect(surface, (25, 45, 75), (x + 3, y + 3, w - 6, h - 6), 2, border_radius=10)
         
         # Header
         t_header = self.font_menu.render("ONLINE SYSTEM UPDATER", True, COLOR_GOLD)
@@ -1146,7 +1146,7 @@ class HudRenderer:
             # Changelog box (fits neatly within modal)
             c_box = pygame.Rect(x + 40, cy - 22, w - 80, 130)
             pygame.draw.rect(surface, (15, 26, 44), c_box, border_radius=8)
-            pygame.draw.rect(surface, (0, 140, 215), c_box, 1, border_radius=8)
+            pygame.draw.rect(surface, (0, 160, 240), c_box, 2, border_radius=8)
             
             t_ch_h = self.font_caption.render("WHAT'S NEW IN THIS UPDATE:", True, (180, 215, 245))
             surface.blit(t_ch_h, (c_box.left + 16, c_box.top + 10))
