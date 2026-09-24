@@ -9,7 +9,8 @@ import pygame
 from game_config import (
     SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_STAGES, SECRET_STAGE, STAGE_NAMES, STAGE_ENV_NOTES,
     COLOR_PANEL_BG, COLOR_PANEL_BORDER, COLOR_GOLD, COLOR_CYAN, COLOR_WHITE,
-    GAME_VERSION, TOTAL_GAUNTLET_KANA, get_stage_kana, get_asset_path
+    GAME_VERSION, TOTAL_GAUNTLET_KANA, get_stage_kana, get_asset_path,
+    CARD_TOTAL_STAGES, CARD_STAGE_INFO
 )
 
 class HudRenderer:
@@ -49,6 +50,7 @@ class HudRenderer:
         self.font_stage_name = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 20)
         self.font_caption = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 18)
         self.font_kana_sub = pygame.font.Font(get_asset_path("fonts/NotoSansCJK-Bold.ttc"), 18)
+        self.font_kana_body = pygame.font.Font(get_asset_path("fonts/NotoSansCJK-Bold.ttc"), 18)
         self.font_desc = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 15)
         self.font_tiny = self.font_caption  # High-contrast 18pt font alias for handheld readability
 
@@ -672,59 +674,115 @@ class HudRenderer:
             surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
 
         else:
+            # 3D Hiragana Cards: 8-Stage Ribbon
+            n_stages = CARD_TOTAL_STAGES
+            pill_w = 110
+            pill_h = 46
+            gap = 14
+            total_w = n_stages * pill_w + (n_stages - 1) * gap
+            start_x = cx - total_w // 2
+            ribbon_y = 216
+
+            for st in range(1, n_stages + 1):
+                px = start_x + (st - 1) * (pill_w + gap)
+                p_rect = pygame.Rect(px, ribbon_y, pill_w, pill_h)
+                is_cur = (st == selected_stage)
+
+                if is_cur:
+                    pygame.draw.rect(surface, (36, 42, 28), p_rect, border_radius=8)
+                    b_col = COLOR_WHITE if is_blink else COLOR_GOLD
+                    pygame.draw.rect(surface, b_col, p_rect, 3, border_radius=8)
+                    lbl = f"{st:02d}"
+                    txt_p = self.font_sub.render(lbl, True, COLOR_GOLD)
+                else:
+                    pygame.draw.rect(surface, (14, 20, 32), p_rect, border_radius=8)
+                    pygame.draw.rect(surface, (40, 56, 80), p_rect, 1, border_radius=8)
+                    lbl = f"{st:02d}"
+                    txt_p = self.font_sub.render(lbl, True, (130, 155, 180))
+
+                surface.blit(txt_p, txt_p.get_rect(center=p_rect.center))
+
             # 3D Hiragana Cards Showcase Panel
             card_w = 1180
             card_h = 440
             card_x = cx - card_w // 2
-            card_y = 260
+            card_y = 286
             c_rect = pygame.Rect(card_x, card_y, card_w, card_h)
 
             pygame.draw.rect(surface, (12, 18, 30), c_rect, border_radius=14)
             pygame.draw.rect(surface, COLOR_GOLD, c_rect, 2, border_radius=14)
 
-            # Stage Name & Tech
-            st_title = "STAGE 01 : 3-SET GAUNTLET"
-            env_note = "3D GODOT 4 ENGINE & BLENDER 3D TABLE // TACTILE COMBAT"
+            # Retrieve stage configuration
+            info = CARD_STAGE_INFO.get(selected_stage, CARD_STAGE_INFO[1])
 
+            # Stage Name & Subtitle
+            st_title = f"STAGE {selected_stage:02d} : {info['title']}"
             txt_st_title = self.font_menu.render(st_title, True, COLOR_GOLD)
             surface.blit(txt_st_title, txt_st_title.get_rect(center=(cx, card_y + 44)))
 
-            txt_env = self.font_caption.render(env_note, True, (180, 215, 245))
-            surface.blit(txt_env, txt_env.get_rect(center=(cx, card_y + 82)))
+            stars = "★" * info["difficulty"] + "☆" * (8 - info["difficulty"])
+            txt_sub_jp = self.font_kana_sub.render(f"{info['japanese']}   |   DIFFICULTY: {stars}", True, (180, 215, 245))
+            surface.blit(txt_sub_jp, txt_sub_jp.get_rect(center=(cx, card_y + 82)))
 
             # Divider line 1
             pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
 
-            # Trial Objectives
-            txt_sec = self.font_caption.render("★ MISSION OBJECTIVES & CONTROLS ★", True, theme_col)
-            surface.blit(txt_sec, txt_sec.get_rect(center=(cx, card_y + 145)))
+            # Section Header
+            txt_sec = self.font_caption.render(f"★ STAGE {selected_stage:02d} OBJECTIVES & SYLLABARY FOCUS ★", True, theme_col)
+            surface.blit(txt_sec, txt_sec.get_rect(center=(cx, card_y + 138)))
 
-            r1 = "OBJECTIVE: Form 3 successive Hiragana sets before the countdown finishes"
-            r2 = "CONTROLS: D-Pad / Stick [LEFT / RIGHT] to browse cards • [A] Select to Tray • [B] Deselect"
-            r3 = "VISUALS: Spatial elevation pop with gold border focus and dynamic 3D shadows"
+            # Summary
+            txt_sum = self.font_kana_body.render(info["summary"], True, COLOR_WHITE)
+            surface.blit(txt_sum, txt_sum.get_rect(center=(cx, card_y + 175)))
 
-            txt_r1 = self.font_sub.render(r1, True, COLOR_WHITE)
-            surface.blit(txt_r1, txt_r1.get_rect(center=(cx, card_y + 200)))
-            txt_r2 = self.font_sub.render(r2, True, (180, 225, 255))
-            surface.blit(txt_r2, txt_r2.get_rect(center=(cx, card_y + 250)))
-            txt_r3 = self.font_sub.render(r3, True, COLOR_GOLD)
-            surface.blit(txt_r3, txt_r3.get_rect(center=(cx, card_y + 300)))
+            # Target Kana preview
+            k_preview = "      ".join(info["kana_preview"])
+            txt_k = self.font_kana_title.render(k_preview, True, COLOR_GOLD)
+            surface.blit(txt_k, txt_k.get_rect(center=(cx, card_y + 225)))
+
+            # Sample words
+            sample_words = info["words"]
+            w_preview = "TARGET WORDS: " + "   •   ".join(sample_words)
+            txt_w = self.font_kana_body.render(w_preview, True, (180, 225, 255))
+            if txt_w.get_width() > card_w - 80:
+                w_preview = "TARGET WORDS: " + "   •   ".join(sample_words[:4]) + "   •   etc."
+                txt_w = self.font_kana_body.render(w_preview, True, (180, 225, 255))
+            surface.blit(txt_w, txt_w.get_rect(center=(cx, card_y + 278)))
+
+            # Controls Hint
+            txt_tips = self.font_caption.render("CONTROLS: D-Pad / Stick [LEFT/RIGHT] browse  •  [A] Select  •  [B] Deselect  •  [X] Spell Word", True, (255, 220, 140))
+            surface.blit(txt_tips, txt_tips.get_rect(center=(cx, card_y + 325)))
 
             # Divider line 2
             pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
 
             # Specs
-            txt_specs = self.font_caption.render("HAND CAPACITY: 8 CARDS    |    SETS REQUIRED: 3    |    ELEVATION: 3D DYNAMIC POP", True, (160, 200, 235))
+            txt_specs = self.font_caption.render(f"CLEAR GOAL: {info['goal']} WORDS COMPLETED    |    HAND: 8 CARDS    |    ENGINE: GODOT 4 + BLENDER 3D", True, (160, 200, 235))
             surface.blit(txt_specs, txt_specs.get_rect(center=(cx, card_y + 400)))
 
             # Action Buttons
             btn_y = 758
+            # Prev Button
+            btn_prev = pygame.Rect(cx - 520, btn_y, 200, 56)
+            pygame.draw.rect(surface, (16, 25, 40), btn_prev, border_radius=10)
+            pygame.draw.rect(surface, (0, 140, 220), btn_prev, 1, border_radius=10)
+            txt_pv = self.font_sub.render("◄ PREV STAGE", True, (180, 220, 255))
+            surface.blit(txt_pv, txt_pv.get_rect(center=btn_prev.center))
+
+            # Start Battle Button (Highlighted)
             btn_start = pygame.Rect(cx - 280, btn_y, 560, 56)
             pygame.draw.rect(surface, (22, 38, 62), btn_start, border_radius=10)
             st_bcol = COLOR_WHITE if is_blink else COLOR_GOLD
             pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
             txt_st = self.font_menu.render("► START BATTLE (A / ENTER) ◄", True, st_bcol)
             surface.blit(txt_st, txt_st.get_rect(center=btn_start.center))
+
+            # Next Button
+            btn_next = pygame.Rect(cx + 320, btn_y, 200, 56)
+            pygame.draw.rect(surface, (16, 25, 40), btn_next, border_radius=10)
+            pygame.draw.rect(surface, (0, 140, 220), btn_next, 1, border_radius=10)
+            txt_nx = self.font_sub.render("NEXT STAGE ►", True, (180, 220, 255))
+            surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
 
         # Back to Title Button
         back_y = 838

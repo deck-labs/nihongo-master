@@ -1,11 +1,11 @@
 {
-  "version": "1.1.2",
-  "tag_name": "v1.1.2",
-  "name": "Nihongo Master v1.1.2",
+  "version": "1.1.3",
+  "tag_name": "v1.1.3",
+  "name": "Nihongo Master v1.1.3",
   "release_date": "2026-09-24",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.2/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.2/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.1.2: Refactored title menu and stage select flow so Stage Select only comes up once a game is selected. Title menu cleanly lists the 3 arcade games (Hiragana Arcade, Katakana Arcade, 3D Hiragana Cards) plus Options, Check for Updates, and Quit. Selecting any game opens a dedicated mission briefing and stage select screen with live syllabary preview and stage details before starting."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.3/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.3/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.1.3: Expanded 3D Hiragana Cards up to Stage 8 with an escalating difficulty curve. Features 8 full stages (Basic Vowels, Consonant Lines, Lookalikes, Dakuten, Handakuten, Sokuon/Glottal Stops, Compound Words, and Grand Master Gauntlet) with intelligent confusable decoy traps, dedicated 8-stage selector ribbon and briefings in the main launcher, smooth stage transitions, and victory fanfare."
 }
 

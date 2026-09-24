@@ -5,7 +5,9 @@ enum State { TITLE, PLAYING, CORRECT, INCORRECT, SET_CLEAR, STAGE_CLEAR, PAUSED 
 
 var current_state: State = State.PLAYING
 var previous_state: State = State.PLAYING
-var current_set_index: int = 1
+const MAX_STAGES: int = 8
+var current_stage_index: int = 1
+var current_set_index: int = 1 # Backwards compatibility alias
 var words_completed: int = 0
 var total_words_solved: int = 0
 var total_attempts: int = 0
@@ -38,7 +40,9 @@ var toast_timer: float = 0.0
 @onready var modal_set_clear: PanelContainer = $HUD/ModalSetClear
 @onready var set_clear_title: Label = $HUD/ModalSetClear/Margin/VBox/Title
 @onready var modal_stage_clear: PanelContainer = $HUD/ModalStageClear
+@onready var stage_clear_title: Label = $HUD/ModalStageClear/Margin/VBox/Title
 @onready var stage_clear_stats: Label = $HUD/ModalStageClear/Margin/VBox/Stats
+@onready var stage_clear_prompt: Label = $HUD/ModalStageClear/Margin/VBox/Prompt
 @onready var modal_paused: PanelContainer = $HUD/ModalPaused
 
 # Audio Players
@@ -56,7 +60,21 @@ const CardScene = preload("res://scenes/card_3d.tscn")
 func _ready():
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	_init_card_instances()
-	start_game()
+	_parse_cmdline_stage()
+	start_stage(current_stage_index)
+
+func _parse_cmdline_stage():
+	var env_st = OS.get_environment("NIHONGO_CARD_STAGE")
+	if env_st != "" and env_st.is_valid_int():
+		current_stage_index = clampi(env_st.to_int(), 1, MAX_STAGES)
+		return
+
+	var args = OS.get_cmdline_args()
+	for i in range(args.size()):
+		if args[i] == "--stage" and i + 1 < args.size():
+			if args[i + 1].is_valid_int():
+				current_stage_index = clampi(args[i + 1].to_int(), 1, MAX_STAGES)
+				return
 
 func _init_card_instances():
 	for i in range(8):
@@ -67,21 +85,21 @@ func _init_card_instances():
 		hand_cards.append(card)
 
 func start_game():
-	current_set_index = 1
-	words_completed = 0
-	total_words_solved = 0
-	total_attempts = 0
-	used_words.clear()
-	start_set(1)
+	start_stage(1)
 
-func start_set(set_idx: int):
-	current_set_index = set_idx
+func start_stage(stage_idx: int):
+	current_stage_index = clampi(stage_idx, 1, MAX_STAGES)
+	current_set_index = current_stage_index
 	words_completed = 0
 	used_words.clear()
 	next_round()
 
+# Backwards compatibility alias
+func start_set(set_idx: int):
+	start_stage(set_idx)
+
 func next_round():
-	var cfg = WordsData.STAGE_SETS[current_set_index]
+	var cfg = WordsData.STAGE_DATA.get(current_stage_index, WordsData.STAGE_DATA[1])
 	var pool = []
 	for w in cfg["words"]:
 		if not used_words.has(w["romaji"]):
@@ -108,11 +126,38 @@ func _deal_8_card_hand():
 	var needed = target_chars.size()
 	var decoy_count = 8 - needed
 
-	var decoys_pool = WordsData.GOJUON_POOL.duplicate()
-	for c in target_chars:
-		decoys_pool.erase(c)
-	decoys_pool.shuffle()
-	var decoys = decoys_pool.slice(0, decoy_count)
+	var cfg = WordsData.STAGE_DATA.get(current_stage_index, WordsData.STAGE_DATA[1])
+	var decoy_mode = cfg.get("decoy_mode", "random")
+
+	var decoys: Array = []
+
+	# 1. Intelligent decoy selection based on stage difficulty
+	if decoy_mode in ["similar", "lookalike", "dakuten", "handakuten", "sokuon", "advanced", "master"]:
+		for c in target_chars:
+			if WordsData.CONFUSABLE_MAP.has(c):
+				var conf = WordsData.CONFUSABLE_MAP[c]
+				if not target_chars.has(conf) and not decoys.has(conf):
+					decoys.append(conf)
+					if decoys.size() >= decoy_count:
+						break
+
+	# 2. Complete remaining decoy quota from stage-appropriate pool
+	var pool: Array = []
+	if current_stage_index >= 6:
+		pool = WordsData.SOKUON_POOL + WordsData.HANDAKUTEN_POOL + WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
+	elif current_stage_index == 5:
+		pool = WordsData.HANDAKUTEN_POOL + WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
+	elif current_stage_index == 4:
+		pool = WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
+	else:
+		pool = WordsData.GOJUON_POOL.duplicate()
+
+	pool.shuffle()
+	for c in pool:
+		if decoys.size() >= decoy_count:
+			break
+		if not target_chars.has(c) and not decoys.has(c):
+			decoys.append(c)
 
 	var all_chars = target_chars + decoys
 	all_chars.shuffle()
@@ -170,8 +215,11 @@ func _input(event: InputEvent):
 
 	if current_state == State.STAGE_CLEAR:
 		if (event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A) or (event is InputEventKey and event.pressed and event.keycode == KEY_ENTER):
-			start_game()
-		elif (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_START, JOY_BUTTON_BACK]) or (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE):
+			if current_stage_index >= MAX_STAGES:
+				start_stage(1)
+			else:
+				start_stage(current_stage_index + 1)
+		elif (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_B, JOY_BUTTON_START, JOY_BUTTON_BACK]) or (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE):
 			get_tree().quit()
 		return
 
@@ -320,23 +368,21 @@ func _process(delta: float):
 
 	if current_state == State.CORRECT:
 		if state_timer >= 1.2:
-			var cfg = WordsData.STAGE_SETS[current_set_index]
+			var cfg = WordsData.STAGE_DATA.get(current_stage_index, WordsData.STAGE_DATA[1])
 			if words_completed >= cfg["goal"]:
-				if current_set_index < 3:
-					current_state = State.SET_CLEAR
-					state_timer = 0.0
-					_hide_overlays()
-					set_clear_title.text = "SET %d COMPLETE!" % current_set_index
-					modal_set_clear.visible = true
-					if sfx_fanfare: sfx_fanfare.play()
+				current_state = State.STAGE_CLEAR
+				state_timer = 0.0
+				_hide_overlays()
+				var acc = (float(total_words_solved) / max(1, total_attempts)) * 100.0
+				stage_clear_stats.text = "Words Solved: %d  |  Total Attempts: %d  |  Accuracy: %.1f%%" % [total_words_solved, total_attempts, acc]
+				if current_stage_index >= MAX_STAGES:
+					stage_clear_title.text = "GRAND MASTER CHAMPION!"
+					stage_clear_prompt.text = "All 8 Stages Cleared! Press (A) / Enter to Play Again • (B) to Exit"
 				else:
-					current_state = State.STAGE_CLEAR
-					state_timer = 0.0
-					_hide_overlays()
-					var acc = (float(total_words_solved) / max(1, total_attempts)) * 100.0
-					stage_clear_stats.text = "Words Solved: %d  |  Total Attempts: %d  |  Accuracy: %.1f%%" % [total_words_solved, total_attempts, acc]
-					modal_stage_clear.visible = true
-					if sfx_fanfare: sfx_fanfare.play()
+					stage_clear_title.text = "STAGE %02d CLEAR!" % current_stage_index
+					stage_clear_prompt.text = "Press (A) / Enter for Stage %02d • (B) to Exit" % (current_stage_index + 1)
+				modal_stage_clear.visible = true
+				if sfx_fanfare: sfx_fanfare.play()
 			else:
 				next_round()
 
@@ -348,13 +394,13 @@ func _process(delta: float):
 
 	elif current_state == State.SET_CLEAR:
 		if state_timer >= 2.8:
-			start_set(current_set_index + 1)
+			start_stage(current_stage_index + 1)
 
 func _update_hud():
 	if current_word.is_empty():
 		return
-	var cfg = WordsData.STAGE_SETS[current_set_index]
-	top_set_label.text = "SET %d/3 — %s" % [current_set_index, cfg["name"].to_upper()]
+	var cfg = WordsData.STAGE_DATA.get(current_stage_index, WordsData.STAGE_DATA[1])
+	top_set_label.text = "STAGE %02d/%02d — %s" % [current_stage_index, MAX_STAGES, cfg["name"].to_upper()]
 	top_progress_label.text = "WORDS: %d/%d" % [words_completed, cfg["goal"]]
 	
 	romaji_label.text = "  ".join(current_word["romaji"].split())
@@ -368,3 +414,4 @@ func _update_hud():
 		pip.custom_minimum_size = Vector2(14, 14)
 		pip.color = Color(0.18, 0.84, 0.45, 1) if i < words_completed else Color(0.25, 0.35, 0.3, 0.8)
 		pips_container.add_child(pip)
+

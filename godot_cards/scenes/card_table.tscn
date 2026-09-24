@@ -112,7 +112,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.95, 0.98, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 18
-text = "SET 1/3 — HIRAGANA INTRODUCTION"
+text = "STAGE 01/08 — BASIC VOWELS"
 horizontal_alignment = 1
 
 [node name="Pips" type="HBoxContainer" parent="HUD/TopBar/Margin/HBox/VBoxCenter"]
