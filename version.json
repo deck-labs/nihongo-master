@@ -1,11 +1,11 @@
 {
-  "version": "1.1.1",
-  "tag_name": "v1.1.1",
-  "name": "Nihongo Master v1.1.1",
+  "version": "1.1.2",
+  "tag_name": "v1.1.2",
+  "name": "Nihongo Master v1.1.2",
   "release_date": "2026-09-24",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.1/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.1/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.1.1: Always runs at full screen mode. After selecting a card, selection focus automatically returns to the hand cards so players don't have to press down. Removed the circular ring around highlighted cards in favor of a clean, elevated 3D pop and gold border. On the title screen, all selectable games (Hiragana Arcade, Katakana Arcade, 3D Hiragana Cards) are permanently visible side-by-side in distinct cards with direct menu selection."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.2/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.2/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.1.2: Refactored title menu and stage select flow so Stage Select only comes up once a game is selected. Title menu cleanly lists the 3 arcade games (Hiragana Arcade, Katakana Arcade, 3D Hiragana Cards) plus Options, Check for Updates, and Quit. Selecting any game opens a dedicated mission briefing and stage select screen with live syllabary preview and stage details before starting."
 }
 

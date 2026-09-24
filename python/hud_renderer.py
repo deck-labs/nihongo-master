@@ -7,9 +7,9 @@ import math
 import time
 import pygame
 from game_config import (
-    SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_STAGES, STAGE_NAMES, STAGE_ENV_NOTES,
+    SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_STAGES, SECRET_STAGE, STAGE_NAMES, STAGE_ENV_NOTES,
     COLOR_PANEL_BG, COLOR_PANEL_BORDER, COLOR_GOLD, COLOR_CYAN, COLOR_WHITE,
-    GAME_VERSION, TOTAL_GAUNTLET_KANA, get_asset_path
+    GAME_VERSION, TOTAL_GAUNTLET_KANA, get_stage_kana, get_asset_path
 )
 
 class HudRenderer:
@@ -457,37 +457,23 @@ class HudRenderer:
         div_y = cards_y + card_h + 30
         pygame.draw.line(surface, (0, 140, 220), (cx - 720, div_y), (cx + 720, div_y), 2)
         
-        # 3. Direct Menu Items (7 visible options)
-        menu_y_start = div_y + 52
-        spacing = 62
+        # 3. Direct Menu Items (6 visible options)
+        menu_y_start = div_y + 54
+        spacing = 68
 
         menu_items = [
-            ("START HIRAGANA ARCADE", 0),
-            ("START KATAKANA ARCADE", 1),
-            ("START 3D HIRAGANA CARDS", 2),
-            ("STAGE SELECT", 3),
-            ("OPTIONS", 4),
-            ("CHECK FOR UPDATES", 5),
-            ("QUIT", 6)
+            ("HIRAGANA ARCADE", 0),
+            ("KATAKANA ARCADE", 1),
+            ("3D HIRAGANA CARDS", 2),
+            ("OPTIONS", 3),
+            ("CHECK FOR UPDATES", 4),
+            ("QUIT", 5)
         ]
 
         for label, idx in menu_items:
             is_sel = (menu_index == idx)
             y_pos = menu_y_start + idx * spacing
-
-            if idx == 3: # STAGE SELECT
-                eff_mode = "cards" if menu_index == 2 else ("katakana" if menu_index == 1 else ("hiragana" if menu_index == 0 else game_mode))
-                if eff_mode == "cards":
-                    st_str = "STAGE SELECT   ◄  STAGE 01 : 3-SET GAUNTLET  ►" if is_sel else "STAGE SELECT   < STAGE 01 : 3-SET GAUNTLET >"
-                elif selected_stage == 11:
-                    st_name = "★ RAINBOW SKYWAY ★"
-                    st_str = f"STAGE SELECT   ◄  BONUS TRIAL : {st_name}  ►" if is_sel else "STAGE SELECT   < BONUS TRIAL : ★ SECRET ★ >"
-                else:
-                    st_name = STAGE_NAMES.get(selected_stage, "STAGE 01")
-                    st_str = f"STAGE SELECT   ◄  STAGE {selected_stage:02d} : {st_name}  ►" if is_sel else f"STAGE SELECT   < STAGE {selected_stage:02d} >"
-                item_text = st_str
-            else:
-                item_text = label
+            item_text = label
 
             col = COLOR_WHITE if (is_sel and is_blink) else (COLOR_GOLD if is_sel else (210, 230, 250))
             txt_surf = self.font_menu.render(item_text, True, col)
@@ -504,7 +490,252 @@ class HudRenderer:
             surface.blit(txt_disp, (40, surface_h - 48))
 
         # Footer
-        txt_foot = self.font_caption.render("▲/▼ NAVIGATE   ◀/▶ ADJUST   [ENTER] / [A] / [START]: SELECT   [SELECT + START]: QUIT", True, (210, 235, 255))
+        txt_foot = self.font_caption.render("▲/▼ / ◀/▶: CHOOSE GAME   [ENTER] / [A] / [START]: SELECT GAME   [SELECT + START]: QUIT", True, (210, 235, 255))
+        surface.blit(txt_foot, txt_foot.get_rect(center=(cx, surface_h - 60)))
+
+    def render_stage_select_screen(self, surface: pygame.Surface, selected_stage: int,
+                                   game_mode: str = "hiragana", secret_unlocked: bool = False):
+        # Solid dark arcade canvas
+        surface.fill((8, 12, 22))
+        surface_w = surface.get_width()
+        surface_h = surface.get_height()
+        cx = surface_w // 2
+
+        is_blink = (int(time.time() * 1000) // 200) % 2 == 0
+
+        # Mode configuration
+        if game_mode == "hiragana":
+            mode_badge = "HIRAGANA ARCADE"
+            mode_sub = "CLASSIC ROAD RACER // ひらがな レーサー"
+            theme_col = (0, 225, 255)
+        elif game_mode == "katakana":
+            mode_badge = "KATAKANA ARCADE"
+            mode_sub = "TURBO ROAD RACER // カタカナ レーサー"
+            theme_col = (255, 175, 45)
+        else:
+            mode_badge = "3D HIRAGANA CARDS"
+            mode_sub = "3D GODOT & BLENDER BATTLE // カード バトル"
+            theme_col = COLOR_GOLD
+
+        # Current Version Running Indicator (Upper-Left)
+        ver_text = f"VERSION {GAME_VERSION}"
+        txt_ver = self.font_version.render(ver_text, True, (180, 230, 255))
+        badge_w = txt_ver.get_width() + 28
+        badge_h = txt_ver.get_height() + 14
+        badge_rect = pygame.Rect(40, 32, badge_w, badge_h)
+        pygame.draw.rect(surface, (12, 22, 38), badge_rect, border_radius=6)
+        pygame.draw.rect(surface, (0, 160, 240), badge_rect, 2, border_radius=6)
+        surface.blit(txt_ver, txt_ver.get_rect(center=badge_rect.center))
+
+        # 1. Mode Pill Badge at Top
+        txt_badge = self.font_caption.render(f"★  {mode_badge}  ★", True, theme_col)
+        b_rect = pygame.Rect(cx - 240, 52, 480, 38)
+        pygame.draw.rect(surface, (15, 26, 44), b_rect, border_radius=19)
+        pygame.draw.rect(surface, theme_col, b_rect, 2, border_radius=19)
+        surface.blit(txt_badge, txt_badge.get_rect(center=b_rect.center))
+
+        # 2. Main Title (STAGE SELECT)
+        title_text = "STAGE SELECT"
+        title_y = 126
+        t_b = self.font_title.render(title_text, True, (0, 0, 0))
+        surface.blit(t_b, t_b.get_rect(center=(cx, title_y + 4)))
+        t_r = self.font_title.render(title_text, True, (215, 38, 38))
+        surface.blit(t_r, t_r.get_rect(center=(cx, title_y + 2)))
+        t_g = self.font_title.render(title_text, True, COLOR_GOLD)
+        surface.blit(t_g, t_g.get_rect(center=(cx, title_y)))
+
+        txt_sub = self.font_kana_sub.render(mode_sub, True, (180, 215, 245))
+        surface.blit(txt_sub, txt_sub.get_rect(center=(cx, 180)))
+
+        # 3. Content for Racing Modes vs Card Mode
+        if game_mode in ("hiragana", "katakana"):
+            # Stage Ribbon
+            n_stages = SECRET_STAGE if secret_unlocked else TOTAL_STAGES
+            pill_w = 86
+            pill_h = 46
+            gap = 12
+            total_w = n_stages * pill_w + (n_stages - 1) * gap
+            start_x = cx - total_w // 2
+            ribbon_y = 216
+
+            for st in range(1, n_stages + 1):
+                px = start_x + (st - 1) * (pill_w + gap)
+                p_rect = pygame.Rect(px, ribbon_y, pill_w, pill_h)
+                is_cur = (st == selected_stage)
+
+                if is_cur:
+                    pygame.draw.rect(surface, (28, 48, 76), p_rect, border_radius=8)
+                    b_col = COLOR_WHITE if is_blink else COLOR_GOLD
+                    pygame.draw.rect(surface, b_col, p_rect, 3, border_radius=8)
+                    lbl = "★" if st == 11 else f"{st:02d}"
+                    txt_p = self.font_sub.render(lbl, True, COLOR_GOLD)
+                else:
+                    pygame.draw.rect(surface, (14, 20, 32), p_rect, border_radius=8)
+                    pygame.draw.rect(surface, (40, 56, 80), p_rect, 1, border_radius=8)
+                    lbl = "★" if st == 11 else f"{st:02d}"
+                    txt_p = self.font_sub.render(lbl, True, (130, 155, 180))
+
+                surface.blit(txt_p, txt_p.get_rect(center=p_rect.center))
+
+            # Main Mission Showcase Panel
+            card_w = 1180
+            card_h = 440
+            card_x = cx - card_w // 2
+            card_y = 286
+            c_rect = pygame.Rect(card_x, card_y, card_w, card_h)
+
+            pygame.draw.rect(surface, (12, 18, 30), c_rect, border_radius=14)
+            pygame.draw.rect(surface, theme_col, c_rect, 2, border_radius=14)
+
+            # Stage Name & Environment
+            if selected_stage == 11:
+                st_title = "BONUS TRIAL : ★ RAINBOW SKYWAY ★"
+                env_note = STAGE_ENV_NOTES.get(11, "COSMIC GAUNTLET")
+            else:
+                st_name = STAGE_NAMES.get(selected_stage, f"STAGE {selected_stage}")
+                st_title = f"STAGE {selected_stage:02d} : {st_name}"
+                env_note = STAGE_ENV_NOTES.get(selected_stage, "")
+
+            txt_st_title = self.font_menu.render(st_title, True, COLOR_GOLD)
+            surface.blit(txt_st_title, txt_st_title.get_rect(center=(cx, card_y + 44)))
+
+            txt_env = self.font_caption.render(env_note, True, (180, 215, 245))
+            surface.blit(txt_env, txt_env.get_rect(center=(cx, card_y + 82)))
+
+            # Divider line 1
+            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
+
+            # Target Kana Syllabary Section
+            txt_sec = self.font_caption.render("★ TARGET KANA SYLLABARY PRACTICED IN THIS STAGE ★", True, theme_col)
+            surface.blit(txt_sec, txt_sec.get_rect(center=(cx, card_y + 140)))
+
+            if selected_stage == 11:
+                txt_b1 = self.font_menu.render("ALL 71 KANA & DAKUTEN COMPLETE GAUNTLET", True, COLOR_WHITE)
+                surface.blit(txt_b1, txt_b1.get_rect(center=(cx, card_y + 205)))
+                txt_b2 = self.font_sub.render("Comprehensive Kana Master Trial • Infinite Syllabary Practice", True, (160, 205, 245))
+                surface.blit(txt_b2, txt_b2.get_rect(center=(cx, card_y + 255)))
+            else:
+                stage_kana = get_stage_kana(game_mode, selected_stage)
+                if len(stage_kana) > 5:
+                    k1 = "    ".join([k["kana"] for k in stage_kana[:5]])
+                    r1 = "   •   ".join([k["romaji"] for k in stage_kana[:5]])
+                    k2 = "    ".join([k["kana"] for k in stage_kana[5:]])
+                    r2 = "   •   ".join([k["romaji"] for k in stage_kana[5:]])
+
+                    txt_k1 = self.font_kana_title.render(k1, True, COLOR_WHITE)
+                    surface.blit(txt_k1, txt_k1.get_rect(center=(cx, card_y + 195)))
+                    txt_r1 = self.font_sub.render(r1, True, COLOR_GOLD)
+                    surface.blit(txt_r1, txt_r1.get_rect(center=(cx, card_y + 236)))
+
+                    txt_k2 = self.font_kana_title.render(k2, True, COLOR_WHITE)
+                    surface.blit(txt_k2, txt_k2.get_rect(center=(cx, card_y + 282)))
+                    txt_r2 = self.font_sub.render(r2, True, COLOR_GOLD)
+                    surface.blit(txt_r2, txt_r2.get_rect(center=(cx, card_y + 322)))
+                else:
+                    k1 = "      ".join([k["kana"] for k in stage_kana])
+                    r1 = "    •    ".join([k["romaji"] for k in stage_kana])
+
+                    txt_k1 = self.font_kana_title.render(k1, True, COLOR_WHITE)
+                    surface.blit(txt_k1, txt_k1.get_rect(center=(cx, card_y + 215)))
+                    txt_r1 = self.font_sub.render(r1, True, COLOR_GOLD)
+                    surface.blit(txt_r1, txt_r1.get_rect(center=(cx, card_y + 270)))
+
+            # Divider line 2
+            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
+
+            # Mission specs
+            txt_specs = self.font_caption.render("COURSE DISTANCE: 36,000m    |    TARGET: 100% FUEL CLEAR    |    SPEED GOAL: 280+ KM/H", True, (160, 200, 235))
+            surface.blit(txt_specs, txt_specs.get_rect(center=(cx, card_y + 400)))
+
+            # Action Buttons
+            btn_y = 758
+            # Prev Button
+            btn_prev = pygame.Rect(cx - 520, btn_y, 200, 56)
+            pygame.draw.rect(surface, (16, 25, 40), btn_prev, border_radius=10)
+            pygame.draw.rect(surface, (0, 140, 220), btn_prev, 1, border_radius=10)
+            txt_pv = self.font_sub.render("◄ PREV STAGE", True, (180, 220, 255))
+            surface.blit(txt_pv, txt_pv.get_rect(center=btn_prev.center))
+
+            # Start Mission Button (Highlighted)
+            btn_start = pygame.Rect(cx - 280, btn_y, 560, 56)
+            pygame.draw.rect(surface, (22, 38, 62), btn_start, border_radius=10)
+            st_bcol = COLOR_WHITE if is_blink else COLOR_GOLD
+            pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
+            txt_st = self.font_menu.render("► START STAGE (A / ENTER) ◄", True, st_bcol)
+            surface.blit(txt_st, txt_st.get_rect(center=btn_start.center))
+
+            # Next Button
+            btn_next = pygame.Rect(cx + 320, btn_y, 200, 56)
+            pygame.draw.rect(surface, (16, 25, 40), btn_next, border_radius=10)
+            pygame.draw.rect(surface, (0, 140, 220), btn_next, 1, border_radius=10)
+            txt_nx = self.font_sub.render("NEXT STAGE ►", True, (180, 220, 255))
+            surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
+
+        else:
+            # 3D Hiragana Cards Showcase Panel
+            card_w = 1180
+            card_h = 440
+            card_x = cx - card_w // 2
+            card_y = 260
+            c_rect = pygame.Rect(card_x, card_y, card_w, card_h)
+
+            pygame.draw.rect(surface, (12, 18, 30), c_rect, border_radius=14)
+            pygame.draw.rect(surface, COLOR_GOLD, c_rect, 2, border_radius=14)
+
+            # Stage Name & Tech
+            st_title = "STAGE 01 : 3-SET GAUNTLET"
+            env_note = "3D GODOT 4 ENGINE & BLENDER 3D TABLE // TACTILE COMBAT"
+
+            txt_st_title = self.font_menu.render(st_title, True, COLOR_GOLD)
+            surface.blit(txt_st_title, txt_st_title.get_rect(center=(cx, card_y + 44)))
+
+            txt_env = self.font_caption.render(env_note, True, (180, 215, 245))
+            surface.blit(txt_env, txt_env.get_rect(center=(cx, card_y + 82)))
+
+            # Divider line 1
+            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
+
+            # Trial Objectives
+            txt_sec = self.font_caption.render("★ MISSION OBJECTIVES & CONTROLS ★", True, theme_col)
+            surface.blit(txt_sec, txt_sec.get_rect(center=(cx, card_y + 145)))
+
+            r1 = "OBJECTIVE: Form 3 successive Hiragana sets before the countdown finishes"
+            r2 = "CONTROLS: D-Pad / Stick [LEFT / RIGHT] to browse cards • [A] Select to Tray • [B] Deselect"
+            r3 = "VISUALS: Spatial elevation pop with gold border focus and dynamic 3D shadows"
+
+            txt_r1 = self.font_sub.render(r1, True, COLOR_WHITE)
+            surface.blit(txt_r1, txt_r1.get_rect(center=(cx, card_y + 200)))
+            txt_r2 = self.font_sub.render(r2, True, (180, 225, 255))
+            surface.blit(txt_r2, txt_r2.get_rect(center=(cx, card_y + 250)))
+            txt_r3 = self.font_sub.render(r3, True, COLOR_GOLD)
+            surface.blit(txt_r3, txt_r3.get_rect(center=(cx, card_y + 300)))
+
+            # Divider line 2
+            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
+
+            # Specs
+            txt_specs = self.font_caption.render("HAND CAPACITY: 8 CARDS    |    SETS REQUIRED: 3    |    ELEVATION: 3D DYNAMIC POP", True, (160, 200, 235))
+            surface.blit(txt_specs, txt_specs.get_rect(center=(cx, card_y + 400)))
+
+            # Action Buttons
+            btn_y = 758
+            btn_start = pygame.Rect(cx - 280, btn_y, 560, 56)
+            pygame.draw.rect(surface, (22, 38, 62), btn_start, border_radius=10)
+            st_bcol = COLOR_WHITE if is_blink else COLOR_GOLD
+            pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
+            txt_st = self.font_menu.render("► START BATTLE (A / ENTER) ◄", True, st_bcol)
+            surface.blit(txt_st, txt_st.get_rect(center=btn_start.center))
+
+        # Back to Title Button
+        back_y = 838
+        btn_back = pygame.Rect(cx - 190, back_y, 380, 48)
+        pygame.draw.rect(surface, (16, 22, 34), btn_back, border_radius=10)
+        pygame.draw.rect(surface, (0, 140, 220), btn_back, 1, border_radius=10)
+        txt_bk = self.font_sub.render("◄ BACK TO TITLE (B / ESC)", True, (180, 215, 245))
+        surface.blit(txt_bk, txt_bk.get_rect(center=btn_back.center))
+
+        # Footer
+        txt_foot = self.font_caption.render("◄/► / ▲/▼: CHANGE STAGE   [A] / [ENTER]: START MISSION   [B] / [ESC]: BACK TO GAME SELECT", True, (210, 235, 255))
         surface.blit(txt_foot, txt_foot.get_rect(center=(cx, surface_h - 60)))
 
     def render_volume_menu(self, surface: pygame.Surface, is_title_screen: bool, selected_idx: int,

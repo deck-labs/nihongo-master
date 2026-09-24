@@ -14,7 +14,7 @@ from game_config import (
 
 def main():
     parser = argparse.ArgumentParser(description="Nihongo Master (Python Edition)")
-    parser.add_argument("--mode", type=str, default=None, choices=["hiragana", "katakana"], help="Game mode (hiragana or katakana)")
+    parser.add_argument("--mode", type=str, default=None, choices=["hiragana", "katakana", "cards"], help="Game mode (hiragana, katakana, or cards)")
     parser.add_argument("--stage", type=int, default=None, help="Stage to start on (1-11)")
     parser.add_argument("--trackdist", type=float, default=0.0, help="Initial track distance")
     parser.add_argument("--title", action="store_true", help="Force title screen")
@@ -22,6 +22,7 @@ def main():
     parser.add_argument("--menu", action="store_true", help="Open audio settings menu immediately")
     parser.add_argument("--pause", action="store_true", help="Start game paused")
     parser.add_argument("--stageclear", action="store_true", help="Start with stage clear banner")
+    parser.add_argument("--stageselect", action="store_true", help="Start directly in stage select screen")
     parser.add_argument("--screenshot", type=str, default="", help="Save screenshot to path after frames and exit")
     parser.add_argument("--windowed", action="store_true", help="Run in windowed mode instead of fullscreen")
     parser.add_argument("--headless", action="store_true", help="Run without graphical display")
@@ -108,12 +109,17 @@ def main():
     )
     if args.mode:
         engine.game_mode = args.mode
-        init_k = "ア" if args.mode == "katakana" else "あ"
-        engine.player.update_kana(init_k)
-        engine.road.rebuild_stage11_gantries(args.mode)
+        if args.mode != "cards":
+            init_k = "ア" if args.mode == "katakana" else "あ"
+            engine.player.update_kana(init_k)
+            engine.road.rebuild_stage11_gantries(args.mode)
 
     if args.titlemenu > 0:
         engine.title_menu_index = args.titlemenu
+
+    if args.stageselect:
+        engine.is_title_screen = True
+        engine.is_stage_select = True
 
     if args.screenshot:
         # Run 25 frames to settle physics & textures, capture, then exit

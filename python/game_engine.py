@@ -105,6 +105,7 @@ class GameEngine:
         self.current_stage = start_stage
         self.selected_stage = start_stage
         self.is_title_screen = not skip_title
+        self.is_stage_select = False
         self.title_menu_index = 0
         self.is_volume_menu_open = start_menu
         self.volume_selected_index = 0
@@ -383,6 +384,7 @@ class GameEngine:
 
     def return_to_title(self):
         self.is_title_screen = True
+        self.is_stage_select = False
         self.is_paused = False
         self.is_volume_menu_open = False
         self.is_update_dialog_open = False
@@ -522,14 +524,22 @@ class GameEngine:
             self.volume_selected_index = (self.volume_selected_index - 1 + max_opts) % max_opts
             self.audio.play_pause()
         elif self.is_title_screen:
-            self.title_menu_index = (self.title_menu_index - 1 + 7) % 7
-            if self.title_menu_index == 0:
-                self.game_mode = "hiragana"
-            elif self.title_menu_index == 1:
-                self.game_mode = "katakana"
-            elif self.title_menu_index == 2:
-                self.game_mode = "cards"
-            self.audio.play_pause()
+            if self.is_stage_select:
+                if self.game_mode in ("hiragana", "katakana"):
+                    max_st = SECRET_STAGE if self.secret_stage_unlocked else TOTAL_CAMPAIGN_STAGES
+                    self.selected_stage = (self.selected_stage - 2 + max_st) % max_st + 1
+                    self.current_stage = self.selected_stage
+                    self.road.current_stage = self.selected_stage
+                    self.audio.play_pause()
+            else:
+                self.title_menu_index = (self.title_menu_index - 1 + 6) % 6
+                if self.title_menu_index == 0:
+                    self.game_mode = "hiragana"
+                elif self.title_menu_index == 1:
+                    self.game_mode = "katakana"
+                elif self.title_menu_index == 2:
+                    self.game_mode = "cards"
+                self.audio.play_pause()
 
     def menu_down(self):
         if self.is_update_dialog_open:
@@ -539,14 +549,22 @@ class GameEngine:
             self.volume_selected_index = (self.volume_selected_index + 1) % max_opts
             self.audio.play_pause()
         elif self.is_title_screen:
-            self.title_menu_index = (self.title_menu_index + 1) % 7
-            if self.title_menu_index == 0:
-                self.game_mode = "hiragana"
-            elif self.title_menu_index == 1:
-                self.game_mode = "katakana"
-            elif self.title_menu_index == 2:
-                self.game_mode = "cards"
-            self.audio.play_pause()
+            if self.is_stage_select:
+                if self.game_mode in ("hiragana", "katakana"):
+                    max_st = SECRET_STAGE if self.secret_stage_unlocked else TOTAL_CAMPAIGN_STAGES
+                    self.selected_stage = (self.selected_stage % max_st) + 1
+                    self.current_stage = self.selected_stage
+                    self.road.current_stage = self.selected_stage
+                    self.audio.play_pause()
+            else:
+                self.title_menu_index = (self.title_menu_index + 1) % 6
+                if self.title_menu_index == 0:
+                    self.game_mode = "hiragana"
+                elif self.title_menu_index == 1:
+                    self.game_mode = "katakana"
+                elif self.title_menu_index == 2:
+                    self.game_mode = "cards"
+                self.audio.play_pause()
 
     def menu_left(self):
         if self.is_update_dialog_open:
@@ -557,21 +575,23 @@ class GameEngine:
             elif self.volume_selected_index < 3:
                 self.adjust_volume(-0.05)
         elif self.is_title_screen:
-            if self.title_menu_index in (0, 1, 2):
-                self.title_menu_index = (self.title_menu_index - 1 + 3) % 3
-                if self.title_menu_index == 0:
-                    self.game_mode = "hiragana"
-                elif self.title_menu_index == 1:
-                    self.game_mode = "katakana"
-                elif self.title_menu_index == 2:
-                    self.game_mode = "cards"
-                self.audio.play_pause()
-            elif self.title_menu_index == 3:
-                max_st = SECRET_STAGE if self.secret_stage_unlocked else TOTAL_CAMPAIGN_STAGES
-                self.selected_stage = (self.selected_stage - 2 + max_st) % max_st + 1
-                self.current_stage = self.selected_stage
-                self.road.current_stage = self.selected_stage
-                self.audio.play_pause()
+            if self.is_stage_select:
+                if self.game_mode in ("hiragana", "katakana"):
+                    max_st = SECRET_STAGE if self.secret_stage_unlocked else TOTAL_CAMPAIGN_STAGES
+                    self.selected_stage = (self.selected_stage - 2 + max_st) % max_st + 1
+                    self.current_stage = self.selected_stage
+                    self.road.current_stage = self.selected_stage
+                    self.audio.play_pause()
+            else:
+                if self.title_menu_index in (0, 1, 2):
+                    self.title_menu_index = (self.title_menu_index - 1 + 3) % 3
+                    if self.title_menu_index == 0:
+                        self.game_mode = "hiragana"
+                    elif self.title_menu_index == 1:
+                        self.game_mode = "katakana"
+                    elif self.title_menu_index == 2:
+                        self.game_mode = "cards"
+                    self.audio.play_pause()
 
     def menu_right(self):
         if self.is_update_dialog_open:
@@ -582,21 +602,23 @@ class GameEngine:
             elif self.volume_selected_index < 3:
                 self.adjust_volume(0.05)
         elif self.is_title_screen:
-            if self.title_menu_index in (0, 1, 2):
-                self.title_menu_index = (self.title_menu_index + 1) % 3
-                if self.title_menu_index == 0:
-                    self.game_mode = "hiragana"
-                elif self.title_menu_index == 1:
-                    self.game_mode = "katakana"
-                elif self.title_menu_index == 2:
-                    self.game_mode = "cards"
-                self.audio.play_pause()
-            elif self.title_menu_index == 3:
-                max_st = SECRET_STAGE if self.secret_stage_unlocked else TOTAL_CAMPAIGN_STAGES
-                self.selected_stage = (self.selected_stage % max_st) + 1
-                self.current_stage = self.selected_stage
-                self.road.current_stage = self.selected_stage
-                self.audio.play_pause()
+            if self.is_stage_select:
+                if self.game_mode in ("hiragana", "katakana"):
+                    max_st = SECRET_STAGE if self.secret_stage_unlocked else TOTAL_CAMPAIGN_STAGES
+                    self.selected_stage = (self.selected_stage % max_st) + 1
+                    self.current_stage = self.selected_stage
+                    self.road.current_stage = self.selected_stage
+                    self.audio.play_pause()
+            else:
+                if self.title_menu_index in (0, 1, 2):
+                    self.title_menu_index = (self.title_menu_index + 1) % 3
+                    if self.title_menu_index == 0:
+                        self.game_mode = "hiragana"
+                    elif self.title_menu_index == 1:
+                        self.game_mode = "katakana"
+                    elif self.title_menu_index == 2:
+                        self.game_mode = "cards"
+                    self.audio.play_pause()
 
     def get_aspect_mode_label(self) -> str:
         if self.aspect_mode == "stretch":
@@ -721,27 +743,28 @@ class GameEngine:
                     self.adjust_volume(0.05)
             return
         elif self.is_title_screen:
-            if self.title_menu_index == 0:
-                self.game_mode = "hiragana"
+            if self.is_stage_select:
+                self.is_stage_select = False
                 self.start_game_from_title()
-            elif self.title_menu_index == 1:
-                self.game_mode = "katakana"
-                self.start_game_from_title()
-            elif self.title_menu_index == 2:
-                self.game_mode = "cards"
-                self.start_game_from_title()
-            elif self.title_menu_index == 3:
-                max_st = SECRET_STAGE if self.secret_stage_unlocked else TOTAL_CAMPAIGN_STAGES
-                self.selected_stage = (self.selected_stage % max_st) + 1
-                self.current_stage = self.selected_stage
-                self.road.current_stage = self.selected_stage
-                self.audio.play_pause()
-            elif self.title_menu_index == 4:
-                self.toggle_volume_menu()
-            elif self.title_menu_index == 5:
-                self.open_update_dialog()
-            elif self.title_menu_index == 6:
-                self.quit_game()
+            else:
+                if self.title_menu_index == 0:
+                    self.game_mode = "hiragana"
+                    self.is_stage_select = True
+                    self.audio.play_pause()
+                elif self.title_menu_index == 1:
+                    self.game_mode = "katakana"
+                    self.is_stage_select = True
+                    self.audio.play_pause()
+                elif self.title_menu_index == 2:
+                    self.game_mode = "cards"
+                    self.is_stage_select = True
+                    self.audio.play_pause()
+                elif self.title_menu_index == 3:
+                    self.toggle_volume_menu()
+                elif self.title_menu_index == 4:
+                    self.open_update_dialog()
+                elif self.title_menu_index == 5:
+                    self.quit_game()
         elif self.is_stage_clear:
             if self.current_stage == 11:
                 self.return_to_title()
@@ -767,7 +790,11 @@ class GameEngine:
         if self.is_volume_menu_open:
             self.toggle_volume_menu()
         elif self.is_title_screen:
-            self.quit_game()
+            if self.is_stage_select:
+                self.is_stage_select = False
+                self.audio.play_pause()
+            else:
+                self.quit_game()
         elif self.is_stage_clear or self.is_game_over:
             self.return_to_title()
 
@@ -865,30 +892,59 @@ class GameEngine:
                             self.close_update_dialog()
                 elif self.is_title_screen and not self.is_volume_menu_open:
                     cx = self.virtual_width // 2
-                    if getattr(self.hud, "spr_title_logo", None):
-                        m_start = 562
-                        sp = 64
+                    if self.is_stage_select:
+                        # Stage select mouse clicks
+                        if self.game_mode in ("hiragana", "katakana"):
+                            n_stages = SECRET_STAGE if self.secret_stage_unlocked else TOTAL_STAGES
+                            pill_w, pill_h, gap = 86, 46, 12
+                            total_w = n_stages * pill_w + (n_stages - 1) * gap
+                            start_x = cx - total_w // 2
+                            ribbon_y = 216
+                            for st in range(1, n_stages + 1):
+                                px = start_x + (st - 1) * (pill_w + gap)
+                                if pygame.Rect(px, ribbon_y, pill_w, pill_h).collidepoint(mx, my):
+                                    self.selected_stage = st
+                                    self.current_stage = st
+                                    self.road.current_stage = st
+                                    self.audio.play_pause()
+                            if pygame.Rect(cx - 520, 758, 200, 56).collidepoint(mx, my):
+                                self.menu_left()
+                            elif pygame.Rect(cx + 320, 758, 200, 56).collidepoint(mx, my):
+                                self.menu_right()
+
+                        # Start button
+                        if pygame.Rect(cx - 280, 758, 560, 56).collidepoint(mx, my):
+                            self.menu_confirm()
+                        # Back button
+                        elif pygame.Rect(cx - 190, 838, 380, 48).collidepoint(mx, my):
+                            self.menu_back()
                     else:
-                        title_y = int(self.virtual_height * 0.22)
-                        sub_y = title_y + 68
-                        m_start = sub_y + 148
-                        sp = 68
-                    pad = 28
-                    if (m_start - pad) <= my <= (m_start + pad) and (cx - 520) <= mx <= (cx + 520):
-                        self.toggle_game_mode()
-                    elif (m_start + sp - pad) <= my <= (m_start + sp + pad) and (cx - 360) <= mx <= (cx + 360):
-                        self.start_game_from_title()
-                    elif (m_start + sp * 2 - pad) <= my <= (m_start + sp * 2 + pad) and (cx - 540) <= mx <= (cx + 540):
-                        if mx < cx:
-                            self.menu_left()
-                        else:
-                            self.menu_right()
-                    elif (m_start + sp * 3 - pad) <= my <= (m_start + sp * 3 + pad) and (cx - 360) <= mx <= (cx + 360):
-                        self.toggle_volume_menu()
-                    elif (m_start + sp * 4 - pad) <= my <= (m_start + sp * 4 + pad) and (cx - 360) <= mx <= (cx + 360):
-                        self.open_update_dialog()
-                    elif (m_start + sp * 5 - pad) <= my <= (m_start + sp * 5 + pad) and (cx - 360) <= mx <= (cx + 360):
-                        self.quit_game()
+                        # Title screen mouse clicks
+                        # 1. 3 Game cards at top
+                        cards_y = int(self.virtual_height * 0.14) + 60 + 46
+                        card_w, card_h = 440, 114
+                        centers_x = [cx - 480, cx, cx + 480]
+                        for i, c_x in enumerate(centers_x):
+                            if pygame.Rect(c_x - card_w // 2, cards_y, card_w, card_h).collidepoint(mx, my):
+                                self.title_menu_index = i
+                                if i == 0:
+                                    self.game_mode = "hiragana"
+                                elif i == 1:
+                                    self.game_mode = "katakana"
+                                elif i == 2:
+                                    self.game_mode = "cards"
+                                self.is_stage_select = True
+                                self.audio.play_pause()
+
+                        # 2. Direct 6 menu items below divider
+                        div_y = cards_y + card_h + 30
+                        menu_y_start = div_y + 54
+                        spacing = 68
+                        for idx in range(6):
+                            y_pos = menu_y_start + idx * spacing
+                            if (y_pos - 28) <= my <= (y_pos + 28) and (cx - 360) <= mx <= (cx + 360):
+                                self.title_menu_index = idx
+                                self.menu_confirm()
                 elif self.is_volume_menu_open:
                     cx = self.virtual_width // 2 if self.is_title_screen else 760
                     cy = self.virtual_height // 2
@@ -1478,7 +1534,12 @@ class GameEngine:
         # 5. Overlays
         if self.is_title_screen:
             disp_info = f"{self.detected_res[0]}x{self.detected_res[1]} [16:10 STANDARD]"
-            self.hud.render_title_screen(self.virtual_screen, self.title_menu_index, self.selected_stage, self.game_mode, disp_info)
+            if self.is_stage_select:
+                self.hud.render_stage_select_screen(
+                    self.virtual_screen, self.selected_stage, self.game_mode, self.secret_stage_unlocked
+                )
+            else:
+                self.hud.render_title_screen(self.virtual_screen, self.title_menu_index, self.selected_stage, self.game_mode, disp_info)
             if self.is_update_dialog_open:
                 self.hud.render_update_modal(self.virtual_screen, self.update_mgr)
             
