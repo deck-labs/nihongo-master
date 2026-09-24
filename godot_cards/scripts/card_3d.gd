@@ -20,7 +20,7 @@ var mesh_inst: MeshInstance3D = null
 @onready var lbl_br: Label = $SubViewport/CardFace/BottomRightKana
 @onready var badge_rect: ColorRect = $SubViewport/CardFace/Badge
 @onready var badge_lbl: Label = $SubViewport/CardFace/Badge/BadgeNumber
-@onready var reticle: MeshInstance3D = $Reticle
+@onready var border_rect: ReferenceRect = $SubViewport/CardFace/Border
 
 var face_material: StandardMaterial3D = null
 
@@ -60,11 +60,12 @@ func update_order_badge():
 
 func set_hovered(hover: bool):
 	is_hovered = hover
-	if reticle:
-		reticle.visible = hover
+	if border_rect:
+		border_rect.border_color = Color(1.0, 0.80, 0.22, 1.0) if hover else Color(0.85, 0.8, 0.72, 1.0)
+		border_rect.border_width = 7.0 if hover else 3.0
 		
-	var target_y = base_pos.y + (0.24 if hover else 0.0)
-	var target_rx = base_rot.x + (-14.0 if hover else 0.0)
+	var target_y = base_pos.y + (0.26 if hover else 0.0)
+	var target_rx = base_rot.x + (-12.0 if hover else 0.0)
 
 	if current_tween and current_tween.is_valid():
 		current_tween.kill()

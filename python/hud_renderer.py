@@ -48,6 +48,7 @@ class HudRenderer:
         self.font_sub = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 22)
         self.font_stage_name = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 20)
         self.font_caption = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 18)
+        self.font_kana_sub = pygame.font.Font(get_asset_path("fonts/NotoSansCJK-Bold.ttc"), 18)
         self.font_desc = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 15)
         self.font_tiny = self.font_caption  # High-contrast 18pt font alias for handheld readability
 
@@ -363,131 +364,139 @@ class HudRenderer:
         pygame.draw.rect(surface, (0, 160, 240), badge_rect, 2, border_radius=6)
         surface.blit(txt_ver, txt_ver.get_rect(center=badge_rect.center))
         
-        # 1. 8-Bit Title Logo or Retro Chromatic Fallback
-        if self.spr_title_logo:
-            logo_rect = self.spr_title_logo.get_rect(center=(cx, 260))
-            surface.blit(self.spr_title_logo, logo_rect)
-            sub_y = logo_rect.bottom + 26
-            pill_y = sub_y
-            div_y = sub_y + 50
-            menu_y_start = sub_y + 104
-            spacing = 64
-        else:
-            title_text = "NIHONGO MASTER"
-            title_y = int(surface_h * 0.22)
-            t_b = self.font_title.render(title_text, True, (0, 0, 0))
-            surface.blit(t_b, t_b.get_rect(center=(cx, title_y + 4)))
-            t_r = self.font_title.render(title_text, True, (215, 38, 38))
-            surface.blit(t_r, t_r.get_rect(center=(cx, title_y + 2)))
-            t_g = self.font_title.render(title_text, True, COLOR_GOLD)
-            surface.blit(t_g, t_g.get_rect(center=(cx, title_y)))
-            sub_text = "日本語  マスター"
-            sub_y = title_y + 68
-            t_k = self.font_kana_title.render(sub_text, True, COLOR_CYAN)
-            surface.blit(t_k, t_k.get_rect(center=(cx, sub_y)))
-            pill_y = sub_y + 44
-            div_y = sub_y + 94
-            menu_y_start = sub_y + 148
-            spacing = 68
-
-        # Active Mode Banner Pill
-        if game_mode == "cards":
-            mode_tag = "★ 3D HIRAGANA CARDS (STAGE 1) ★"
-            mode_col = COLOR_GOLD
-            cur_mode_str = "HIRAGANA CARDS"
-            start_lbl = "START CARDS GAME"
-        elif game_mode == "katakana":
-            mode_tag = "★ KATAKANA MASTER MODE ★"
-            mode_col = (255, 175, 45)
-            cur_mode_str = "KATAKANA MASTER"
-            start_lbl = "START KATAKANA"
-        else:
-            mode_tag = "★ HIRAGANA MASTER MODE ★"
-            mode_col = (0, 225, 255)
-            cur_mode_str = "HIRAGANA MASTER"
-            start_lbl = "START HIRAGANA"
-
-        txt_m_tag = self.font_sub.render(mode_tag, True, mode_col)
-        pill_w = txt_m_tag.get_width() + 40
-        pill_h = 36
-        pill_rect = pygame.Rect(cx - pill_w // 2, pill_y, pill_w, pill_h)
-        pygame.draw.rect(surface, (14, 22, 38), pill_rect, border_radius=18)
-        pygame.draw.rect(surface, mode_col, pill_rect, 2, border_radius=18)
-        surface.blit(txt_m_tag, txt_m_tag.get_rect(center=pill_rect.center))
+        # 1. Title Logo or Retro Chromatic Typography (Centered)
+        title_text = "NIHONGO MASTER"
+        title_y = int(surface_h * 0.14)
+        t_b = self.font_title.render(title_text, True, (0, 0, 0))
+        surface.blit(t_b, t_b.get_rect(center=(cx, title_y + 4)))
+        t_r = self.font_title.render(title_text, True, (215, 38, 38))
+        surface.blit(t_r, t_r.get_rect(center=(cx, title_y + 2)))
+        t_g = self.font_title.render(title_text, True, COLOR_GOLD)
+        surface.blit(t_g, t_g.get_rect(center=(cx, title_y)))
         
-        # Divider line
-        pygame.draw.line(surface, (0, 140, 220), (cx - 380, div_y), (cx + 380, div_y), 2)
-        
-        # 3. Menu Items with 200ms NES Blinking (16:10 spacious vertical layout)
+        sub_text = "日本語  マスター"
+        sub_y = title_y + 60
+        t_k = self.font_kana_title.render(sub_text, True, COLOR_CYAN)
+        surface.blit(t_k, t_k.get_rect(center=(cx, sub_y)))
+
+        # 2. Visibly Display All 3 Selectable Games Side-by-Side
+        games_data = [
+            {
+                "id": "hiragana",
+                "title": "HIRAGANA ARCADE",
+                "tag": "CLASSIC ROAD RACER",
+                "kana": "ひらがな レーサー",
+                "menu_idx": 0,
+                "col": (0, 225, 255)
+            },
+            {
+                "id": "katakana",
+                "title": "KATAKANA ARCADE",
+                "tag": "TURBO ROAD RACER",
+                "kana": "カタカナ レーサー",
+                "menu_idx": 1,
+                "col": (255, 175, 45)
+            },
+            {
+                "id": "cards",
+                "title": "3D HIRAGANA CARDS",
+                "tag": "3D GODOT & BLENDER",
+                "kana": "カード バトル (STAGE 1)",
+                "menu_idx": 2,
+                "col": COLOR_GOLD
+            }
+        ]
+
+        cards_y = sub_y + 46
+        card_w, card_h = 440, 114
+        centers_x = [cx - 480, cx, cx + 480]
+
         is_blink = (int(time.time() * 1000) // 200) % 2 == 0
-        
-        # Item 0: GAME MODE
-        is_sel_0 = (menu_index == 0)
-        col0 = COLOR_WHITE if (is_sel_0 and is_blink) else (COLOR_GOLD if is_sel_0 else (210, 230, 250))
-        txt_0 = self.font_menu.render(f"GAME MODE   ◄  {cur_mode_str}  ►", True, col0)
-        r0 = txt_0.get_rect(center=(cx, menu_y_start))
-        if is_sel_0 and is_blink:
-            arrow = self.font_menu.render("►", True, COLOR_GOLD)
-            surface.blit(arrow, (r0.left - 45, r0.top))
-        surface.blit(txt_0, r0)
 
-        # Item 1: START
-        is_sel_1 = (menu_index == 1)
-        col1 = COLOR_WHITE if (is_sel_1 and is_blink) else (COLOR_GOLD if is_sel_1 else (210, 230, 250))
-        txt_1 = self.font_menu.render(start_lbl, True, col1)
-        r1 = txt_1.get_rect(center=(cx, menu_y_start + spacing))
-        if is_sel_1 and is_blink:
-            arrow = self.font_menu.render("►", True, COLOR_GOLD)
-            surface.blit(arrow, (r1.left - 45, r1.top))
-        surface.blit(txt_1, r1)
-        
-        # Item 2: STAGE SELECT
-        is_sel_2 = (menu_index == 2)
-        col2 = COLOR_WHITE if (is_sel_2 and is_blink) else (COLOR_GOLD if is_sel_2 else (210, 230, 250))
-        if game_mode == "cards":
-            st_str = "STAGE SELECT   ◄  STAGE 01 : 3-SET GAUNTLET  ►" if is_sel_2 else "STAGE SELECT   < STAGE 01 : 3-SET GAUNTLET >"
-        elif selected_stage == 11:
-            st_name = "★ RAINBOW SKYWAY ★"
-            st_str = f"STAGE SELECT   ◄  BONUS TRIAL : {st_name}  ►" if is_sel_2 else "STAGE SELECT   < BONUS TRIAL : ★ SECRET ★ >"
-        else:
-            st_name = STAGE_NAMES.get(selected_stage, "STAGE 01")
-            st_str = f"STAGE SELECT   ◄  STAGE {selected_stage:02d} : {st_name}  ►" if is_sel_2 else f"STAGE SELECT   < STAGE {selected_stage:02d} >"
-        txt_2 = self.font_menu.render(st_str, True, col2)
-        r2 = txt_2.get_rect(center=(cx, menu_y_start + spacing * 2))
-        if is_sel_2 and is_blink:
-            arrow = self.font_menu.render("►", True, COLOR_GOLD)
-            surface.blit(arrow, (r2.left - 45, r2.top))
-        surface.blit(txt_2, r2)
-        
-        # Item 3: OPTIONS
-        is_sel_3 = (menu_index == 3)
-        col3 = COLOR_WHITE if (is_sel_3 and is_blink) else (COLOR_GOLD if is_sel_3 else (210, 230, 250))
-        txt_3 = self.font_menu.render("OPTIONS", True, col3)
-        r3 = txt_3.get_rect(center=(cx, menu_y_start + spacing * 3))
-        if is_sel_3 and is_blink:
-            arrow = self.font_menu.render("►", True, COLOR_GOLD)
-            surface.blit(arrow, (r3.left - 45, r3.top))
-        surface.blit(txt_3, r3)
+        for i, g in enumerate(games_data):
+            c_center_x = centers_x[i]
+            c_rect = pygame.Rect(c_center_x - card_w // 2, cards_y, card_w, card_h)
+            is_active_game = (game_mode == g["id"])
+            is_focused = (menu_index == g["menu_idx"])
 
-        # Item 4: CHECK FOR UPDATES
-        is_sel_4 = (menu_index == 4)
-        col4 = COLOR_WHITE if (is_sel_4 and is_blink) else (COLOR_GOLD if is_sel_4 else (210, 230, 250))
-        txt_4 = self.font_menu.render("CHECK FOR UPDATES", True, col4)
-        r4 = txt_4.get_rect(center=(cx, menu_y_start + spacing * 4))
-        if is_sel_4 and is_blink:
-            arrow = self.font_menu.render("►", True, COLOR_GOLD)
-            surface.blit(arrow, (r4.left - 45, r4.top))
-        surface.blit(txt_4, r4)
+            # Card background
+            bg_col = (20, 32, 54) if (is_focused or is_active_game) else (12, 16, 26)
+            pygame.draw.rect(surface, bg_col, c_rect, border_radius=14)
 
-        # Item 5: QUIT
-        is_sel_5 = (menu_index == 5)
-        col5 = COLOR_WHITE if (is_sel_5 and is_blink) else (COLOR_GOLD if is_sel_5 else (210, 230, 250))
-        txt_5 = self.font_menu.render("QUIT", True, col5)
-        r5 = txt_5.get_rect(center=(cx, menu_y_start + spacing * 5))
-        if is_sel_5 and is_blink:
-            arrow = self.font_menu.render("►", True, COLOR_GOLD)
-            surface.blit(arrow, (r5.left - 45, r5.top))
-        surface.blit(txt_5, r5)
+            # Border
+            if is_focused:
+                b_col = COLOR_WHITE if is_blink else COLOR_GOLD
+                pygame.draw.rect(surface, b_col, c_rect, 4, border_radius=14)
+            elif is_active_game:
+                pygame.draw.rect(surface, g["col"], c_rect, 2, border_radius=14)
+            else:
+                pygame.draw.rect(surface, (40, 56, 80), c_rect, 1, border_radius=14)
+
+            # Status Pill at top
+            if is_active_game or is_focused:
+                status_txt = "► SELECTED ◄" if is_focused else "★ ACTIVE ★"
+                status_col = COLOR_GOLD if is_focused else g["col"]
+            else:
+                status_txt = "AVAILABLE"
+                status_col = (110, 130, 155)
+
+            txt_st = self.font_caption.render(status_txt, True, status_col)
+            surface.blit(txt_st, txt_st.get_rect(center=(c_center_x, cards_y + 22)))
+
+            # Game Title
+            t_col = COLOR_WHITE if (is_focused and is_blink) else (COLOR_GOLD if is_focused else (COLOR_WHITE if is_active_game else (170, 195, 220)))
+            txt_title = self.font_sub.render(g["title"], True, t_col)
+            surface.blit(txt_title, txt_title.get_rect(center=(c_center_x, cards_y + 54)))
+
+            # Game Subtitle / Kana
+            sub_col = g["col"] if (is_active_game or is_focused) else (100, 125, 150)
+            txt_desc = self.font_kana_sub.render(f"{g['tag']} • {g['kana']}", True, sub_col)
+            surface.blit(txt_desc, txt_desc.get_rect(center=(c_center_x, cards_y + 86)))
+
+        # Divider line
+        div_y = cards_y + card_h + 30
+        pygame.draw.line(surface, (0, 140, 220), (cx - 720, div_y), (cx + 720, div_y), 2)
+        
+        # 3. Direct Menu Items (7 visible options)
+        menu_y_start = div_y + 52
+        spacing = 62
+
+        menu_items = [
+            ("START HIRAGANA ARCADE", 0),
+            ("START KATAKANA ARCADE", 1),
+            ("START 3D HIRAGANA CARDS", 2),
+            ("STAGE SELECT", 3),
+            ("OPTIONS", 4),
+            ("CHECK FOR UPDATES", 5),
+            ("QUIT", 6)
+        ]
+
+        for label, idx in menu_items:
+            is_sel = (menu_index == idx)
+            y_pos = menu_y_start + idx * spacing
+
+            if idx == 3: # STAGE SELECT
+                eff_mode = "cards" if menu_index == 2 else ("katakana" if menu_index == 1 else ("hiragana" if menu_index == 0 else game_mode))
+                if eff_mode == "cards":
+                    st_str = "STAGE SELECT   ◄  STAGE 01 : 3-SET GAUNTLET  ►" if is_sel else "STAGE SELECT   < STAGE 01 : 3-SET GAUNTLET >"
+                elif selected_stage == 11:
+                    st_name = "★ RAINBOW SKYWAY ★"
+                    st_str = f"STAGE SELECT   ◄  BONUS TRIAL : {st_name}  ►" if is_sel else "STAGE SELECT   < BONUS TRIAL : ★ SECRET ★ >"
+                else:
+                    st_name = STAGE_NAMES.get(selected_stage, "STAGE 01")
+                    st_str = f"STAGE SELECT   ◄  STAGE {selected_stage:02d} : {st_name}  ►" if is_sel else f"STAGE SELECT   < STAGE {selected_stage:02d} >"
+                item_text = st_str
+            else:
+                item_text = label
+
+            col = COLOR_WHITE if (is_sel and is_blink) else (COLOR_GOLD if is_sel else (210, 230, 250))
+            txt_surf = self.font_menu.render(item_text, True, col)
+            r = txt_surf.get_rect(center=(cx, y_pos))
+
+            if is_sel and is_blink:
+                arrow = self.font_menu.render("►", True, COLOR_GOLD)
+                surface.blit(arrow, (r.left - 45, r.top))
+            surface.blit(txt_surf, r)
 
         # Display Mode Badge (Bottom-Left)
         if display_info:

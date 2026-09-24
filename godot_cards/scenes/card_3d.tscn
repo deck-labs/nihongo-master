@@ -1,29 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://c83k1q7v9x4p"]
+[gd_scene load_steps=4 format=3 uid="uid://c83k1q7v9x4p"]
 
 [ext_resource type="Script" path="res://scripts/card_3d.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://assets/models/playing_card.glb" id="2_mesh"]
 [ext_resource type="FontFile" path="res://assets/fonts/NotoSansCJK-Bold.ttc" id="3_font"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_glow"]
-shading_mode = 0
-albedo_color = Color(1, 0.8, 0.2, 0.85)
-
-[sub_resource type="TorusMesh" id="TorusMesh_ring"]
-material = SubResource("StandardMaterial3D_glow")
-inner_radius = 0.72
-outer_radius = 0.82
-rings = 32
-ring_segments = 4
-
 [node name="Card3D" type="Node3D"]
 script = ExtResource("1_script")
 
 [node name="MeshInstance3D" parent="." instance=ExtResource("2_mesh")]
-
-[node name="Reticle" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
-visible = false
-mesh = SubResource("TorusMesh_ring")
 
 [node name="SubViewport" type="SubViewport" parent="."]
 size = Vector2i(512, 716)

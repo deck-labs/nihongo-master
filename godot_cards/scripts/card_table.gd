@@ -54,6 +54,7 @@ var toast_timer: float = 0.0
 const CardScene = preload("res://scenes/card_3d.tscn")
 
 func _ready():
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	_init_card_instances()
 	start_game()
 
@@ -225,13 +226,25 @@ func toggle_selected_card():
 		selected_cards.append(card)
 		_update_card_tray_positions()
 		if sfx_select: sfx_select.play()
+
+		# Card selection goes back to the hand so player won't have to press down
+		var next_idx = -1
+		for offset in range(1, 8):
+			var check_idx = (cursor_index + offset) % 8
+			if not hand_cards[check_idx].is_selected:
+				next_idx = check_idx
+				break
+		if next_idx != -1:
+			cursor_index = next_idx
+		_update_cursor_hover()
 	else:
 		selected_cards.erase(card)
 		card.set_order(0)
 		var hand_pos = _get_hand_position(card.hand_index)
-		card.glide_to(hand_pos, Vector3.ZERO, 0.22)
+		card.glide_to(hand_pos, Vector3(24.0, 0, 0), 0.22)
 		_update_card_tray_positions()
 		if sfx_deselect: sfx_deselect.play()
+		_update_cursor_hover()
 
 func reset_selection():
 	if selected_cards.is_empty():
@@ -239,9 +252,10 @@ func reset_selection():
 	for c in selected_cards:
 		c.set_order(0)
 		var hand_pos = _get_hand_position(c.hand_index)
-		c.glide_to(hand_pos, Vector3.ZERO, 0.24)
+		c.glide_to(hand_pos, Vector3(24.0, 0, 0), 0.24)
 	selected_cards.clear()
 	if sfx_reset: sfx_reset.play()
+	_update_cursor_hover()
 
 func submit_word():
 	if selected_cards.is_empty():
