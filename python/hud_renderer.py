@@ -759,7 +759,7 @@ class HudRenderer:
             pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
 
             # Specs
-            txt_specs = self.font_caption.render(f"CLEAR GOAL: {info['goal']} WORDS COMPLETED    |    HAND: 8 CARDS    |    ENGINE: GODOT 4 + BLENDER 3D", True, (160, 200, 235))
+            txt_specs = self.font_caption.render(f"CURRICULUM: 3 SETS ({info.get('total_words', 9)} WORDS TOTAL)    |    HAND: 8 CARDS    |    ENGINE: GODOT 4 + BLENDER 3D", True, (160, 200, 235))
             surface.blit(txt_specs, txt_specs.get_rect(center=(cx, card_y + 400)))
 
             # Action Buttons

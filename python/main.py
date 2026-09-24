@@ -34,6 +34,9 @@ def main():
         os.environ["SDL_VIDEODRIVER"] = "dummy"
         os.environ["SDL_AUDIODRIVER"] = "dummy"
 
+    # Prevent SDL from minimizing the fullscreen window when losing focus to child processes (e.g. Godot)
+    os.environ["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
+
     pygame.init()
     pygame.display.set_caption("Nihongo Master - 日本語 マスター")
 

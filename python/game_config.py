@@ -22,7 +22,7 @@ ROAD_WIDTH = GAME_W - (ROAD_MARGIN * 2.0)  # 640.0 px wide 4-lane highway
 PLAYER_SCREEN_Y = 960.0  # 1200 - 240.0
 
 # Version & Release Metadata
-GAME_VERSION = "1.1.5"
+GAME_VERSION = "1.1.6"
 GITHUB_REPO = "deck-labs/nihongo-master"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/deck-labs/nihongo-master/main/version.json"
 RELEASES_API_URL = "https://api.github.com/repos/deck-labs/nihongo-master/releases/latest"
@@ -84,76 +84,91 @@ CARD_STAGE_INFO = {
         "title": "BASIC VOWELS",
         "japanese": "基本母音（あ・い・う・え・お）",
         "difficulty": 1,
+        "sets": 3,
+        "total_words": 9,
         "goal": 3,
-        "words": ["あお (Blue)", "いえ (House)", "うえ (Above)", "あい (Love)", "あき (Autumn)"],
-        "summary": "Master foundational vowels (あ い う え お) and construct early 2-kana words. Decoys draw from basic Gojuon characters.",
+        "words": ["あお (Blue)", "いえ (House)", "うえ (Above)", "ねこ (Cat)", "そら (Sky)"],
+        "summary": "Master foundational vowels across 3 sets (9 words). Set 1: Pure Vowels • Set 2: Consonant Basics • Set 3: Everyday Nature.",
         "kana_preview": ["あ", "い", "う", "え", "お"]
     },
     2: {
         "title": "KA, SA, TA, NA LINES",
         "japanese": "か・さ・た・な行（子音基礎）",
         "difficulty": 2,
+        "sets": 3,
+        "total_words": 9,
         "goal": 3,
-        "words": ["さかな (Fish)", "つき (Moon)", "ねこ (Cat)", "はな (Flower)", "いぬ (Dog)"],
-        "summary": "Expand into primary consonant syllables. Decoys include same-line distractors to test phonetic recall.",
+        "words": ["さかな (Fish)", "つき (Moon)", "たけ (Bamboo)", "いぬ (Dog)", "はな (Flower)"],
+        "summary": "Expand into primary consonant syllables across 3 sets (9 words). Decoys include same-line distractors to test phonetic recall.",
         "kana_preview": ["か", "き", "く", "さ", "た", "な"]
     },
     3: {
         "title": "CORE SYLLABLES & LOOKALIKES",
         "japanese": "類似文字・識別（さ/き・わ/れ）",
         "difficulty": 3,
-        "goal": 4,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
         "words": ["さくら (Cherry)", "くるま (Car)", "とり (Bird)", "やま (Mountain)", "かわ (River)"],
-        "summary": "Form everyday 3-kana terms while distinguishing lookalike Kana characters (さ vs き, わ vs れ).",
+        "summary": "Form everyday 3-kana terms across 3 sets (9 words) while distinguishing lookalike Kana characters (さ vs き, わ vs れ).",
         "kana_preview": ["さ", "き", "わ", "れ", "ら", "り"]
     },
     4: {
         "title": "VOICED CONSONANTS (DAKUTEN)",
         "japanese": "濁音（が・ざ・だ・ば・ご）",
         "difficulty": 4,
-        "goal": 4,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
         "words": ["りんご (Apple)", "みず (Water)", "かぜ (Wind)", "えいが (Movie)", "ともだち (Friend)"],
-        "summary": "Identify voiced mark Dakuten (゛). Hand cards feature unvoiced decoy traps (e.g. が vs か) testing mark recognition.",
+        "summary": "Identify voiced mark Dakuten across 3 sets (9 words). Hand cards feature unvoiced decoy traps testing mark recognition.",
         "kana_preview": ["が", "ぎ", "ざ", "だ", "ば", "ご"]
     },
     5: {
         "title": "HANDAKUTEN & NASAL 'N'",
         "japanese": "半濁音・撥音（ぱ・ぴ・ん）",
         "difficulty": 5,
-        "goal": 4,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
         "words": ["きんぎょ (Goldfish)", "しんぶん (News)", "てんぷら (Tempura)", "えんぴつ (Pencil)", "さんぽ (Stroll)"],
-        "summary": "P-sounds with Handakuten (゜) and nasal ん. Decoys challenge the visual distinction between Dakuten and Handakuten.",
+        "summary": "P-sounds with Handakuten (゜) and nasal ん across 3 sets (9 words). Decoys challenge visual distinction with Dakuten.",
         "kana_preview": ["ぱ", "ぴ", "ぷ", "ぺ", "ぽ", "ん"]
     },
     6: {
         "title": "SOKUON & GEMINATE STOPS",
         "japanese": "促音（っ）・詰まる音",
         "difficulty": 6,
-        "goal": 5,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
         "words": ["きって (Stamp)", "がっこう (School)", "ざっし (Magazine)", "きっぷ (Ticket)", "しっぽ (Tail)"],
-        "summary": "Tackle small 'っ' geminate glottal stops. Decoys present full 'つ' vs small 'っ' to sharpen precision spelling.",
+        "summary": "Tackle small 'っ' geminate glottal stops across 3 sets (9 words). Decoys present full 'つ' vs small 'っ' to sharpen precision.",
         "kana_preview": ["っ", "つ", "き", "て", "が", "こ"]
     },
     7: {
         "title": "ADVANCED COMPOUNDS",
         "japanese": "上級語彙・複合表現",
         "difficulty": 7,
-        "goal": 5,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
         "words": ["おんがく (Music)", "ひこうき (Plane)", "ちかてつ (Subway)", "びょういん (Clinic)", "りょこう (Trip)"],
-        "summary": "Multi-syllable compound words combining long vowels, Dakuten, and compound Kana formations with tight decoy cards.",
+        "summary": "Multi-syllable compound words across 3 sets (9 words) combining long vowels, Dakuten, and compound Kana formations.",
         "kana_preview": ["お", "ん", "が", "く", "ひ", "こ"]
     },
     8: {
         "title": "GRAND MASTER GAUNTLET",
         "japanese": "免許皆伝・最終試練",
         "difficulty": 8,
-        "goal": 6,
-        "words": ["とうきょう (Tokyo)", "にほんご (Japanese)", "せんせい (Teacher)", "しょうぼうしゃ (Fire Engine)", "たんじょうび (Birthday)"],
-        "summary": "Ultimate test of Hiragana fluency. Authentic vocabulary featuring all syllabic modifiers and deceptive traps.",
+        "sets": 3,
+        "total_words": 10,
+        "goal": 4,
+        "words": ["とうきょう (Tokyo)", "にほんご (Japanese)", "せんせい (Teacher)", "しょうぼうしゃ (Fire Engine)", "ありがとう (Thank You)"],
+        "summary": "Ultimate test of Hiragana fluency across 3 sets (10 words total). Authentic vocabulary with all syllabic modifiers and traps.",
         "kana_preview": ["と", "う", "き", "ょ", "に", "ほ"]
     }
 }
-
 
 # ==============================================================================
 # HIRAGANA SYLLABARY DEFINITIONS (46 Core + 20 Dakuten + 5 Handakuten = 71 Total)

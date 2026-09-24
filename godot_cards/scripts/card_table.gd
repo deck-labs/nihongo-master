@@ -7,7 +7,7 @@ var current_state: State = State.PLAYING
 var previous_state: State = State.PLAYING
 const MAX_STAGES: int = 8
 var current_stage_index: int = 1
-var current_set_index: int = 1 # Backwards compatibility alias
+var current_set_index: int = 1
 var words_completed: int = 0
 var total_words_solved: int = 0
 var total_attempts: int = 0
@@ -21,6 +21,13 @@ var cursor_index: int = 0
 # Timers
 var state_timer: float = 0.0
 var toast_timer: float = 0.0
+
+# Mouse auto-hide state
+var mouse_visible: bool = false
+var mouse_idle_timer: float = 0.0
+var mouse_startup_grace_timer: float = 1.0
+var idle_anchor_pos: Vector2 = Vector2.ZERO
+var last_moving_pos: Vector2 = Vector2.ZERO
 
 # 3D Node References
 @onready var camera: Camera3D = $Camera3D
@@ -39,6 +46,7 @@ var toast_timer: float = 0.0
 @onready var banner_incorrect: PanelContainer = $HUD/BannerIncorrect
 @onready var modal_set_clear: PanelContainer = $HUD/ModalSetClear
 @onready var set_clear_title: Label = $HUD/ModalSetClear/Margin/VBox/Title
+@onready var set_clear_sub: Label = $HUD/ModalSetClear/Margin/VBox/Sub
 @onready var modal_stage_clear: PanelContainer = $HUD/ModalStageClear
 @onready var stage_clear_title: Label = $HUD/ModalStageClear/Margin/VBox/Title
 @onready var stage_clear_stats: Label = $HUD/ModalStageClear/Margin/VBox/Stats
@@ -59,9 +67,23 @@ const CardScene = preload("res://scenes/card_3d.tscn")
 
 func _ready():
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	_hide_mouse()
+	mouse_startup_grace_timer = 1.0
 	_init_card_instances()
 	_parse_cmdline_stage()
 	start_stage(current_stage_index)
+
+func _hide_mouse():
+	mouse_visible = false
+	mouse_idle_timer = 0.0
+	idle_anchor_pos = get_viewport().get_mouse_position()
+	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
+
+func _show_mouse(pos: Vector2):
+	mouse_visible = true
+	mouse_idle_timer = 2.0
+	last_moving_pos = pos
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 func _parse_cmdline_stage():
 	var env_st = OS.get_environment("NIHONGO_CARD_STAGE")
@@ -89,24 +111,26 @@ func start_game():
 
 func start_stage(stage_idx: int):
 	current_stage_index = clampi(stage_idx, 1, MAX_STAGES)
-	current_set_index = current_stage_index
+	current_set_index = 1
 	words_completed = 0
 	used_words.clear()
 	next_round()
 
-# Backwards compatibility alias
 func start_set(set_idx: int):
-	start_stage(set_idx)
+	current_set_index = clampi(set_idx, 1, WordsData.SETS_PER_STAGE)
+	words_completed = 0
+	used_words.clear()
+	next_round()
 
 func next_round():
-	var cfg = WordsData.STAGE_DATA.get(current_stage_index, WordsData.STAGE_DATA[1])
+	var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index)
 	var pool = []
-	for w in cfg["words"]:
+	for w in set_cfg["words"]:
 		if not used_words.has(w["romaji"]):
 			pool.append(w)
 	if pool.is_empty():
 		used_words.clear()
-		pool = cfg["words"].duplicate()
+		pool = set_cfg["words"].duplicate()
 
 	current_word = pool[randi() % pool.size()]
 	used_words.append(current_word["romaji"])
@@ -126,12 +150,12 @@ func _deal_8_card_hand():
 	var needed = target_chars.size()
 	var decoy_count = 8 - needed
 
-	var cfg = WordsData.STAGE_DATA.get(current_stage_index, WordsData.STAGE_DATA[1])
-	var decoy_mode = cfg.get("decoy_mode", "random")
+	var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index)
+	var decoy_mode = set_cfg.get("decoy_mode", "random")
 
 	var decoys: Array = []
 
-	# 1. Intelligent decoy selection based on stage difficulty
+	# 1. Intelligent decoy selection based on set decoy mode & confusables
 	if decoy_mode in ["similar", "lookalike", "dakuten", "handakuten", "sokuon", "advanced", "master"]:
 		for c in target_chars:
 			if WordsData.CONFUSABLE_MAP.has(c):
@@ -143,11 +167,13 @@ func _deal_8_card_hand():
 
 	# 2. Complete remaining decoy quota from stage-appropriate pool
 	var pool: Array = []
-	if current_stage_index >= 6:
+	if current_stage_index >= 7 or decoy_mode == "master" or decoy_mode == "advanced":
 		pool = WordsData.SOKUON_POOL + WordsData.HANDAKUTEN_POOL + WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
-	elif current_stage_index == 5:
+	elif current_stage_index == 6 or decoy_mode == "sokuon":
+		pool = WordsData.SOKUON_POOL + WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
+	elif current_stage_index == 5 or decoy_mode == "handakuten":
 		pool = WordsData.HANDAKUTEN_POOL + WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
-	elif current_stage_index == 4:
+	elif current_stage_index == 4 or decoy_mode == "dakuten":
 		pool = WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
 	else:
 		pool = WordsData.GOJUON_POOL.duplicate()
@@ -191,6 +217,19 @@ func _update_cursor_hover():
 	for i in range(8):
 		hand_cards[i].set_hovered(i == cursor_index)
 
+func _get_card_at_screen_pos(pos: Vector2) -> int:
+	var closest_idx = -1
+	var min_dist = 999999.0
+	for i in range(8):
+		var card = hand_cards[i]
+		var screen_pos = camera.unproject_position(card.global_position)
+		var dist = pos.distance_to(screen_pos)
+		if abs(pos.x - screen_pos.x) < 70 and abs(pos.y - screen_pos.y) < 95:
+			if dist < min_dist:
+				min_dist = dist
+				closest_idx = i
+	return closest_idx
+
 func _update_card_tray_positions():
 	var total = selected_cards.size()
 	for i in range(total):
@@ -200,6 +239,58 @@ func _update_card_tray_positions():
 		c.glide_to(t_pos, Vector3(24.0, 0, 0), 0.22)
 
 func _input(event: InputEvent):
+	# Auto-hide mouse when gamepad or keyboard is used
+	if event is InputEventJoypadButton or event is InputEventKey:
+		if mouse_visible:
+			_hide_mouse()
+	elif event is InputEventJoypadMotion:
+		if abs(event.axis_value) > 0.4 and mouse_visible:
+			_hide_mouse()
+
+	# Mouse movement tracking
+	if event is InputEventMouseMotion:
+		var mpos = event.position
+		if mouse_startup_grace_timer > 0.0:
+			idle_anchor_pos = mpos
+		elif not mouse_visible:
+			var dist = mpos.distance_to(idle_anchor_pos)
+			if dist >= 15.0:
+				_show_mouse(mpos)
+		else:
+			var dist = mpos.distance_to(last_moving_pos)
+			if dist >= 2.0:
+				mouse_idle_timer = 2.0
+				last_moving_pos = mpos
+
+		if mouse_visible and current_state == State.PLAYING:
+			var hovered = _get_card_at_screen_pos(mpos)
+			if hovered != -1 and hovered != cursor_index:
+				cursor_index = hovered
+				_update_cursor_hover()
+
+	# Mouse clicks
+	elif event is InputEventMouseButton and event.pressed:
+		if mouse_startup_grace_timer <= 0.0:
+			_show_mouse(event.position)
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if current_state == State.PLAYING:
+				var clicked = _get_card_at_screen_pos(event.position)
+				if clicked != -1:
+					cursor_index = clicked
+					_update_cursor_hover()
+					toggle_selected_card()
+			elif current_state == State.SET_CLEAR:
+				modal_set_clear.visible = false
+				start_set(current_set_index + 1)
+			elif current_state == State.STAGE_CLEAR:
+				if current_stage_index >= MAX_STAGES:
+					start_stage(1)
+				else:
+					start_stage(current_stage_index + 1)
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			if current_state == State.PLAYING:
+				reset_selection()
+
 	if current_state == State.PAUSED:
 		if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and event.keycode in [KEY_ESCAPE, KEY_P]):
 			toggle_pause()
@@ -211,6 +302,16 @@ func _input(event: InputEvent):
 				start_set(current_set_index)
 			elif event.button_index in [JOY_BUTTON_X, 2, 3]:
 				get_tree().quit()
+		return
+
+	if current_state == State.SET_CLEAR:
+		if (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_A, JOY_BUTTON_START]) or \
+		   (event is InputEventKey and event.pressed and event.keycode in [KEY_ENTER, KEY_SPACE]):
+			modal_set_clear.visible = false
+			start_set(current_set_index + 1)
+		elif (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_B, JOY_BUTTON_BACK]) or \
+		     (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE):
+			get_tree().quit()
 		return
 
 	if current_state == State.STAGE_CLEAR:
@@ -366,23 +467,44 @@ func _process(delta: float):
 		if toast_timer <= 0.0 and toast_panel:
 			toast_panel.visible = false
 
+	# Mouse auto-hide countdown (2 seconds idle, with 1.0s startup grace)
+	if mouse_startup_grace_timer > 0.0:
+		mouse_startup_grace_timer = max(0.0, mouse_startup_grace_timer - delta)
+		if mouse_visible:
+			_hide_mouse()
+	elif mouse_visible:
+		mouse_idle_timer -= delta
+		if mouse_idle_timer <= 0.0:
+			_hide_mouse()
+
 	if current_state == State.CORRECT:
 		if state_timer >= 1.2:
-			var cfg = WordsData.STAGE_DATA.get(current_stage_index, WordsData.STAGE_DATA[1])
-			if words_completed >= cfg["goal"]:
-				current_state = State.STAGE_CLEAR
-				state_timer = 0.0
-				_hide_overlays()
-				var acc = (float(total_words_solved) / max(1, total_attempts)) * 100.0
-				stage_clear_stats.text = "Words Solved: %d  |  Total Attempts: %d  |  Accuracy: %.1f%%" % [total_words_solved, total_attempts, acc]
-				if current_stage_index >= MAX_STAGES:
-					stage_clear_title.text = "GRAND MASTER CHAMPION!"
-					stage_clear_prompt.text = "All 8 Stages Cleared! Press (A) / Enter to Play Again • (B) to Exit"
+			var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index)
+			var set_goal = set_cfg.get("goal", 3)
+			if words_completed >= set_goal:
+				if current_set_index < WordsData.SETS_PER_STAGE:
+					current_state = State.SET_CLEAR
+					state_timer = 0.0
+					_hide_overlays()
+					set_clear_title.text = "SET %d/3 COMPLETE!" % current_set_index
+					var next_set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index + 1)
+					set_clear_sub.text = "Next: %s\nPress (A) / Space to Continue" % next_set_cfg.get("name", "Next Set")
+					modal_set_clear.visible = true
+					if sfx_fanfare: sfx_fanfare.play()
 				else:
-					stage_clear_title.text = "STAGE %02d CLEAR!" % current_stage_index
-					stage_clear_prompt.text = "Press (A) / Enter for Stage %02d • (B) to Exit" % (current_stage_index + 1)
-				modal_stage_clear.visible = true
-				if sfx_fanfare: sfx_fanfare.play()
+					current_state = State.STAGE_CLEAR
+					state_timer = 0.0
+					_hide_overlays()
+					var acc = (float(total_words_solved) / max(1, total_attempts)) * 100.0
+					stage_clear_stats.text = "Words Solved: %d  |  Total Attempts: %d  |  Accuracy: %.1f%%" % [total_words_solved, total_attempts, acc]
+					if current_stage_index >= MAX_STAGES:
+						stage_clear_title.text = "GRAND MASTER CHAMPION!"
+						stage_clear_prompt.text = "All 8 Stages Cleared! Press (A) / Enter to Play Again • (B) to Exit"
+					else:
+						stage_clear_title.text = "STAGE %02d CLEAR!" % current_stage_index
+						stage_clear_prompt.text = "Press (A) / Enter for Stage %02d • (B) to Exit" % (current_stage_index + 1)
+					modal_stage_clear.visible = true
+					if sfx_fanfare: sfx_fanfare.play()
 			else:
 				next_round()
 
@@ -393,15 +515,18 @@ func _process(delta: float):
 			if banner_incorrect: banner_incorrect.visible = false
 
 	elif current_state == State.SET_CLEAR:
-		if state_timer >= 2.8:
-			start_stage(current_stage_index + 1)
+		if state_timer >= 2.6:
+			modal_set_clear.visible = false
+			start_set(current_set_index + 1)
 
 func _update_hud():
 	if current_word.is_empty():
 		return
-	var cfg = WordsData.STAGE_DATA.get(current_stage_index, WordsData.STAGE_DATA[1])
-	top_set_label.text = "STAGE %02d/%02d — %s" % [current_stage_index, MAX_STAGES, cfg["name"].to_upper()]
-	top_progress_label.text = "WORDS: %d/%d" % [words_completed, cfg["goal"]]
+	var stage_cfg = WordsData.STAGE_DATA.get(current_stage_index, WordsData.STAGE_DATA[1])
+	var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index)
+	var set_goal = set_cfg.get("goal", 3)
+	top_set_label.text = "STAGE %02d/%02d: %s   [SET %d/3: %s]" % [current_stage_index, MAX_STAGES, stage_cfg["name"].to_upper(), current_set_index, set_cfg["name"].to_upper()]
+	top_progress_label.text = "SET WORDS: %d/%d" % [words_completed, set_goal]
 	
 	romaji_label.text = "  ".join(current_word["romaji"].split())
 	meaning_label.text = "“ %s ”" % current_word["meaning"]
@@ -409,9 +534,10 @@ func _update_hud():
 	# Update pips
 	for child in pips_container.get_children():
 		child.queue_free()
-	for i in range(cfg["goal"]):
+	for i in range(set_goal):
 		var pip = ColorRect.new()
-		pip.custom_minimum_size = Vector2(14, 14)
+		pip.custom_minimum_size = Vector2(16, 16)
 		pip.color = Color(0.18, 0.84, 0.45, 1) if i < words_completed else Color(0.25, 0.35, 0.3, 0.8)
 		pips_container.add_child(pip)
+
 

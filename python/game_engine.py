@@ -377,13 +377,32 @@ class GameEngine:
             import subprocess
             env = os.environ.copy()
             env["NIHONGO_CARD_STAGE"] = str(start_stage)
+            env["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
             subprocess.run(cmd, env=env)
         except Exception as e:
             print(f"[NihongoMaster] Error launching card game: {e}")
 
-        # Return to title screen and resume music
+        # Ensure Pygame window is un-minimized, restored to foreground, and focused
+        try:
+            from pygame._sdl2.video import Window
+            win = Window.from_display_module()
+            win.restore()
+            win.show()
+            win.focus()
+            if hasattr(self, 'screen') and (self.screen.get_flags() & pygame.FULLSCREEN):
+                win.set_fullscreen(True)
+        except Exception as e:
+            print(f"[NihongoMaster] Window restore notice: {e}")
+
+        # Drain stale window/mouse events accumulated while child was running
+        pygame.event.pump()
+        pygame.event.clear()
+
+        # Enforce hidden mouse cursor and return to title screen
+        self.hide_cursor()
         self.return_to_title()
-        self.audio.play_title_music()
+        self._present_to_screen()
+        pygame.display.flip()
 
     def return_to_title(self):
         self.is_title_screen = True
