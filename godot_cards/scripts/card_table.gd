@@ -375,16 +375,6 @@ func toggle_selected_card():
 		selected_cards.append(card)
 		_update_card_tray_positions()
 		if sfx_select: sfx_select.play()
-
-		# Card selection goes back to the hand so player won't have to press down
-		var next_idx = -1
-		for offset in range(1, 8):
-			var check_idx = (cursor_index + offset) % 8
-			if not hand_cards[check_idx].is_selected:
-				next_idx = check_idx
-				break
-		if next_idx != -1:
-			cursor_index = next_idx
 		_update_cursor_hover()
 	else:
 		selected_cards.erase(card)

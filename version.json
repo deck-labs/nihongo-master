@@ -1,11 +1,11 @@
 {
-  "version": "1.1.8",
-  "tag_name": "v1.1.8",
-  "name": "Nihongo Master v1.1.8 - Road Seam Polish & Katakana Secret Stage Unlock",
+  "version": "1.1.9",
+  "tag_name": "v1.1.9",
+  "name": "Nihongo Master v1.1.9 - Hiragana Cards Cursor Retention Polish",
   "release_date": "2026-09-25",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.8/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.8/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.1.8: Fixed the broken/sheared road line and lane divider seams at 2400m on Stage 10 Fuji Speedway for seamless road continuity, removed the diagonal black groove stripe across the asphalt, and enabled the Secret Stage (Stage 11: Rainbow Skyway) unlock for Katakana Arcade with unified save support and Stage 10 campaign clear progression."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.9/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.9/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.1.9: In 3D Hiragana Cards, after selecting a card with (A) or mouse click, the cursor/focus now stays on the selected card instead of automatically jumping to the next card, giving the player total manual control over navigation and deselection."
 }
 
