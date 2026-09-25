@@ -17,10 +17,11 @@ from game_config import (
 )
 
 class RoadRenderer:
-    def __init__(self):
+    def __init__(self, game_mode: str = "hiragana"):
         self.track_distance = 0.0
         self.current_stage = 1
         self.frames = 0
+        self.game_mode = game_mode
         
         # Textures and sprites
         self.tex_asphalt = None
@@ -66,13 +67,19 @@ class RoadRenderer:
         self.stage9_mesas = []
         self.stage9_tumbleweeds = []
         self.stage10_grandstands = []
+        self.stage10_trackside_crowds = []
+        self.stage10_tire_walls = []
+        self.stage10_pit_buildings = []
+        self.stage10_marshal_posts = []
+        self.stage10_distance_boards = []
+        self.stage10_gantries = []
         self.stage10_banners = []
         self.stage10_searchlights = []
+        self.stage10_cache = {}
         self.stage11_stars = []
         self.stage11_crystals = []
         self.stage11_torii = []
         self.stage11_gantries = []
-        self.game_mode = "hiragana"
         
         self._load_assets()
         self._generate_scenery()
@@ -248,6 +255,129 @@ class RoadRenderer:
         pygame.draw.ellipse(self.shadow_boulder, (0, 0, 0, 55), (10, 8, self.boulder_w + 6, int(self.boulder_h * 0.65)))
         # Core contact shadow directly beneath boulder
         pygame.draw.ellipse(self.shadow_boulder, (0, 0, 0, 145), (4, 6, self.boulder_w, int(self.boulder_h * 0.55)))
+
+        # Initialize Stage 10 Fuji Speedway Racing Circuit Assets
+        self._init_stage10_assets()
+
+    def _init_stage10_assets(self):
+        """Pre-render and cache Stage 10 Fuji Speedway racing banners, flags, and pit boards."""
+        try:
+            font_sm = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 11)
+            font_md = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 15)
+            font_lg = pygame.font.Font(get_asset_path("fonts/DejaVuSans-Bold.ttf"), 22)
+            font_jp = pygame.font.Font(get_asset_path("fonts/NotoSansCJK-Bold.ttc"), 13)
+        except Exception:
+            font_sm = pygame.font.Font(None, 14)
+            font_md = pygame.font.Font(None, 18)
+            font_lg = pygame.font.Font(None, 24)
+            font_jp = pygame.font.Font(None, 16)
+            
+        self.font_race_sm = font_sm
+        self.font_race_md = font_md
+        self.font_race_lg = font_lg
+        self.font_race_jp = font_jp
+        
+        cache = {}
+        
+        # 1. Cheering Flags (14x10 px)
+        # Checkered flag
+        f_chk = pygame.Surface((14, 10), pygame.SRCALPHA)
+        f_chk.fill((255, 255, 255))
+        for r in range(2):
+            for c in range(3):
+                if (r + c) % 2 == 0:
+                    pygame.draw.rect(f_chk, (20, 20, 20), (c * 5, r * 5, 5, 5))
+        pygame.draw.rect(f_chk, (10, 10, 10), (0, 0, 14, 10), 1)
+        cache["flag_checkered"] = f_chk
+
+        # Japanese Hinomaru flag
+        f_jp = pygame.Surface((14, 10), pygame.SRCALPHA)
+        f_jp.fill((250, 250, 250))
+        pygame.draw.circle(f_jp, (215, 20, 20), (7, 5), 3)
+        pygame.draw.rect(f_jp, (180, 180, 180), (0, 0, 14, 10), 1)
+        cache["flag_hinomaru"] = f_jp
+
+        # Team red flag
+        f_red = pygame.Surface((14, 10), pygame.SRCALPHA)
+        f_red.fill((225, 25, 25))
+        pygame.draw.rect(f_red, (255, 215, 0), (0, 0, 14, 10), 1)
+        cache["flag_red"] = f_red
+
+        # Team blue flag
+        f_blu = pygame.Surface((14, 10), pygame.SRCALPHA)
+        f_blu.fill((25, 75, 210))
+        pygame.draw.rect(f_blu, (255, 255, 255), (0, 0, 14, 10), 1)
+        cache["flag_blue"] = f_blu
+
+        # Team gold flag
+        f_gld = pygame.Surface((14, 10), pygame.SRCALPHA)
+        f_gld.fill((255, 215, 0))
+        pygame.draw.rect(f_gld, (20, 20, 20), (0, 0, 14, 10), 1)
+        cache["flag_gold"] = f_gld
+
+        # 2. Grandstand & Catch Fence Banners (150x16 px)
+        banners_data = [
+            ("BRIDGESTONE", (210, 20, 20), (255, 255, 255)),
+            ("ADVAN", (18, 18, 18), (255, 255, 255)),
+            ("FUJI SPEEDWAY", (10, 22, 48), (255, 215, 0)),
+            ("MOTUL", (205, 10, 10), (255, 255, 255)),
+            ("DENSO", (245, 245, 245), (220, 25, 25)),
+            ("YOKOHAMA", (20, 20, 20), (255, 255, 255)),
+            ("ENDLESS", (12, 48, 145), (255, 225, 0)),
+            ("AUTOBACS", (255, 95, 0), (15, 15, 15)),
+            ("TOYOTA GAZOO", (15, 15, 15), (255, 255, 255)),
+            ("HKS PERFORMANCE", (245, 245, 245), (140, 20, 180)),
+            ("SUPER GT 2026", (15, 25, 55), (0, 220, 255)),
+            ("GO FOR VICTORY!", (215, 25, 25), (255, 255, 255)),
+            ("RACING SPIRIT", (18, 65, 30), (255, 240, 80)),
+        ]
+        for name, bg_col, txt_col in banners_data:
+            s_banner = pygame.Surface((150, 16), pygame.SRCALPHA)
+            pygame.draw.rect(s_banner, bg_col, (0, 0, 150, 16), border_radius=2)
+            pygame.draw.rect(s_banner, (255, 255, 255, 180), (0, 0, 150, 16), 1, border_radius=2)
+            ts = font_sm.render(name, True, txt_col)
+            s_banner.blit(ts, ts.get_rect(center=(75, 8)))
+            cache["banner_" + name] = s_banner
+
+        # Japanese Fan Banner (150x16 px)
+        s_jp = pygame.Surface((150, 16), pygame.SRCALPHA)
+        pygame.draw.rect(s_jp, (180, 20, 20), (0, 0, 150, 16), border_radius=2)
+        pygame.draw.rect(s_jp, (255, 255, 255), (0, 0, 150, 16), 1, border_radius=2)
+        ts_jp = font_jp.render("がんばれ! 富士スピードウェイ", True, (255, 255, 255))
+        s_jp.blit(ts_jp, ts_jp.get_rect(center=(75, 8)))
+        cache["banner_JP_GANBARE"] = s_jp
+
+        # 3. Pit Boards (44x22 px)
+        pit_data = [
+            ("pit_p1", "P1 +2.4s", (255, 215, 0)),
+            ("pit_lap", "LAP 10", (0, 220, 255)),
+            ("pit_fuel", "FUEL OK", (40, 230, 80)),
+            ("pit_push", "PUSH NOW!", (255, 80, 80)),
+            ("pit_box", "BOX BOX", (255, 215, 0)),
+        ]
+        for key, text, col in pit_data:
+            s_pit = pygame.Surface((44, 22), pygame.SRCALPHA)
+            pygame.draw.rect(s_pit, (10, 12, 16), (0, 0, 44, 22), border_radius=2)
+            pygame.draw.rect(s_pit, (220, 225, 235), (0, 0, 44, 22), 1, border_radius=2)
+            ts = font_sm.render(text, True, col)
+            s_pit.blit(ts, ts.get_rect(center=(22, 11)))
+            cache[key] = s_pit
+
+        # 4. Brake Marker Boards (30x20 px)
+        brakes = [
+            ("150", (15, 45, 130), (255, 255, 255)),
+            ("100", (200, 20, 20), (255, 255, 255)),
+            ("50", (255, 210, 0), (15, 15, 15))
+        ]
+        for dist_txt, bg_c, txt_c in brakes:
+            s_brk = pygame.Surface((30, 20), pygame.SRCALPHA)
+            pygame.draw.rect(s_brk, bg_c, (0, 0, 30, 20), border_radius=2)
+            pygame.draw.rect(s_brk, (255, 255, 255), (0, 0, 30, 20), 1, border_radius=2)
+            ts = font_sm.render(dist_txt, True, txt_c)
+            s_brk.blit(ts, ts.get_rect(center=(15, 10)))
+            cache["brake_" + dist_txt] = s_brk
+
+        self.stage10_cache = cache
 
     def _get_safe_verge_x(self, stage: int, world_y: float, side: int, obj_w: float, road_clearance: float = 28.0, screen_pad: float = 12.0, rng: random.Random = None) -> tuple[float, int]:
         """Calculates a guaranteed safe verge X coordinate outside the road for any stage at world_y.
@@ -500,29 +630,231 @@ class RoadRenderer:
                 "rot": rng.uniform(0.0, 6.28)
             })
 
-        # Stage 10: Circuit Grandstands and Celebration Searchlights
-        gy = 200.0
-        while gy < STAGE_TRACK_LENGTH - 1000.0:
+        # Stage 10: Fuji Speedway Grand Championship Racing Circuit
+        # 1. Dual-sided Start & Finish Straight Stadium Grandstands
+        for gy in range(80, 2100, 220):
+            # Left grandstand
+            lx, _ = self._get_safe_verge_x(10, float(gy), -1, 160.0, road_clearance=26.0, screen_pad=10.0, rng=rng)
+            brand_l = rng.choice(["FUJI SPEEDWAY", "BRIDGESTONE", "ADVAN", "MOTUL", "DENSO", "YOKOHAMA", "AUTOBACS", "TOYOTA GAZOO"])
+            spec_l = []
+            for r in range(6):
+                row_specs = []
+                for c in range(14):
+                    row_specs.append({
+                        "skin": rng.choice([(255, 220, 180), (242, 195, 130), (225, 175, 110), (198, 135, 70), (145, 90, 40)]),
+                        "shirt": rng.choice([(225, 30, 30), (30, 85, 215), (250, 250, 250), (250, 210, 20), (35, 180, 75), (255, 120, 20), (25, 25, 30)]),
+                        "has_flag": rng.random() < 0.24,
+                        "flag": rng.choice(["flag_checkered", "flag_hinomaru", "flag_red", "flag_blue", "flag_gold"]),
+                        "phase": rng.uniform(0.0, 6.28)
+                    })
+                spec_l.append(row_specs)
+            self.stage10_grandstands.append({
+                "pos": (lx, float(gy)),
+                "side": -1,
+                "w": 160.0,
+                "h": 96.0,
+                "brand": brand_l,
+                "rows": 6,
+                "cols": 14,
+                "spectators": spec_l
+            })
+
+        # Dual-sided Grandstands at Finish Stretch
+        for gy in range(33800, 35700, 220):
+            for side in [-1, 1]:
+                gx, _ = self._get_safe_verge_x(10, float(gy), side, 160.0, road_clearance=26.0, screen_pad=10.0, rng=rng)
+                brand = rng.choice(["FUJI SPEEDWAY", "BRIDGESTONE", "ADVAN", "MOTUL", "AUTOBACS", "TOYOTA GAZOO"])
+                spec = []
+                for r in range(6):
+                    row_specs = []
+                    for c in range(14):
+                        row_specs.append({
+                            "skin": rng.choice([(255, 220, 180), (242, 195, 130), (225, 175, 110), (198, 135, 70), (145, 90, 40)]),
+                            "shirt": rng.choice([(225, 30, 30), (30, 85, 215), (250, 250, 250), (250, 210, 20), (35, 180, 75), (255, 120, 20), (25, 25, 30)]),
+                            "has_flag": rng.random() < 0.30,
+                            "flag": rng.choice(["flag_checkered", "flag_hinomaru", "flag_red", "flag_blue", "flag_gold"]),
+                            "phase": rng.uniform(0.0, 6.28)
+                        })
+                    spec.append(row_specs)
+                self.stage10_grandstands.append({
+                    "pos": (gx, float(gy)),
+                    "side": side,
+                    "w": 160.0,
+                    "h": 96.0,
+                    "brand": brand,
+                    "rows": 6,
+                    "cols": 14,
+                    "spectators": spec
+                })
+
+        # Infield Grandstands along technical circuit sections
+        gy = 2300.0
+        while gy < 33600.0:
             side = -1 if rng.random() < 0.5 else 1
-            gx, _ = self._get_safe_verge_x(10, gy, side, 75.0, road_clearance=28.0, rng=rng)
+            gw = rng.uniform(150.0, 190.0)
+            gh = rng.uniform(88.0, 105.0)
+            gx, _ = self._get_safe_verge_x(10, gy, side, gw, road_clearance=26.0, screen_pad=10.0, rng=rng)
+            brand = rng.choice(["BRIDGESTONE", "ADVAN", "YOKOHAMA", "MOTUL", "DENSO", "ENDLESS", "FUJI SPEEDWAY", "HKS PERFORMANCE"])
+            spec = []
+            for r in range(6):
+                row_specs = []
+                for c in range(14):
+                    row_specs.append({
+                        "skin": rng.choice([(255, 220, 180), (242, 195, 130), (225, 175, 110), (198, 135, 70), (145, 90, 40)]),
+                        "shirt": rng.choice([(225, 30, 30), (30, 85, 215), (250, 250, 250), (250, 210, 20), (35, 180, 75), (255, 120, 20), (25, 25, 30)]),
+                        "has_flag": rng.random() < 0.22,
+                        "flag": rng.choice(["flag_checkered", "flag_hinomaru", "flag_red", "flag_blue", "flag_gold"]),
+                        "phase": rng.uniform(0.0, 6.28)
+                    })
+                spec.append(row_specs)
             self.stage10_grandstands.append({
                 "pos": (gx, gy),
-                "w": 75.0,
-                "h": 50.0,
-                "banner_col": rng.choice([(225, 40, 40), (40, 130, 230), (245, 185, 20), (35, 185, 85)])
+                "side": side,
+                "w": gw,
+                "h": gh,
+                "brand": brand,
+                "rows": 6,
+                "cols": 14,
+                "spectators": spec
             })
-            gy += rng.uniform(220.0, 360.0)
+            gy += rng.uniform(220.0, 340.0)
 
+        # 2. Pit Lane & Team Garages along Main Straightaway (Right Verge)
+        for py in range(120, 1600, 160):
+            team_info = rng.choice([
+                ("TOYOTA GAZOO", (215, 25, 25)),
+                ("NISMO RACING", (200, 20, 20)),
+                ("SUBARU STI", (18, 55, 165)),
+                ("HONDA RACING", (240, 240, 240)),
+                ("TEAM IMPUL", (25, 65, 185)),
+                ("AUTOBACS RACING", (255, 95, 0))
+            ])
+            pit_b = rng.choice(["pit_p1", "pit_lap", "pit_fuel", "pit_push", "pit_box"])
+            self.stage10_pit_buildings.append({
+                "y": float(py),
+                "team": team_info[0],
+                "col": team_info[1],
+                "pit_board": pit_b
+            })
+
+        for py in range(34400, 35600, 160):
+            team_info = rng.choice([
+                ("TOYOTA GAZOO", (215, 25, 25)),
+                ("NISMO RACING", (200, 20, 20)),
+                ("SUBARU STI", (18, 55, 165)),
+                ("HONDA RACING", (240, 240, 240))
+            ])
+            pit_b = rng.choice(["pit_p1", "pit_lap", "pit_fuel", "pit_push", "pit_box"])
+            self.stage10_pit_buildings.append({
+                "y": float(py),
+                "team": team_info[0],
+                "col": team_info[1],
+                "pit_board": pit_b
+            })
+
+        # 3. Trackside Catch Fences & Standing Embankment Crowds
+        cy = 280.0
+        while cy < STAGE_TRACK_LENGTH - 800.0:
+            side = -1 if rng.random() < 0.5 else 1
+            cw = rng.uniform(85.0, 120.0)
+            cx, _ = self._get_safe_verge_x(10, cy, side, cw, road_clearance=24.0, screen_pad=8.0, rng=rng)
+            b_key = rng.choice([
+                "banner_FUJI SPEEDWAY", "banner_JP_GANBARE", "banner_GO FOR VICTORY!",
+                "banner_SUPER GT 2026", "banner_RACING SPIRIT", "banner_BRIDGESTONE", "banner_ADVAN"
+            ])
+            n_people = rng.randint(8, 14)
+            people = []
+            for _ in range(n_people):
+                people.append({
+                    "skin": rng.choice([(255, 220, 180), (242, 195, 130), (225, 175, 110), (198, 135, 70), (145, 90, 40)]),
+                    "shirt": rng.choice([(225, 30, 30), (30, 85, 215), (250, 250, 250), (250, 210, 20), (35, 180, 75), (255, 120, 20), (25, 25, 30)]),
+                    "has_flag": rng.random() < 0.35,
+                    "flag": rng.choice(["flag_checkered", "flag_hinomaru", "flag_red", "flag_blue", "flag_gold"]),
+                    "phase": rng.uniform(0.0, 6.28)
+                })
+            self.stage10_trackside_crowds.append({
+                "pos": (cx, cy),
+                "side": side,
+                "w": cw,
+                "banner_key": b_key,
+                "people": people
+            })
+            cy += rng.uniform(180.0, 280.0)
+
+        # 4. Corner Runoff Tire Walls
+        ty = 500.0
+        while ty < STAGE_TRACK_LENGTH - 1000.0:
+            side = -1 if rng.random() < 0.5 else 1
+            tw = rng.uniform(70.0, 110.0)
+            tx, _ = self._get_safe_verge_x(10, ty, side, tw, road_clearance=22.0, screen_pad=10.0, rng=rng)
+            c_style = rng.choice(["red_white", "blue_yellow", "black_white"])
+            self.stage10_tire_walls.append({
+                "pos": (tx, ty),
+                "w": tw,
+                "side": side,
+                "style": c_style
+            })
+            ty += rng.uniform(320.0, 520.0)
+
+        # 5. Trackside Corner Marshal Posts
+        my = 400.0
+        while my < STAGE_TRACK_LENGTH - 800.0:
+            side = -1 if (int(my // 500) % 2 == 0) else 1
+            mx, _ = self._get_safe_verge_x(10, my, side, 34.0, road_clearance=20.0, screen_pad=12.0, rng=rng)
+            seg_pos = my % 2400.0
+            is_curve = (200.0 <= seg_pos <= 1900.0)
+            self.stage10_marshal_posts.append({
+                "pos": (mx, my),
+                "side": side,
+                "flag_col": (255, 210, 0) if is_curve else (35, 215, 60)
+            })
+            my += rng.uniform(550.0, 750.0)
+
+        # 6. Braking Distance Marker Boards (150m, 100m, 50m before chicane & hairpin)
+        seg_len = 2400.0
+        for seg_idx in range(1, int(STAGE_TRACK_LENGTH / seg_len)):
+            base_s = seg_idx * seg_len
+            pattern = (seg_idx + 3) % 4
+            # Dunlop Chicane (pattern 0, entry at 200m)
+            if pattern == 0:
+                for dist in [150, 100, 50]:
+                    by = base_s + 200.0 - dist
+                    self.stage10_distance_boards.append({
+                        "y": by,
+                        "side": -1,
+                        "key": str(dist)
+                    })
+            # Hairpin Apex (pattern 2, entry at 250m)
+            elif pattern == 2:
+                for dist in [150, 100, 50]:
+                    by = base_s + 250.0 - dist
+                    self.stage10_distance_boards.append({
+                        "y": by,
+                        "side": 1,
+                        "key": str(dist)
+                    })
+
+        # 7. Overhead Race Gantries & Sponsor Bridges
+        self.stage10_gantries = [
+            {"y": 140.0, "type": "start_lights", "title": "FUJI SPEEDWAY // OFFICIAL TIMING"},
+            {"y": 8000.0, "type": "footbridge", "title": "BRIDGESTONE MOTORSPORT"},
+            {"y": 16000.0, "type": "footbridge", "title": "DUNLOP CORNER BRIDGE"},
+            {"y": 24000.0, "type": "footbridge", "title": "ADVAN RACING BRIDGE"},
+            {"y": 32000.0, "type": "footbridge", "title": "TOYOTA GAZOO RACING"},
+            {"y": 35900.0, "type": "finish_gantry", "title": "FINAL LAP // CHAMPIONSHIP"}
+        ]
+
+        # 8. Stadium Searchlights & Floodlight Towers
         sy = 300.0
         while sy < STAGE_TRACK_LENGTH - 1200.0:
             side = -1 if rng.random() < 0.5 else 1
-            sx, _ = self._get_safe_verge_x(10, sy, side, 20.0, road_clearance=24.0, rng=rng)
+            sx, _ = self._get_safe_verge_x(10, sy, side, 24.0, road_clearance=24.0, rng=rng)
             self.stage10_searchlights.append({
                 "pos": (sx, sy),
                 "phase": rng.uniform(0.0, 6.28),
-                "sweep_speed": rng.uniform(1.2, 2.4)
+                "sweep_speed": rng.uniform(1.2, 2.2)
             })
-            sy += rng.uniform(320.0, 500.0)
+            sy += rng.uniform(320.0, 480.0)
 
         # Stage 11: Rainbow Skyway (Secret All-Hiragana Mastery Gauntlet)
         for _ in range(100):
@@ -1070,51 +1402,59 @@ class RoadRenderer:
             seg_len = 2400.0
             seg_idx = int(world_y / seg_len)
             seg_pos = world_y % seg_len
-            pattern = abs(seg_idx) % 4
             
             shift = 0.0
-            if pattern == 0:
-                # Dunlop Technical S-Chicane
-                if 200.0 <= seg_pos < 700.0:
-                    t = (seg_pos - 200.0) / 500.0
-                    shift = -110.0 * (0.5 - 0.5 * math.cos(t * math.pi))
-                elif 700.0 <= seg_pos < 1550.0:
-                    t = (seg_pos - 700.0) / 850.0
-                    shift = -110.0 + 220.0 * (0.5 - 0.5 * math.cos(t * math.pi))
-                elif 1550.0 <= seg_pos < 2050.0:
-                    t = (seg_pos - 1550.0) / 500.0
-                    shift = 110.0 * (0.5 + 0.5 * math.cos(t * math.pi))
-            elif pattern == 1:
-                # 100R High-Speed Carousel Right
-                if 250.0 <= seg_pos < 850.0:
-                    t = (seg_pos - 250.0) / 600.0
-                    shift = 130.0 * (0.5 - 0.5 * math.cos(t * math.pi))
-                elif 850.0 <= seg_pos < 1600.0:
-                    shift = 130.0
-                elif 1600.0 <= seg_pos < 2200.0:
-                    t = (seg_pos - 1600.0) / 600.0
-                    shift = 130.0 * (0.5 + 0.5 * math.cos(t * math.pi))
-            elif pattern == 2:
-                # Hairpin Apex Left
-                if 250.0 <= seg_pos < 850.0:
-                    t = (seg_pos - 250.0) / 600.0
-                    shift = -130.0 * (0.5 - 0.5 * math.cos(t * math.pi))
-                elif 850.0 <= seg_pos < 1600.0:
-                    shift = -130.0
-                elif 1600.0 <= seg_pos < 2200.0:
-                    t = (seg_pos - 1600.0) / 600.0
-                    shift = -130.0 * (0.5 + 0.5 * math.cos(t * math.pi))
+            if seg_idx == 0:
+                # Iconic 1.5km Fuji Start Straightaway: laser straight for grid & pit lane
+                if seg_pos < 1600.0:
+                    shift = 0.0
+                else:
+                    t = (seg_pos - 1600.0) / 800.0
+                    shift = -25.0 * (0.5 - 0.5 * math.cos(t * math.pi))
             else:
-                # Fuji Grand Championship Main Straightaway
-                if 350.0 <= seg_pos < 850.0:
-                    t = (seg_pos - 350.0) / 500.0
-                    shift = 30.0 * (0.5 - 0.5 * math.cos(t * math.pi))
-                elif 850.0 <= seg_pos < 1450.0:
-                    shift = 30.0
-                elif 1450.0 <= seg_pos < 1950.0:
-                    t = (seg_pos - 1450.0) / 500.0
-                    shift = 30.0 * (0.5 + 0.5 * math.cos(t * math.pi))
-                    
+                pattern = (abs(seg_idx) + 3) % 4
+                if pattern == 0:
+                    # Dunlop Technical S-Chicane
+                    if 200.0 <= seg_pos < 700.0:
+                        t = (seg_pos - 200.0) / 500.0
+                        shift = -110.0 * (0.5 - 0.5 * math.cos(t * math.pi))
+                    elif 700.0 <= seg_pos < 1550.0:
+                        t = (seg_pos - 700.0) / 850.0
+                        shift = -110.0 + 220.0 * (0.5 - 0.5 * math.cos(t * math.pi))
+                    elif 1550.0 <= seg_pos < 2050.0:
+                        t = (seg_pos - 1550.0) / 500.0
+                        shift = 110.0 * (0.5 + 0.5 * math.cos(t * math.pi))
+                elif pattern == 1:
+                    # 100R High-Speed Carousel Right
+                    if 250.0 <= seg_pos < 850.0:
+                        t = (seg_pos - 250.0) / 600.0
+                        shift = 130.0 * (0.5 - 0.5 * math.cos(t * math.pi))
+                    elif 850.0 <= seg_pos < 1600.0:
+                        shift = 130.0
+                    elif 1600.0 <= seg_pos < 2200.0:
+                        t = (seg_pos - 1600.0) / 600.0
+                        shift = 130.0 * (0.5 + 0.5 * math.cos(t * math.pi))
+                elif pattern == 2:
+                    # Hairpin Apex Left
+                    if 250.0 <= seg_pos < 850.0:
+                        t = (seg_pos - 250.0) / 600.0
+                        shift = -130.0 * (0.5 - 0.5 * math.cos(t * math.pi))
+                    elif 850.0 <= seg_pos < 1600.0:
+                        shift = -130.0
+                    elif 1600.0 <= seg_pos < 2200.0:
+                        t = (seg_pos - 1600.0) / 600.0
+                        shift = -130.0 * (0.5 + 0.5 * math.cos(t * math.pi))
+                else:
+                    # Fuji Grand Championship Main Straightaway
+                    if 350.0 <= seg_pos < 850.0:
+                        t = (seg_pos - 350.0) / 500.0
+                        shift = 30.0 * (0.5 - 0.5 * math.cos(t * math.pi))
+                    elif 850.0 <= seg_pos < 1450.0:
+                        shift = 30.0
+                    elif 1450.0 <= seg_pos < 1950.0:
+                        t = (seg_pos - 1450.0) / 500.0
+                        shift = 30.0 * (0.5 + 0.5 * math.cos(t * math.pi))
+                        
             return (normal_left + shift, normal_right + shift)
 
         if stage == 11:
@@ -2304,114 +2644,562 @@ class RoadRenderer:
             pygame.draw.line(surface, (135, 95, 60), (px, py - rad * 0.7), (px, py + rad * 0.7), 2)
 
     def _render_stage10(self, surface: pygame.Surface):
+        """Stage 10: Fuji Speedway - Professional FIA Grand Prix Racing Circuit.
+        Features authentic racing circuit infrastructure:
+        - Deep twilight championship sky and manicured turf verges
+        - FIA gravel traps & blue/white diagonal safety runoff aprons (///)
+        - Continuous sponsor crash barriers with cycling Japanese motorsport brands & catch fencing
+        - 3D beveled Grand Prix curbs (red/white with bevel highlights)
+        - Dark formula asphalt with rubbered-in racing groove line and corner braking skid marks
+        - Staggered starting grid slots with pole position #1 (world_y < 460m)
+        - Roadside tire walls (3-tier stacked tires with color bands)
+        - Pit buildings & pit lane wall with team mechanics holding pit boards towards track
+        - Trackside corner marshal posts with waving green/yellow flags
+        - Braking distance marker boards (150m, 100m, 50m before chicanes & hairpins)
+        - Trackside safety fences with standing cheering crowds & waving flags
+        - Multi-tier stadium grandstands with animated cheering spectators, waving flags, and sparkling camera flashes
+        - Overhead starting lights gantry, sponsor footbridges, and finish arch spanning the track
+        - Towering floodlight searchlights with sweeping atmospheric beams
+        """
         scr_h = self.screen_height
         ply_y = self.player_screen_y
         import time
         now = time.time()
-        
-        # 1. Dark Championship Circuit Base
-        pygame.draw.rect(surface, (18, 24, 32), (GAME_X, 0, GAME_W, scr_h))
-        
+        c = self.stage10_cache
+
+        # 1. Dark Championship Circuit Sky & Base
+        pygame.draw.rect(surface, (14, 18, 28), (GAME_X, 0, GAME_W, scr_h))
+
         # 2. Championship Manicured Racing Turf across Entire Viewport
         self.draw_tiled_texture(surface, self.tex_grass, (GAME_X, 0, GAME_W, scr_h))
-        
-        # Manicured emerald race verge overlay across entire terrain
         turf_overlay = pygame.Surface((int(GAME_W), scr_h), pygame.SRCALPHA)
-        turf_overlay.fill((20, 75, 35, 75))
+        turf_overlay.fill((16, 68, 30, 85))
         surface.blit(turf_overlay, (GAME_X, 0))
 
-        # 3. Circuit Grandstands & Cheering Spectators
-        for stand in self.stage10_grandstands:
-            gx, gy = stand["pos"]
-            gw, gh = stand["w"], stand["h"]
-            b_col = stand["banner_col"]
-            scr_y = ply_y - (gy - self.track_distance)
-            if -80 <= scr_y <= scr_h + 80:
-                r_l, r_r = self.get_road_edges(10, gy)
-                margin = 24.0 + gw * 0.5
-                if gx < (r_l + r_r) * 0.5:
-                    gx = min(gx, r_l - margin)
-                else:
-                    gx = max(gx, r_r + margin)
-                # 3D Grandstand Ground Shadow on turf
-                pygame.draw.ellipse(surface, (0, 0, 0, 110), (int(gx - gw * 0.45), int(scr_y - 4), int(gw * 0.9), 12))
-                pygame.draw.polygon(surface, (0, 0, 0, 75), [
-                    (gx - gw * 0.45, scr_y),
-                    (gx + gw * 0.45, scr_y),
-                    (gx + gw * 0.55, scr_y + 14),
-                    (gx - gw * 0.35, scr_y + 14)
-                ])
-
-                # Canopy roof
-                pygame.draw.rect(surface, (45, 52, 68), (gx - gw * 0.5, scr_y - gh, gw, 10), border_radius=3)
-                # Tiers with crowd colors
-                pygame.draw.rect(surface, (30, 36, 50), (gx - gw * 0.45, scr_y - gh + 10, gw * 0.9, gh - 18))
-                for cr in range(4):
-                    for cc in range(6):
-                        c_dot_col = (240, 200, 180) if (cr + cc) % 2 == 0 else (220, 60, 60)
-                        pygame.draw.circle(surface, c_dot_col, (int(gx - gw * 0.4 + cc * 10), int(scr_y - gh + 14 + cr * 6)), 2)
-                # Championship Banner along front
-                pygame.draw.rect(surface, b_col, (gx - gw * 0.48, scr_y - 8, gw * 0.96, 8), border_radius=2)
-
-        # 4. Animated Celebration Searchlights
-        for light in self.stage10_searchlights:
-            sx, sy = light["pos"]
-            ph = light["phase"]
-            spd = light["sweep_speed"]
-            scr_y = ply_y - (sy - self.track_distance)
-            if -100 <= scr_y <= scr_h + 100:
-                r_l, r_r = self.get_road_edges(10, sy)
-                margin = 26.0
-                if sx < (r_l + r_r) * 0.5:
-                    sx = min(sx, r_l - margin)
-                else:
-                    sx = max(sx, r_r + margin)
-                # 3D Searchlight Base Drop Shadow
-                pygame.draw.ellipse(surface, (0, 0, 0, 120), (int(sx - 10), int(scr_y - 4), 20, 10))
-                # Searchlight base unit
-                pygame.draw.rect(surface, (70, 75, 90), (sx - 8, scr_y - 12, 16, 12), border_radius=2)
-                pygame.draw.circle(surface, (255, 255, 220), (int(sx), int(scr_y - 12)), 5)
-                # Sweeping radiant beam
-                sweep_ang = math.sin(now * spd + ph) * 0.5
-                beam_dx = math.sin(sweep_ang) * 220
-                pygame.draw.line(surface, (255, 245, 200), (sx, scr_y - 12), (sx + beam_dx, scr_y - 200), 3)
-
-        # 5. Slices: Circuit Asphalt, Championship Gold & Crimson Curbs, Markings
+        # 3. Track Slices (Bottom to Top / Back to Front): Runoffs, Barriers, Asphalt, Kerbs, Lines
         slice_h = 6
         for y in range(0, scr_h, slice_h):
             world_y = self.track_distance + (ply_y - y)
             r_left, r_right = self.get_road_edges(10, world_y)
             r_w = r_right - r_left
-            
-            # Championship Safety Armco Barrier (Carbon Grey with Victory Gold Rail)
-            pygame.draw.rect(surface, (38, 42, 52), (r_left - 16.0, y, 16, slice_h))
-            pygame.draw.rect(surface, (38, 42, 52), (r_right, y, 16, slice_h))
-            pygame.draw.rect(surface, (255, 215, 0), (r_left - 16.0, y, 2, slice_h))
-            pygame.draw.rect(surface, (255, 215, 0), (r_right + 14.0, y, 2, slice_h))
-            
-            # Formula-Grade Race Asphalt Surface
-            pygame.draw.rect(surface, (26, 28, 34), (r_left, y, r_w, slice_h))
-            
-            # Dashed Lane Dividers (Crisp Track White)
+
+            # Road curvature estimation for gravel traps
+            r_prev_l, _ = self.get_road_edges(10, world_y - 20.0)
+            r_next_l, _ = self.get_road_edges(10, world_y + 20.0)
+            curve_dir = r_next_l - r_prev_l
+
+            # Gravel Runoff Traps on outside of curves
+            if abs(curve_dir) > 1.2:
+                gravel_col = (175, 150, 115) if (int(world_y * 0.2) % 2 == 0) else (165, 140, 105)
+                if curve_dir < 0:  # Turning left -> outside is right verge
+                    pygame.draw.rect(surface, gravel_col, (r_right + 24, y, 38, slice_h))
+                else:              # Turning right -> outside is left verge
+                    pygame.draw.rect(surface, gravel_col, (r_left - 62, y, 38, slice_h))
+
+            # FIA Painted Runoff Aprons (Blue & White Diagonal Friction Stripes /// outside curves)
+            if abs(curve_dir) > 0.6:
+                apron_cycle = (int(world_y * 0.12) % 2 == 0)
+                apron_col = (24, 75, 155) if apron_cycle else (240, 242, 248)
+                if curve_dir < 0:  # Turning left -> outside is right verge
+                    pygame.draw.rect(surface, apron_col, (r_right + 8, y, 16, slice_h))
+                else:              # Turning right -> outside is left verge
+                    pygame.draw.rect(surface, apron_col, (r_left - 24, y, 16, slice_h))
+
+            # Continuous FIA Concrete Crash Barriers & Sponsor Rail
+            barrier_idx = int(world_y / 160.0) % 5
+            if barrier_idx == 0:
+                bar_base, bar_stripe = (215, 25, 25), (255, 255, 255)  # Bridgestone Red/White
+            elif barrier_idx == 1:
+                bar_base, bar_stripe = (25, 25, 28), (220, 20, 20)    # Advan Black/Red
+            elif barrier_idx == 2:
+                bar_base, bar_stripe = (12, 45, 125), (255, 215, 0)   # Fuji Blue/Gold
+            elif barrier_idx == 3:
+                bar_base, bar_stripe = (255, 100, 0), (20, 20, 20)    # Autobacs Orange/Black
+            else:
+                bar_base, bar_stripe = (200, 15, 15), (255, 255, 255)  # Motul Red/White
+
+            # Barrier body (12px wide concrete barrier)
+            pygame.draw.rect(surface, bar_base, (r_left - 36, y, 12, slice_h))
+            pygame.draw.rect(surface, bar_base, (r_right + 24, y, 12, slice_h))
+            # Contrast middle racing stripe
+            pygame.draw.rect(surface, bar_stripe, (r_left - 32, y, 4, slice_h))
+            pygame.draw.rect(surface, bar_stripe, (r_right + 28, y, 4, slice_h))
+            # Barrier shadow & steel top cap
+            pygame.draw.rect(surface, (230, 235, 245), (r_left - 36, y, 2, slice_h))
+            pygame.draw.rect(surface, (230, 235, 245), (r_right + 34, y, 2, slice_h))
+
+            # Catch Fence Mesh Posts every 36m
+            if int(world_y) % 36 < 6:
+                pygame.draw.line(surface, (160, 175, 195), (r_left - 30, y), (r_left - 30, y - 16), 2)
+                pygame.draw.line(surface, (160, 175, 195), (r_right + 30, y), (r_right + 30, y - 16), 2)
+                pygame.draw.line(surface, (130, 145, 165), (r_left - 36, y - 10), (r_left - 24, y - 10), 1)
+                pygame.draw.line(surface, (130, 145, 165), (r_right + 24, y - 10), (r_right + 36, y - 10), 1)
+
+            # Formula-Grade Circuit Asphalt (Dark Charcoal Slate)
+            pygame.draw.rect(surface, (25, 27, 34), (r_left, y, r_w, slice_h))
+
+            # Rubbered-In Racing Line Groove (Smooth sine wave following track curvature)
+            racing_line_offset = math.sin(world_y * 0.0026) * (r_w * 0.28)
+            groove_center = (r_left + r_right) * 0.5 + racing_line_offset
+            pygame.draw.rect(surface, (17, 18, 22), (groove_center - 26, y, 52, slice_h))
+            pygame.draw.rect(surface, (13, 14, 17), (groove_center - 13, y, 26, slice_h))
+
+            # Corner Braking Skid Marks entering technical sections
+            seg_pos = world_y % 2400.0
+            if (120.0 <= seg_pos <= 280.0) or (650.0 <= seg_pos <= 780.0):
+                if int(world_y) % 14 < 10:
+                    pygame.draw.rect(surface, (10, 10, 12), (groove_center - 20, y, 7, slice_h))
+                    pygame.draw.rect(surface, (10, 10, 12), (groove_center + 13, y, 7, slice_h))
+
+            # Staggered Starting Grid Slots (track_dist < 460m)
             lane_w = r_w / 4.0
+            if 60.0 <= world_y <= 460.0:
+                grid_pos = int(world_y - 60.0) % 50
+                if grid_pos < 10:
+                    slot_num = int((world_y - 60.0) / 50.0)
+                    slot_x = r_left + lane_w * 1.5 if (slot_num % 2 == 0) else r_left + lane_w * 2.5
+                    box_col = (255, 215, 0) if slot_num == 0 else (245, 245, 250)
+                    pygame.draw.rect(surface, box_col, (slot_x - 30, y, 60, slice_h), 2)
+                    if slot_num == 0:
+                        # Yellow pole position bar
+                        pygame.draw.rect(surface, (255, 215, 0), (slot_x - 32, y, 64, 2))
+
+            # Starting Line Checkered Strip at world_y = 50m
+            if 46.0 <= world_y <= 54.0:
+                chk_w = 12
+                chk_y_idx = int((world_y - 46.0) / 4.0)
+                for cx_i in range(int(r_w / chk_w) + 1):
+                    is_white = ((cx_i + chk_y_idx) % 2 == 0)
+                    col = (250, 250, 250) if is_white else (20, 20, 20)
+                    pygame.draw.rect(surface, col, (r_left + cx_i * chk_w, y, chk_w, slice_h))
+
+            # Dashed Lane Dividers (Crisp Track White)
             dash_cycle = (int(y + self.track_distance)) % 60
             if dash_cycle < 30:
-                pygame.draw.rect(surface, (250, 250, 250), (r_left + lane_w - 1.5, y, 3, slice_h))
-                pygame.draw.rect(surface, (250, 250, 250), (r_left + lane_w * 3.0 - 1.5, y, 3, slice_h))
-                # Double Grand Championship Gold & Cyan Center Line
+                pygame.draw.rect(surface, (245, 248, 255), (r_left + lane_w - 1.5, y, 3, slice_h))
+                pygame.draw.rect(surface, (245, 248, 255), (r_left + lane_w * 3.0 - 1.5, y, 3, slice_h))
+                # Double Grand Prix Center Line (Championship Gold & Pure White)
                 pygame.draw.rect(surface, (255, 215, 0), (r_left + lane_w * 2.0 - 3.0, y, 2, slice_h))
-                pygame.draw.rect(surface, (0, 220, 255), (r_left + lane_w * 2.0 + 1.0, y, 2, slice_h))
-                
-            # Curbs: Alternating Championship Gold and Victory Crimson
-            curb_cycle = (int(y + self.track_distance) // 18) % 2
-            curb_col = (255, 215, 0) if curb_cycle == 0 else (225, 35, 35)
+                pygame.draw.rect(surface, (255, 255, 255), (r_left + lane_w * 2.0 + 1.0, y, 2, slice_h))
+
+            # 3D Beveled Racing Curbs (Red & White Alternating)
+            curb_cycle = (int(world_y // 16) % 2)
+            curb_col = (225, 25, 25) if curb_cycle == 0 else (255, 255, 255)
+            # Left curb
             pygame.draw.rect(surface, curb_col, (r_left - 8, y, 8, slice_h))
+            pygame.draw.rect(surface, (255, 255, 255), (r_left - 2, y, 2, slice_h))
+            pygame.draw.rect(surface, (40, 10, 10) if curb_cycle == 0 else (120, 120, 120), (r_left - 8, y, 1, slice_h))
+            # Right curb
             pygame.draw.rect(surface, curb_col, (r_right, y, 8, slice_h))
-            
-            # High-Luminance Diamond Apex Beacons every 40m
+            pygame.draw.rect(surface, (255, 255, 255), (r_right, y, 2, slice_h))
+            pygame.draw.rect(surface, (40, 10, 10) if curb_cycle == 0 else (120, 120, 120), (r_right + 7, y, 1, slice_h))
+
+            # High-Luminance LED Apex Beacons every 40m
             if int(world_y) % 40 < 6:
-                pygame.draw.rect(surface, (180, 240, 255), (r_left - 12, y + 1, 4, 4))
-                pygame.draw.rect(surface, (180, 240, 255), (r_right + 8, y + 1, 4, 4))
+                pygame.draw.rect(surface, (180, 245, 255), (r_left - 12, y + 1, 4, 4))
+                pygame.draw.rect(surface, (180, 245, 255), (r_right + 8, y + 1, 4, 4))
+
+        # 4. Roadside Scenery Objects (Depth-Sorted / Filtered by Visibility)
+        # 4a. Corner Runoff Tire Walls
+        for tw_obj in self.stage10_tire_walls:
+            tx, ty = tw_obj["pos"]
+            tw = tw_obj["w"]
+            side = tw_obj["side"]
+            style = tw_obj["style"]
+            scr_y = ply_y - (ty - self.track_distance)
+            if -70 <= scr_y <= scr_h + 70:
+                r_l, r_r = self.get_road_edges(10, ty)
+                if side == -1:
+                    tx = min(tx, r_l - 24.0 - tw * 0.5)
+                else:
+                    tx = max(tx, r_r + 24.0 + tw * 0.5)
+                # Drop shadow on verge
+                pygame.draw.ellipse(surface, (0, 0, 0, 110), (int(tx - tw * 0.5), int(scr_y - 2), int(tw), 12))
+                # Stack of 3 tiers of racing tires
+                t_cols = {
+                    "red_white": [(220, 25, 25), (250, 250, 250)],
+                    "blue_yellow": [(25, 75, 210), (255, 215, 0)],
+                    "black_white": [(30, 30, 35), (245, 245, 245)]
+                }.get(style, [(220, 25, 25), (250, 250, 250)])
+                
+                n_tires = max(4, int(tw / 14))
+                t_step = tw / n_tires
+                for tier in range(3):
+                    tier_y = scr_y - 20 + tier * 6
+                    for ti in range(n_tires):
+                        col = t_cols[(ti + tier) % 2]
+                        t_x = tx - tw * 0.5 + ti * t_step
+                        pygame.draw.rect(surface, col, (int(t_x), int(tier_y), int(t_step - 1), 6), border_radius=2)
+                        # Dark rubber inner rim
+                        pygame.draw.circle(surface, (15, 15, 20), (int(t_x + t_step * 0.5), int(tier_y + 3)), 2)
+                # Protective safety wrap belt along front
+                pygame.draw.line(surface, (20, 20, 25), (tx - tw * 0.5, scr_y - 10), (tx + tw * 0.5, scr_y - 10), 2)
+                pygame.draw.line(surface, (255, 255, 255), (tx - tw * 0.5, scr_y - 9), (tx + tw * 0.5, scr_y - 9), 1)
+
+        # 4b. Pit Lane & Team Garages with Pit Wall & Mechanics
+        for pb in self.stage10_pit_buildings:
+            py = pb["y"]
+            team = pb["team"]
+            col = pb["col"]
+            pit_b = pb["pit_board"]
+            scr_y = ply_y - (py - self.track_distance)
+            if -120 <= scr_y <= scr_h + 120:
+                _, r_r = self.get_road_edges(10, py)
+                # Concrete Pit Wall running along right verge (outside the barrier)
+                pw_x = r_r + 42.0
+                pygame.draw.rect(surface, (50, 55, 65), (int(pw_x), int(scr_y - 32), 10, 64))
+                pygame.draw.rect(surface, col, (int(pw_x), int(scr_y - 32), 10, 4))
+                pygame.draw.line(surface, (255, 215, 0), (pw_x, scr_y - 28), (pw_x + 10, scr_y - 28), 1)
+                
+                # Mechanic: Standing behind pit wall holding Pit Board toward track
+                m1_x = pw_x + 10
+                m1_y = scr_y - 18
+                # Torso in team jumpsuit
+                pygame.draw.rect(surface, col, (int(m1_x), int(m1_y), 6, 8))
+                # Head with team helmet
+                pygame.draw.circle(surface, (245, 205, 180), (int(m1_x + 3), int(m1_y - 4)), 3)
+                pygame.draw.circle(surface, col, (int(m1_x + 3), int(m1_y - 5)), 3)
+                # Arms holding pit board pole extending toward the track
+                pygame.draw.line(surface, (40, 40, 45), (m1_x, m1_y + 2), (pw_x - 14, m1_y + 2), 2)
+                # Blit pre-rendered Pit Board ("P1 +2.4s", "LAP 10", "FUEL OK", "BOX BOX")
+                pb_surf = c.get(pit_b)
+                if pb_surf:
+                    surface.blit(pb_surf, (int(pw_x - 36), int(m1_y - 8)))
+
+                # Overhead Pit Wall Canopy & Timing Console
+                canopy_rect = pygame.Rect(int(pw_x + 14), int(scr_y - 38), 34, 14)
+                pygame.draw.rect(surface, col, canopy_rect, border_radius=2)
+                # Telemetry monitors glowing inside pit stall
+                pygame.draw.rect(surface, (0, 220, 255), (int(pw_x + 18), int(scr_y - 20), 8, 6))
+                pygame.draw.rect(surface, (40, 230, 80), (int(pw_x + 28), int(scr_y - 20), 8, 6))
+
+                # Team Garage Facade in background
+                gar_x = pw_x + 58.0
+                gar_w = 90.0
+                gar_h = 56.0
+                pygame.draw.polygon(surface, (0, 0, 0, 90), [
+                    (gar_x, scr_y + 20), (gar_x + gar_w, scr_y + 20),
+                    (gar_x + gar_w + 12, scr_y + 26), (gar_x + 8, scr_y + 26)
+                ])
+                # Garage structure
+                pygame.draw.rect(surface, (36, 40, 50), (int(gar_x), int(scr_y - 28), int(gar_w), int(gar_h)))
+                # Team header fascia
+                pygame.draw.rect(surface, col, (int(gar_x), int(scr_y - 28), int(gar_w), 12), border_radius=2)
+                # Roller shutter doors
+                pygame.draw.rect(surface, (60, 68, 80), (int(gar_x + 6), int(scr_y - 12), int(gar_w - 12), int(gar_h - 20)))
+                for sly in range(int(scr_y - 10), int(scr_y + 20), 5):
+                    pygame.draw.line(surface, (45, 52, 62), (gar_x + 8, sly), (gar_x + gar_w - 8, sly), 1)
+                # Spare racing tires on tire warmers
+                pygame.draw.rect(surface, (200, 25, 25), (int(gar_x - 14), int(scr_y - 4), 10, 16), border_radius=2)
+                pygame.draw.circle(surface, (15, 15, 20), (int(gar_x - 9), int(scr_y + 4)), 3)
+
+        # 4c. Trackside Corner Marshal Posts with Animated Waving Flags
+        for mp in self.stage10_marshal_posts:
+            mx, my = mp["pos"]
+            side = mp["side"]
+            flag_col = mp["flag_col"]
+            scr_y = ply_y - (my - self.track_distance)
+            if -70 <= scr_y <= scr_h + 70:
+                r_l, r_r = self.get_road_edges(10, my)
+                if side == -1:
+                    mx = min(mx, r_l - 24.0)
+                else:
+                    mx = max(mx, r_r + 24.0)
+                # Ground shadow
+                pygame.draw.ellipse(surface, (0, 0, 0, 100), (int(mx - 14), int(scr_y - 2), 28, 10))
+                # Stilt legs (4 legs)
+                pygame.draw.line(surface, (50, 55, 65), (mx - 10, scr_y), (mx - 8, scr_y - 22), 2)
+                pygame.draw.line(surface, (50, 55, 65), (mx + 10, scr_y), (mx + 8, scr_y - 22), 2)
+                # Platform & safety railing
+                pygame.draw.rect(surface, (220, 225, 235), (int(mx - 12), int(scr_y - 24), 24, 6))
+                pygame.draw.rect(surface, (255, 100, 0), (int(mx - 12), int(scr_y - 32), 24, 8), 1)
+                # Weather canopy roof
+                pygame.draw.rect(surface, (25, 75, 160), (int(mx - 14), int(scr_y - 40), 28, 5), border_radius=2)
+                
+                # Corner Marshal in high-vis orange suit waving flag
+                pygame.draw.rect(surface, (255, 110, 0), (int(mx - 4), int(scr_y - 30), 8, 8))
+                pygame.draw.circle(surface, (255, 255, 255), (int(mx), int(scr_y - 33)), 3)
+                # Animated waving flag pole
+                wave = math.sin(now * 8.0 + my) * 0.35
+                f_pole_dx = int(math.cos(wave) * 14 * (-1 if side == -1 else 1))
+                f_pole_dy = int(math.sin(wave) * 8 - 4)
+                pygame.draw.line(surface, (40, 40, 40), (mx, scr_y - 28), (mx + f_pole_dx, scr_y - 28 + f_pole_dy), 2)
+                # Waving flag cloth
+                f_cloth_rect = pygame.Rect(int(mx + f_pole_dx - 6), int(scr_y - 34 + f_pole_dy), 14, 9)
+                pygame.draw.rect(surface, flag_col, f_cloth_rect, border_radius=1)
+                pygame.draw.rect(surface, (255, 255, 255), f_cloth_rect, 1, border_radius=1)
+
+        # 4d. Braking Distance Marker Boards (150m, 100m, 50m)
+        for db in self.stage10_distance_boards:
+            by = db["y"]
+            side = db["side"]
+            b_key = db["key"]
+            scr_y = ply_y - (by - self.track_distance)
+            if -60 <= scr_y <= scr_h + 60:
+                r_l, r_r = self.get_road_edges(10, by)
+                bx = (r_l - 38.0) if side == -1 else (r_r + 8.0)
+                # Ground shadow
+                pygame.draw.ellipse(surface, (0, 0, 0, 110), (int(bx + 4), int(scr_y - 1), 22, 6))
+                # Dual steel posts
+                pygame.draw.line(surface, (50, 55, 65), (bx + 6, scr_y), (bx + 6, scr_y - 18), 2)
+                pygame.draw.line(surface, (50, 55, 65), (bx + 24, scr_y), (bx + 24, scr_y - 18), 2)
+                # Board surface
+                b_surf = c.get("brake_" + b_key)
+                if b_surf:
+                    surface.blit(b_surf, (int(bx), int(scr_y - 26)))
+
+        # 4e. Trackside Safety Catch Fences & Standing Embankment Crowds
+        for crowd in self.stage10_trackside_crowds:
+            cx, cy = crowd["pos"]
+            side = crowd["side"]
+            cw = crowd["w"]
+            b_key = crowd["banner_key"]
+            people = crowd["people"]
+            scr_y = ply_y - (cy - self.track_distance)
+            if -70 <= scr_y <= scr_h + 70:
+                r_l, r_r = self.get_road_edges(10, cy)
+                if side == -1:
+                    cx = min(cx, r_l - 24.0 - cw * 0.5)
+                else:
+                    cx = max(cx, r_r + 24.0 + cw * 0.5)
+                # Drop shadow on embankment
+                pygame.draw.ellipse(surface, (0, 0, 0, 95), (int(cx - cw * 0.5), int(scr_y - 2), int(cw), 12))
+                # Catch fence mesh posts and wires behind barrier
+                n_posts = max(3, int(cw / 24))
+                for pi in range(n_posts):
+                    px = cx - cw * 0.5 + pi * (cw / (n_posts - 1))
+                    pygame.draw.line(surface, (140, 150, 165), (px, scr_y), (px, scr_y - 30), 2)
+                pygame.draw.line(surface, (110, 120, 135), (cx - cw * 0.5, scr_y - 26), (cx + cw * 0.5, scr_y - 26), 1)
+                pygame.draw.line(surface, (110, 120, 135), (cx - cw * 0.5, scr_y - 18), (cx + cw * 0.5, scr_y - 18), 1)
+
+                # Cheering spectators standing on embankment
+                n_p = len(people)
+                p_step = (cw * 0.85) / max(1, n_p - 1)
+                for i, p in enumerate(people):
+                    px = cx - cw * 0.42 + i * p_step
+                    cheer_y = math.sin(now * 5.0 + p["phase"]) * 3.0
+                    head_y = scr_y - 20 + cheer_y
+                    # Torso
+                    pygame.draw.rect(surface, p["shirt"], (int(px - 3), int(head_y + 4), 6, 8), border_radius=1)
+                    # Head
+                    pygame.draw.circle(surface, p["skin"], (int(px), int(head_y)), 3)
+                    # Arms raising up in cheer
+                    if cheer_y < -0.8:
+                        pygame.draw.line(surface, p["skin"], (px - 3, head_y + 5), (px - 5, head_y - 1), 1)
+                        pygame.draw.line(surface, p["skin"], (px + 3, head_y + 5), (px + 5, head_y - 1), 1)
+                    # Waving mini flag
+                    if p["has_flag"]:
+                        f_wave = math.sin(now * 6.5 + p["phase"]) * 0.3
+                        f_dx = int(math.cos(f_wave) * 8)
+                        f_dy = int(math.sin(f_wave) * 5)
+                        pygame.draw.line(surface, (30, 30, 30), (px + 3, head_y + 2), (px + 6 + f_dx, head_y - 7 + f_dy), 1)
+                        f_surf = c.get(p["flag"])
+                        if f_surf:
+                            surface.blit(f_surf, (int(px + 4 + f_dx), int(head_y - 14 + f_dy)))
+                    # Camera flash sparkles
+                    if math.sin(now * 3.8 + p["phase"] * 7.1) > 0.96:
+                        pygame.draw.circle(surface, (255, 255, 255), (int(px), int(head_y - 2)), 3)
+                        pygame.draw.line(surface, (255, 255, 255), (px - 5, head_y - 2), (px + 5, head_y - 2), 1)
+                        pygame.draw.line(surface, (255, 255, 255), (px, head_y - 7), (px, head_y + 3), 1)
+
+                # Front Sponsor Barrier Banner
+                b_surf = c.get(b_key)
+                if b_surf:
+                    b_rect = b_surf.get_rect(center=(int(cx), int(scr_y - 8)))
+                    surface.blit(b_surf, b_rect)
+
+        # 4f. Stadium Grandstands with 84 Animated Cheering Fans, Flags & Camera Flashes
+        for stand in self.stage10_grandstands:
+            gx, gy = stand["pos"]
+            side = stand["side"]
+            gw, gh = stand["w"], stand["h"]
+            brand = stand["brand"]
+            rows = stand["rows"]
+            cols = stand["cols"]
+            spec = stand["spectators"]
+            scr_y = ply_y - (gy - self.track_distance)
+            if -100 <= scr_y <= scr_h + 100:
+                r_l, r_r = self.get_road_edges(10, gy)
+                if side == -1:
+                    gx = min(gx, r_l - 34.0 - gw * 0.5)
+                else:
+                    gx = max(gx, r_r + 34.0 + gw * 0.5)
+                # 3D Ground Shadow on lawn
+                pygame.draw.polygon(surface, (0, 0, 0, 95), [
+                    (gx - gw * 0.48, scr_y), (gx + gw * 0.48, scr_y),
+                    (gx + gw * 0.54, scr_y + 14), (gx - gw * 0.40, scr_y + 14)
+                ])
+
+                # Grandstand Structural Concrete Framework
+                pygame.draw.rect(surface, (30, 34, 44), (int(gx - gw * 0.48), int(scr_y - gh + 14), int(gw * 0.96), int(gh - 18)))
+                
+                # 6 Seating Tiers
+                for r in range(rows):
+                    tier_y = scr_y - gh + 22 + r * 9
+                    tier_col = (45, 52, 66) if r % 2 == 0 else (36, 42, 54)
+                    pygame.draw.rect(surface, tier_col, (int(gx - gw * 0.46), int(tier_y), int(gw * 0.92), 9))
+
+                # Cheering Spectators (6 rows x 14 columns = 84 fans)
+                c_step = (gw * 0.86) / max(1, cols - 1)
+                for r, r_spec in enumerate(spec):
+                    tier_y = scr_y - gh + 20 + r * 9
+                    for col_i, sp in enumerate(r_spec):
+                        sx = gx - gw * 0.43 + col_i * c_step
+                        cheer_y = math.sin(now * 4.6 + sp["phase"] + col_i * 0.28) * 2.2
+                        sy = tier_y + cheer_y
+                        # Shirt
+                        pygame.draw.rect(surface, sp["shirt"], (int(sx - 2), int(sy + 3), 5, 5), border_radius=1)
+                        # Head
+                        pygame.draw.circle(surface, sp["skin"], (int(sx), int(sy)), 2)
+                        # Arms
+                        if cheer_y < -0.7:
+                            pygame.draw.line(surface, sp["skin"], (sx - 2, sy + 3), (sx - 4, sy), 1)
+                            pygame.draw.line(surface, sp["skin"], (sx + 2, sy + 3), (sx + 4, sy), 1)
+                        # Waving flag on front tiers
+                        if sp["has_flag"] and (r == 0 or r == 1):
+                            f_wave = math.sin(now * 6.0 + sp["phase"]) * 0.35
+                            f_dx = int(math.cos(f_wave) * 7)
+                            f_dy = int(math.sin(f_wave) * 4)
+                            pygame.draw.line(surface, (25, 25, 25), (sx + 2, sy), (sx + 4 + f_dx, sy - 5 + f_dy), 1)
+                            f_surf = c.get(sp["flag"])
+                            if f_surf:
+                                surface.blit(f_surf, (int(sx + 3 + f_dx), int(sy - 11 + f_dy)))
+                        # Camera flash sparkles across the stadium tiers
+                        if math.sin(now * 4.2 + sp["phase"] * 11.3) > 0.975:
+                            pygame.draw.circle(surface, (255, 255, 255), (int(sx), int(sy)), 3)
+                            pygame.draw.line(surface, (255, 255, 255), (sx - 4, sy), (sx + 4, sy), 1)
+                            pygame.draw.line(surface, (255, 255, 255), (sx, sy - 4), (sx, sy + 4), 1)
+
+                # Cantilevered Aerodynamic Canopy Roof
+                pygame.draw.rect(surface, (48, 56, 72), (int(gx - gw * 0.5), int(scr_y - gh), int(gw), 14), border_radius=3)
+                pygame.draw.line(surface, (135, 155, 190), (gx - gw * 0.5, scr_y - gh), (gx + gw * 0.5, scr_y - gh), 2)
+                # Roof support truss pillars
+                for tp_i in range(4):
+                    tpx = gx - gw * 0.44 + tp_i * (gw * 0.88 / 3)
+                    pygame.draw.line(surface, (70, 80, 100), (tpx, scr_y - gh + 14), (tpx, scr_y - gh + 22), 2)
+
+                # Front Sponsor Header Banner
+                b_surf = c.get("banner_" + brand)
+                if b_surf:
+                    surface.blit(b_surf, (int(gx - 75), int(scr_y - 12)))
+
+        # 4g. Overhead Race Gantries & Sponsor Footbridges (Span across the entire road)
+        for gan in self.stage10_gantries:
+            gy = gan["y"]
+            g_type = gan["type"]
+            g_title = gan["title"]
+            scr_y = ply_y - (gy - self.track_distance)
+            if -110 <= scr_y <= scr_h + 110:
+                r_l, r_r = self.get_road_edges(10, gy)
+                gw = (r_r - r_l) + 64.0
+                gx = (r_l + r_r) * 0.5
+                gh = 62.0
+
+                # 3D Gantry Support Towers on Left & Right Verges
+                for tx_pos in [r_l - 30.0, r_r + 18.0]:
+                    # Ground shadow
+                    pygame.draw.ellipse(surface, (0, 0, 0, 120), (int(tx_pos + 6), int(scr_y - 2), 20, 8))
+                    # Lattice steel tower
+                    pygame.draw.rect(surface, (45, 52, 68), (int(tx_pos), int(scr_y - gh), 12, int(gh)))
+                    # Steel cross bracing
+                    for cy_i in range(int(scr_y - gh), int(scr_y), 15):
+                        pygame.draw.line(surface, (75, 85, 105), (tx_pos, cy_i), (tx_pos + 12, cy_i + 15), 1)
+                        pygame.draw.line(surface, (75, 85, 105), (tx_pos + 12, cy_i), (tx_pos, cy_i + 15), 1)
+
+                if g_type == "start_lights":
+                    # Official Timing & Start Lights Gantry
+                    b_rect = pygame.Rect(int(gx - gw * 0.5), int(scr_y - gh - 6), int(gw), 38)
+                    pygame.draw.rect(surface, (20, 24, 34), b_rect, border_radius=4)
+                    pygame.draw.rect(surface, (255, 215, 0), b_rect, 2, border_radius=4)
+                    # Title
+                    if self.font_race_md:
+                        ts = self.font_race_md.render(g_title, True, (255, 255, 255))
+                        surface.blit(ts, ts.get_rect(center=(int(gx), int(scr_y - gh + 4))))
+                    # 5 Start Light Clusters across the gantry
+                    for li in range(5):
+                        lx_pos = gx - 140 + li * 70
+                        pygame.draw.rect(surface, (12, 14, 20), (int(lx_pos - 16), int(scr_y - gh + 14), 32, 16), border_radius=2)
+                        # Red lights
+                        pygame.draw.circle(surface, (255, 30, 30), (int(lx_pos - 7), int(scr_y - gh + 22)), 5)
+                        pygame.draw.circle(surface, (255, 120, 120), (int(lx_pos - 7), int(scr_y - gh + 22)), 2)
+                        # Green lights
+                        pygame.draw.circle(surface, (35, 225, 75), (int(lx_pos + 7), int(scr_y - gh + 22)), 5)
+                        pygame.draw.circle(surface, (180, 255, 200), (int(lx_pos + 7), int(scr_y - gh + 22)), 2)
+
+                elif g_type == "footbridge":
+                    # Massive Enclosed Pedestrian Sponsor Bridge
+                    b_rect = pygame.Rect(int(gx - gw * 0.5), int(scr_y - gh - 8), int(gw), 44)
+                    pygame.draw.rect(surface, (25, 30, 42), b_rect, border_radius=4)
+                    pygame.draw.rect(surface, (220, 30, 30), b_rect, 3, border_radius=4)
+                    # Observation windows with spectator silhouettes inside
+                    for wi in range(int(gw / 28)):
+                        wx = gx - gw * 0.48 + wi * 28
+                        pygame.draw.rect(surface, (50, 110, 160), (int(wx), int(scr_y - gh - 4), 22, 12), border_radius=1)
+                        # Silhouettes inside observation lounge
+                        pygame.draw.circle(surface, (20, 25, 35), (int(wx + 8), int(scr_y - gh + 2)), 3)
+                        pygame.draw.circle(surface, (20, 25, 35), (int(wx + 15), int(scr_y - gh + 2)), 3)
+                    # Sponsor Marquee on lower bridge fascia
+                    m_rect = pygame.Rect(int(gx - gw * 0.46), int(scr_y - gh + 12), int(gw * 0.92), 20)
+                    pygame.draw.rect(surface, (15, 18, 25), m_rect, border_radius=2)
+                    if self.font_race_md:
+                        ts = self.font_race_md.render(g_title, True, (255, 215, 0))
+                        surface.blit(ts, ts.get_rect(center=m_rect.center))
+
+                elif g_type == "finish_gantry":
+                    # Championship Finish Gantry at 35900m
+                    b_rect = pygame.Rect(int(gx - gw * 0.5), int(scr_y - gh - 8), int(gw), 42)
+                    pygame.draw.rect(surface, (18, 20, 28), b_rect, border_radius=4)
+                    pygame.draw.rect(surface, (255, 215, 0), b_rect, 3, border_radius=4)
+                    # Checkered borders
+                    for ci in range(int(gw / 14)):
+                        cx_p = gx - gw * 0.5 + ci * 14
+                        c_col = (255, 255, 255) if ci % 2 == 0 else (20, 20, 20)
+                        pygame.draw.rect(surface, c_col, (int(cx_p), int(scr_y - gh - 7), 14, 6))
+                    if self.font_race_md:
+                        ts = self.font_race_md.render(g_title, True, (255, 230, 80))
+                        surface.blit(ts, ts.get_rect(center=(int(gx), int(scr_y - gh + 14))))
+
+        # 4h. Towering Floodlights & Sweeping Atmospheric Searchlights
+        for light in self.stage10_searchlights:
+            sx, sy = light["pos"]
+            ph = light["phase"]
+            spd = light["sweep_speed"]
+            scr_y = ply_y - (sy - self.track_distance)
+            if -120 <= scr_y <= scr_h + 120:
+                r_l, r_r = self.get_road_edges(10, sy)
+                if sx < (r_l + r_r) * 0.5:
+                    sx = min(sx, r_l - 26.0)
+                else:
+                    sx = max(sx, r_r + 26.0)
+                # Drop shadow
+                pygame.draw.ellipse(surface, (0, 0, 0, 120), (int(sx - 12), int(scr_y - 4), 24, 10))
+                # Tall lattice tower (height 48px)
+                pygame.draw.line(surface, (50, 56, 70), (sx - 6, scr_y), (sx - 3, scr_y - 46), 2)
+                pygame.draw.line(surface, (50, 56, 70), (sx + 6, scr_y), (sx + 3, scr_y - 46), 2)
+                for ty_i in range(int(scr_y - 44), int(scr_y), 12):
+                    pygame.draw.line(surface, (70, 78, 95), (sx - 5, ty_i), (sx + 5, ty_i + 12), 1)
+                # Floodlight fixture pod with 4 projector lamps
+                pygame.draw.rect(surface, (75, 82, 100), (int(sx - 10), int(scr_y - 52), 20, 8), border_radius=2)
+                for lp in [-6, -2, 2, 6]:
+                    pygame.draw.circle(surface, (255, 255, 230), (int(sx + lp), int(scr_y - 48)), 2)
+                # Sweeping volumetric light beam
+                sweep_ang = math.sin(now * spd + ph) * 0.52
+                beam_dx = math.sin(sweep_ang) * 240
+                # Fading multi-layered radiant beam
+                beam_surf = pygame.Surface((320, 240), pygame.SRCALPHA)
+                bx0 = 160
+                by0 = 210
+                bx1 = int(160 + beam_dx * 0.75)
+                by1 = 20
+                # Ambient fan polygon
+                pygame.draw.polygon(beam_surf, (255, 245, 205, 32), [
+                    (bx0 - 3, by0), (bx0 + 3, by0),
+                    (bx1 + 24, by1), (bx1 - 24, by1)
+                ])
+                # Core beam lines
+                pygame.draw.line(beam_surf, (255, 250, 220, 100), (bx0, by0), (bx1, by1), 4)
+                pygame.draw.line(beam_surf, (255, 255, 245, 190), (bx0, by0), (bx1, by1), 2)
+                surface.blit(beam_surf, (int(sx - 160), int(scr_y - 250)))
 
     def _render_stage11(self, surface: pygame.Surface):
         """Stage 11: Rainbow Skyway - Secret All-46 Hiragana Mastery Bonus Stage."""

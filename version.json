@@ -1,11 +1,11 @@
 {
-  "version": "1.1.6",
-  "tag_name": "v1.1.6",
-  "name": "Nihongo Master v1.1.6",
-  "release_date": "2026-09-24",
+  "version": "1.1.7",
+  "tag_name": "v1.1.7",
+  "name": "Nihongo Master v1.1.7 - Fuji Speedway Racing Circuit",
+  "release_date": "2026-09-25",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.6/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.6/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.1.6: Resolved taskbar minimization on exiting 3D Hiragana Cards by disabling SDL focus minimization and restoring fullscreen launcher focus. Added auto-hiding mouse cursor parity (hidden by default, reveals on deliberate movement, auto-hides after 2s idle or controller input). Structured all 8 card stages into 3 progressive sets with escalating decoy difficulty."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.7/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.7/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.1.7: Overhauled Stage 10 (Fuji Speedway) in both Hiragana Arcade and Katakana Arcade into an authentic FIA Grand Prix racing circuit with multi-tier stadium grandstands, 84 cheering fans with waving flags and sparkling camera flashes, full pit lane complex with team garages and mechanics holding pit boards, Dunlop chicane with 150m/100m/50m brake marker boards, corner runoff tire walls in team color bands, trackside safety catch fences with cheering crowds, corner marshal posts with waving green/yellow flags, overhead start lights gantry and enclosed sponsor footbridges, dark formula asphalt with rubbered-in racing groove, and sweeping floodlight searchlights."
 }
 
