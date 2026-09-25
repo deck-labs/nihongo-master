@@ -1,11 +1,11 @@
 {
-  "version": "1.1.7",
-  "tag_name": "v1.1.7",
-  "name": "Nihongo Master v1.1.7 - Fuji Speedway Racing Circuit",
+  "version": "1.1.8",
+  "tag_name": "v1.1.8",
+  "name": "Nihongo Master v1.1.8 - Road Seam Polish & Katakana Secret Stage Unlock",
   "release_date": "2026-09-25",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.7/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.7/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.1.7: Overhauled Stage 10 (Fuji Speedway) in both Hiragana Arcade and Katakana Arcade into an authentic FIA Grand Prix racing circuit with multi-tier stadium grandstands, 84 cheering fans with waving flags and sparkling camera flashes, full pit lane complex with team garages and mechanics holding pit boards, Dunlop chicane with 150m/100m/50m brake marker boards, corner runoff tire walls in team color bands, trackside safety catch fences with cheering crowds, corner marshal posts with waving green/yellow flags, overhead start lights gantry and enclosed sponsor footbridges, dark formula asphalt with rubbered-in racing groove, and sweeping floodlight searchlights."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.8/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.1.8/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.1.8: Fixed the broken/sheared road line and lane divider seams at 2400m on Stage 10 Fuji Speedway for seamless road continuity, removed the diagonal black groove stripe across the asphalt, and enabled the Secret Stage (Stage 11: Rainbow Skyway) unlock for Katakana Arcade with unified save support and Stage 10 campaign clear progression."
 }
 

@@ -1019,10 +1019,10 @@ class RoadRenderer:
                 elif seg_pos < 900.0:
                     t = (seg_pos - 500.0) / 400.0
                     return (base_l + narrow_w * t, base_r)
-                elif seg_pos < 2100.0:
+                elif seg_pos < 1700.0:
                     return (base_l + narrow_w, base_r)
-                elif seg_pos < 2500.0:
-                    t = (seg_pos - 2100.0) / 400.0
+                elif seg_pos < 2100.0:
+                    t = (seg_pos - 1700.0) / 400.0
                     return ((base_l + narrow_w) - narrow_w * t, base_r)
                 else:
                     return (base_l, base_r)
@@ -1406,11 +1406,7 @@ class RoadRenderer:
             shift = 0.0
             if seg_idx == 0:
                 # Iconic 1.5km Fuji Start Straightaway: laser straight for grid & pit lane
-                if seg_pos < 1600.0:
-                    shift = 0.0
-                else:
-                    t = (seg_pos - 1600.0) / 800.0
-                    shift = -25.0 * (0.5 - 0.5 * math.cos(t * math.pi))
+                shift = 0.0
             else:
                 pattern = (abs(seg_idx) + 3) % 4
                 if pattern == 0:
@@ -2738,21 +2734,9 @@ class RoadRenderer:
             # Formula-Grade Circuit Asphalt (Dark Charcoal Slate)
             pygame.draw.rect(surface, (25, 27, 34), (r_left, y, r_w, slice_h))
 
-            # Rubbered-In Racing Line Groove (Smooth sine wave following track curvature)
-            racing_line_offset = math.sin(world_y * 0.0026) * (r_w * 0.28)
-            groove_center = (r_left + r_right) * 0.5 + racing_line_offset
-            pygame.draw.rect(surface, (17, 18, 22), (groove_center - 26, y, 52, slice_h))
-            pygame.draw.rect(surface, (13, 14, 17), (groove_center - 13, y, 26, slice_h))
-
-            # Corner Braking Skid Marks entering technical sections
-            seg_pos = world_y % 2400.0
-            if (120.0 <= seg_pos <= 280.0) or (650.0 <= seg_pos <= 780.0):
-                if int(world_y) % 14 < 10:
-                    pygame.draw.rect(surface, (10, 10, 12), (groove_center - 20, y, 7, slice_h))
-                    pygame.draw.rect(surface, (10, 10, 12), (groove_center + 13, y, 7, slice_h))
+            lane_w = r_w / 4.0
 
             # Staggered Starting Grid Slots (track_dist < 460m)
-            lane_w = r_w / 4.0
             if 60.0 <= world_y <= 460.0:
                 grid_pos = int(world_y - 60.0) % 50
                 if grid_pos < 10:
@@ -2778,9 +2762,9 @@ class RoadRenderer:
             if dash_cycle < 30:
                 pygame.draw.rect(surface, (245, 248, 255), (r_left + lane_w - 1.5, y, 3, slice_h))
                 pygame.draw.rect(surface, (245, 248, 255), (r_left + lane_w * 3.0 - 1.5, y, 3, slice_h))
-                # Double Grand Prix Center Line (Championship Gold & Pure White)
+                # Double Grand Prix Center Line (Championship Gold)
                 pygame.draw.rect(surface, (255, 215, 0), (r_left + lane_w * 2.0 - 3.0, y, 2, slice_h))
-                pygame.draw.rect(surface, (255, 255, 255), (r_left + lane_w * 2.0 + 1.0, y, 2, slice_h))
+                pygame.draw.rect(surface, (255, 215, 0), (r_left + lane_w * 2.0 + 1.0, y, 2, slice_h))
 
             # 3D Beveled Racing Curbs (Red & White Alternating)
             curb_cycle = (int(world_y // 16) % 2)

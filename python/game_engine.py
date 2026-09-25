@@ -189,6 +189,8 @@ class GameEngine:
                     data = json.load(f)
                     self.hiragana_secret_stage_unlocked = bool(data.get("hiragana_secret_stage_unlocked", False))
                     self.katakana_secret_stage_unlocked = bool(data.get("katakana_secret_stage_unlocked", False))
+                    if data.get("secret_stage_unlocked", False) or self.hiragana_secret_stage_unlocked:
+                        self.katakana_secret_stage_unlocked = True
                     if "last_mode" in data and data["last_mode"] in ("hiragana", "katakana"):
                         self.game_mode = data["last_mode"]
             else:
@@ -203,6 +205,9 @@ class GameEngine:
                     with open(k_path, "r", encoding="utf-8") as f:
                         k_data = json.load(f)
                         self.katakana_secret_stage_unlocked = bool(k_data.get("secret_stage_unlocked", False))
+                if self.hiragana_secret_stage_unlocked:
+                    self.katakana_secret_stage_unlocked = True
+                self._save_unlocks()
         except Exception as e:
             print(f"Note: Could not load unlocks: {e}")
 
@@ -821,12 +826,9 @@ class GameEngine:
             if self.current_stage == 11:
                 self.return_to_title()
             elif self.current_stage == TOTAL_STAGES:
+                self.secret_stage_unlocked = True
+                self._save_unlocks()
                 if self.flawless_run and self.run_started_from_stage_1:
-                    if self.game_mode == "katakana":
-                        self.katakana_secret_stage_unlocked = True
-                    else:
-                        self.hiragana_secret_stage_unlocked = True
-                    self._save_unlocks()
                     self.start_stage(11, keep_fuel=True)
                 else:
                     self.return_to_title()
@@ -1103,10 +1105,10 @@ class GameEngine:
                         if event.key in (pygame.K_SPACE, pygame.K_RETURN, pygame.K_b, pygame.K_ESCAPE):
                             self.return_to_title()
                     elif self.current_stage == TOTAL_STAGES:
+                        self.secret_stage_unlocked = True
+                        self._save_unlocks()
                         if self.flawless_run and self.run_started_from_stage_1:
                             if event.key in (pygame.K_SPACE, pygame.K_RETURN, pygame.K_w, pygame.K_UP):
-                                self.secret_stage_unlocked = True
-                                self._save_unlocks()
                                 self.start_stage(11, keep_fuel=True)
                             elif event.key in (pygame.K_b, pygame.K_ESCAPE):
                                 self.return_to_title()
@@ -1210,10 +1212,10 @@ class GameEngine:
                             if btn in (0, 1, 7, 9, 11):
                                 self.return_to_title()
                         elif self.current_stage == TOTAL_STAGES:
+                            self.secret_stage_unlocked = True
+                            self._save_unlocks()
                             if self.flawless_run and self.run_started_from_stage_1:
                                 if btn in (0, 7, 9, 11):
-                                    self.secret_stage_unlocked = True
-                                    self._save_unlocks()
                                     self.start_stage(11, keep_fuel=True)
                                 elif btn == 1:
                                     self.return_to_title()
@@ -1269,10 +1271,10 @@ class GameEngine:
             if self.current_stage == 11 and self.stage_clear_timer >= 6.0:
                 self.return_to_title()
             elif self.current_stage == TOTAL_STAGES:
+                self.secret_stage_unlocked = True
+                self._save_unlocks()
                 if self.flawless_run and self.run_started_from_stage_1:
                     if self.stage_clear_timer >= 5.0:
-                        self.secret_stage_unlocked = True
-                        self._save_unlocks()
                         self.start_stage(11, keep_fuel=True)
                 elif self.stage_clear_timer >= 4.0:
                     self.return_to_title()
