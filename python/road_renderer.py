@@ -85,20 +85,20 @@ class RoadRenderer:
         self._generate_scenery()
 
     def _load_assets(self):
-        def load_img(subpath):
+        def load_img(subpath, alpha=True):
             path = get_asset_path(subpath)
             try:
                 surf = pygame.image.load(path)
-                return surf.convert_alpha()
+                return surf.convert_alpha() if alpha else surf.convert()
             except Exception as e:
                 print(f"Warning: Failed to load {subpath}: {e}")
                 # Fallback blank surface
-                s = pygame.Surface((64, 64), pygame.SRCALPHA)
-                s.fill((100, 100, 100, 255))
+                s = pygame.Surface((64, 64), pygame.SRCALPHA) if alpha else pygame.Surface((64, 64))
+                s.fill((100, 100, 100))
                 return s
 
         def load_cropped(subpath):
-            img = load_img(subpath)
+            img = load_img(subpath, alpha=True)
             if img:
                 bbox = img.get_bounding_rect()
                 if bbox.width > 0 and bbox.height > 0:
@@ -107,20 +107,101 @@ class RoadRenderer:
                     return cropped
             return img
 
-        self.tex_asphalt = load_img("textures/asphalt.png")
-        self.tex_grass = load_img("textures/grass.png")
-        self.tex_concrete = load_img("textures/concrete.png")
-        self.tex_water = load_img("textures/water.png")
-        self.tex_sand = load_img("textures/sand.png")
-        self.tex_rock_ground = load_img("textures/rock_ground.png")
+        # Opaque terrain textures loaded with fast direct-memory convert()
+        self.tex_asphalt = load_img("textures/asphalt.png", alpha=False)
+        self.tex_grass = load_img("textures/grass.png", alpha=False)
+        self.tex_concrete = load_img("textures/concrete.png", alpha=False)
+        self.tex_water = load_img("textures/water.png", alpha=False)
+        self.tex_sand = load_img("textures/sand.png", alpha=False)
+        self.tex_rock_ground = load_img("textures/rock_ground.png", alpha=False)
 
         # Realistic Ocean Water Assets
-        self.tex_deep_ocean = load_img("textures/water_deep_ocean.png")
-        self.tex_caustics = load_img("textures/water_caustics.png")
-        self.tex_foam_wake = load_img("textures/water_foam_wake.png")
-        self.tex_tropical_ocean = load_img("textures/water_tropical_ocean.png")
-        self.tex_foam_lace = load_img("textures/water_foam_lace.png")
-        self.tex_breaker_crest = load_img("textures/water_breaker_crest.png")
+        self.tex_deep_ocean = load_img("textures/water_deep_ocean.png", alpha=False)
+        self.tex_caustics = load_img("textures/water_caustics.png", alpha=True)
+        self.tex_foam_wake = load_img("textures/water_foam_wake.png", alpha=True)
+        self.tex_tropical_ocean = load_img("textures/water_tropical_ocean.png", alpha=False)
+        self.tex_foam_lace = load_img("textures/water_foam_lace.png", alpha=True)
+        self.tex_breaker_crest = load_img("textures/water_breaker_crest.png", alpha=True)
+
+        # Pre-calculated additive water layers for Stage 2 (blazing fast BLEND_ADD)
+        if self.tex_caustics:
+            self.tex_caustics_add = self.tex_caustics.copy().convert()
+            self.tex_caustics_add.fill((120, 120, 120), special_flags=pygame.BLEND_MULT)
+        else:
+            self.tex_caustics_add = None
+
+        if self.tex_foam_wake:
+            self.tex_foam_wake_add = self.tex_foam_wake.copy().convert()
+            self.tex_foam_wake_add.fill((70, 70, 70), special_flags=pygame.BLEND_MULT)
+        else:
+            self.tex_foam_wake_add = None
+
+        # Pre-baked Stage 10 Championship Racing Turf (eliminates per-frame turf_overlay allocation & blit)
+        if self.tex_grass:
+            self.tex_racing_turf = self.tex_grass.copy().convert()
+            tint_surf = pygame.Surface(self.tex_racing_turf.get_size(), pygame.SRCALPHA)
+            tint_surf.fill((16, 68, 30, 85))
+            self.tex_racing_turf.blit(tint_surf, (0, 0))
+            self.tex_racing_turf = self.tex_racing_turf.convert()
+        else:
+            self.tex_racing_turf = None
+
+        # Pre-baked Stage 5 Nighttime Concrete
+        if self.tex_concrete:
+            self.tex_night_concrete = self.tex_concrete.copy().convert()
+            tint_surf = pygame.Surface(self.tex_night_concrete.get_size(), pygame.SRCALPHA)
+            tint_surf.fill((10, 14, 26, 185))
+            self.tex_night_concrete.blit(tint_surf, (0, 0))
+            self.tex_night_concrete = self.tex_night_concrete.convert()
+        else:
+            self.tex_night_concrete = None
+
+        # Pre-baked Stage 6 Dark Volcanic Ash Rock
+        if self.tex_rock_ground:
+            self.tex_volcanic_rock = self.tex_rock_ground.copy().convert()
+            tint_surf = pygame.Surface(self.tex_volcanic_rock.get_size(), pygame.SRCALPHA)
+            tint_surf.fill((25, 12, 16, 175))
+            self.tex_volcanic_rock.blit(tint_surf, (0, 0))
+            self.tex_volcanic_rock = self.tex_volcanic_rock.convert()
+
+            # Pre-baked Stage 7 Glacial Frozen Snow Rock
+            self.tex_glacial_rock = self.tex_rock_ground.copy().convert()
+            tint_surf = pygame.Surface(self.tex_glacial_rock.get_size(), pygame.SRCALPHA)
+            tint_surf.fill((210, 235, 255, 195))
+            self.tex_glacial_rock.blit(tint_surf, (0, 0))
+            self.tex_glacial_rock = self.tex_glacial_rock.convert()
+
+            # Pre-baked Stage 9 Warm Sunset Sandstone Rock
+            self.tex_canyon_rock = self.tex_rock_ground.copy().convert()
+            tint_surf = pygame.Surface(self.tex_canyon_rock.get_size(), pygame.SRCALPHA)
+            tint_surf.fill((190, 75, 35, 140))
+            self.tex_canyon_rock.blit(tint_surf, (0, 0))
+            self.tex_canyon_rock = self.tex_canyon_rock.convert()
+        else:
+            self.tex_volcanic_rock = None
+            self.tex_glacial_rock = None
+            self.tex_canyon_rock = None
+
+        # Pre-baked Stage 8 Spring Rose Turf Grass
+        if self.tex_grass:
+            self.tex_sakura_grass = self.tex_grass.copy().convert()
+            tint_surf = pygame.Surface(self.tex_sakura_grass.get_size(), pygame.SRCALPHA)
+            tint_surf.fill((55, 20, 42, 60))
+            self.tex_sakura_grass.blit(tint_surf, (0, 0))
+            self.tex_sakura_grass = self.tex_sakura_grass.convert()
+        else:
+            self.tex_sakura_grass = None
+
+        # Pre-rendered Stage 3 striped guardrail pattern (10x36 repeating diagonal stripes)
+        self.stage3_guardrail_pat = pygame.Surface((10, 36))
+        self.stage3_guardrail_pat.fill((25, 25, 28))
+        for gy_i in range(36):
+            for dx in range(8):
+                stripe = int(gy_i * 0.35 + dx * 1.5) % 18
+                col = (30, 30, 35) if stripe < 6 else (255, 255, 255)
+                self.stage3_guardrail_pat.set_at((dx + 1, gy_i), col)
+            self.stage3_guardrail_pat.set_at((0, gy_i), (15, 15, 18))
+            self.stage3_guardrail_pat.set_at((9, gy_i), (15, 15, 18))
         
         # Pre-allocated translucent bridge shadow & hydrodynamic pylon wake
         self.surf_bridge_shadow = pygame.Surface((32, 6), pygame.SRCALPHA)
@@ -256,6 +337,28 @@ class RoadRenderer:
         # Core contact shadow directly beneath boulder
         pygame.draw.ellipse(self.shadow_boulder, (0, 0, 0, 145), (4, 6, self.boulder_w, int(self.boulder_h * 0.55)))
 
+        # 5. Stage 8 Sakura Tree Drop Shadow (pre-rendered)
+        sh_w, sh_h = 108, 68
+        self.shadow_sakura = pygame.Surface((sh_w + 20, sh_h + 20), pygame.SRCALPHA)
+        puffs = [(-22, -10, 22), (22, -8, 22), (0, -18, 26), (14, 6, 18), (-12, 4, 18)]
+        cx_s = (sh_w + 20) // 2
+        cy_s = (sh_h + 20) // 2
+        for ox, oy, r in puffs:
+            pygame.draw.circle(self.shadow_sakura, (0, 0, 0, 35), (cx_s + int(ox * 0.7), cy_s + int(oy * 0.7)), int(r * 0.75 + 4))
+        for ox, oy, r in puffs:
+            pygame.draw.circle(self.shadow_sakura, (0, 0, 0, 80), (cx_s + int(ox * 0.7), cy_s + int(oy * 0.7)), int(r * 0.75))
+        pygame.draw.ellipse(self.shadow_sakura, (0, 0, 0, 130), (cx_s - 24, cy_s - 2, 28, 12))
+
+        # 6. Stage 9 Saguaro Cactus Drop Shadow (pre-rendered)
+        self.shadow_cactus = pygame.Surface((90, 50), pygame.SRCALPHA)
+        pygame.draw.line(self.shadow_cactus, (0, 0, 0, 80), (8, 8), (56, 30), 6)
+        pygame.draw.line(self.shadow_cactus, (0, 0, 0, 75), (24, 14), (18, 22), 4)
+        pygame.draw.line(self.shadow_cactus, (0, 0, 0, 75), (35, 20), (47, 16), 4)
+        pygame.draw.ellipse(self.shadow_cactus, (0, 0, 0, 125), (0, 2, 16, 10))
+
+        # 7. Stage 11 Cosmic Aurora Reusable Ribbon Surface
+        self.stage11_aurora_ribbon = pygame.Surface((int(GAME_W), 8), pygame.SRCALPHA)
+
         # Initialize Stage 10 Fuji Speedway Racing Circuit Assets
         self._init_stage10_assets()
 
@@ -378,6 +481,64 @@ class RoadRenderer:
             cache["brake_" + dist_txt] = s_brk
 
         self.stage10_cache = cache
+
+        # Stage 10 Reusable Searchlight Beam Surface
+        self.stage10_beam_surf = pygame.Surface((320, 240), pygame.SRCALPHA)
+
+        # Stage 10 Pre-rendered Animated Grandstand Frames (6 rows x 14 cols spectators, roof, banners)
+        brands = ["BRIDGESTONE", "ADVAN", "FUJI SPEEDWAY", "AUTOBACS", "MOTUL", "YOKOHAMA", "DENSO", "ENDLESS", "TOYOTA GAZOO", "HKS PERFORMANCE"]
+        gw, gh = 160, 96
+        rows, cols = 6, 14
+        self.stage10_stand_frames = {}
+        for brand in brands:
+            self.stage10_stand_frames[brand] = []
+            b_surf = cache.get("banner_" + brand)
+            for frame in range(4):
+                surf = pygame.Surface((gw, gh), pygame.SRCALPHA)
+                # Framework
+                pygame.draw.rect(surf, (30, 34, 44), (int(gw * 0.02), 14, int(gw * 0.96), gh - 18))
+                # 6 Seating Tiers
+                for r in range(rows):
+                    tier_y = 22 + r * 9
+                    tier_col = (45, 52, 66) if r % 2 == 0 else (36, 42, 54)
+                    pygame.draw.rect(surf, tier_col, (int(gw * 0.04), tier_y, int(gw * 0.92), 9))
+                # 84 Spectators
+                c_step = (gw * 0.86) / max(1, cols - 1)
+                f_anim = math.sin(frame * (math.pi / 2.0))
+                for r in range(rows):
+                    tier_y = 20 + r * 9
+                    for col_i in range(cols):
+                        sx = int(gw * 0.07 + col_i * c_step)
+                        phase = (r * 13 + col_i * 7) % 6
+                        cheer_y = int(math.sin(frame * 1.5 + phase) * 2.0)
+                        sy = tier_y + cheer_y
+                        shirt_col = [(225, 30, 30), (30, 85, 215), (250, 250, 250), (250, 210, 20), (35, 180, 75), (255, 120, 20), (25, 25, 30)][(r + col_i) % 7]
+                        skin_col = [(255, 220, 180), (242, 195, 130), (225, 175, 110)][(r * 2 + col_i) % 3]
+                        # Shirt
+                        pygame.draw.rect(surf, shirt_col, (sx - 2, sy + 3, 5, 5), border_radius=1)
+                        # Head
+                        pygame.draw.circle(surf, skin_col, (sx, sy), 2)
+                        # Arms
+                        if cheer_y < 0:
+                            pygame.draw.line(surf, skin_col, (sx - 2, sy + 3), (sx - 4, sy), 1)
+                            pygame.draw.line(surf, skin_col, (sx + 2, sy + 3), (sx + 4, sy), 1)
+                        # Waving flags on front tiers
+                        if (r < 2) and ((col_i % 4) == 1):
+                            f_dx = int(f_anim * 5)
+                            pygame.draw.line(surf, (25, 25, 25), (sx + 2, sy), (sx + 4 + f_dx, sy - 5), 1)
+                            fl_surf = cache.get("flag_checkered" if col_i % 2 == 0 else "flag_hinomaru")
+                            if fl_surf:
+                                surf.blit(fl_surf, (sx + 3 + f_dx, sy - 11))
+                # Cantilevered Aerodynamic Canopy Roof
+                pygame.draw.rect(surf, (48, 56, 72), (0, 0, gw, 14), border_radius=3)
+                pygame.draw.line(surf, (135, 155, 190), (0, 0), (gw, 0), 2)
+                for tp_i in range(4):
+                    tpx = int(gw * 0.06 + tp_i * (gw * 0.88 / 3))
+                    pygame.draw.line(surf, (70, 80, 100), (tpx, 14), (tpx, 22), 2)
+                # Front Sponsor Banner
+                if b_surf:
+                    surf.blit(b_surf, (gw // 2 - 75, gh - 12))
+                self.stage10_stand_frames[brand].append(surf)
 
     def _get_safe_verge_x(self, stage: int, world_y: float, side: int, obj_w: float, road_clearance: float = 28.0, screen_pad: float = 12.0, rng: random.Random = None) -> tuple[float, int]:
         """Calculates a guaranteed safe verge X coordinate outside the road for any stage at world_y.
@@ -1516,7 +1677,7 @@ class RoadRenderer:
                 surface.blit(tex, (x, y))
         surface.set_clip(None)
 
-    def draw_scrolling_texture(self, surface, tex, rect, offset_x=0.0, offset_y=0.0, alpha=255):
+    def draw_scrolling_texture(self, surface, tex, rect, offset_x=0.0, offset_y=0.0, alpha=255, blend_mode=0):
         """Blit a repeating texture across rect with seamless offset scrolling."""
         if not tex:
             return
@@ -1534,16 +1695,21 @@ class RoadRenderer:
             start_y -= th
             
         old_alpha = tex.get_alpha()
-        if alpha < 255:
+        if alpha < 255 and blend_mode == 0:
             tex.set_alpha(alpha)
             
         surface.set_clip(pygame.Rect(rx, ry, rw, rh))
-        for x in range(start_x, rx + rw, tw):
-            for y in range(start_y, ry + rh, th):
-                surface.blit(tex, (x, y))
+        if blend_mode != 0:
+            for x in range(start_x, rx + rw, tw):
+                for y in range(start_y, ry + rh, th):
+                    surface.blit(tex, (x, y), special_flags=blend_mode)
+        else:
+            for x in range(start_x, rx + rw, tw):
+                for y in range(start_y, ry + rh, th):
+                    surface.blit(tex, (x, y))
         surface.set_clip(None)
         
-        if alpha < 255:
+        if alpha < 255 and blend_mode == 0:
             tex.set_alpha(old_alpha if old_alpha is not None else 255)
 
     def render(self, surface: pygame.Surface, stage: int, track_dist: float, player_screen_y: float = None):
@@ -1611,6 +1777,8 @@ class RoadRenderer:
             
         # Trees with 3D Drop Shadows
         for tx, ty in self.stage1_trees:
+            if abs(ty - self.track_distance) > 1400:
+                continue
             scr_y = ply_y - (ty - self.track_distance)
             if -120 <= scr_y <= scr_h + 120 and self.sprite_tree:
                 r_l, r_r = self.get_road_edges(1, ty)
@@ -1635,17 +1803,17 @@ class RoadRenderer:
         base_oy = self.track_distance * 0.4 + self.frames * 1.2
         self.draw_scrolling_texture(surface, self.tex_deep_ocean or self.tex_water, (GAME_X, 0, GAME_W, scr_h), base_ox, base_oy)
 
-        # 2. Shimmering sunlight caustics layer (scrolling diagonally with soft blend)
-        if self.tex_caustics:
+        # 2. Shimmering sunlight caustics layer (additive blending, blazing fast)
+        if self.tex_caustics_add:
             caustic_ox = math.cos(wave_time * 0.45) * 42.0 + self.frames * 0.7
             caustic_oy = -self.track_distance * 0.22 - self.frames * 1.1
-            self.draw_scrolling_texture(surface, self.tex_caustics, (GAME_X, 0, GAME_W, scr_h), caustic_ox, caustic_oy, alpha=135)
+            self.draw_scrolling_texture(surface, self.tex_caustics_add, (GAME_X, 0, GAME_W, scr_h), caustic_ox, caustic_oy, blend_mode=pygame.BLEND_ADD)
 
-        # 3. Ambient wave crest drift
-        if self.tex_foam_wake:
+        # 3. Ambient wave crest drift (additive blending, blazing fast)
+        if self.tex_foam_wake_add:
             foam_ox = self.frames * 0.5
             foam_oy = self.track_distance * 0.32 + self.frames * 1.8
-            self.draw_scrolling_texture(surface, self.tex_foam_wake, (GAME_X, 0, GAME_W, scr_h), foam_ox, foam_oy, alpha=45)
+            self.draw_scrolling_texture(surface, self.tex_foam_wake_add, (GAME_X, 0, GAME_W, scr_h), foam_ox, foam_oy, blend_mode=pygame.BLEND_ADD)
 
         for y in range(0, scr_h, slice_h):
             world_y = self.track_distance + (ply_y - y)
@@ -1728,7 +1896,7 @@ class RoadRenderer:
                         pygame.draw.line(surface, (220, 245, 255), (sx, sy - sz), (sx, sy + sz), 1)
 
     def _render_stage3(self, surface: pygame.Surface):
-        slice_h = 4
+        slice_h = 6
         wave_time = self.frames * 0.04
         scr_h = self.screen_height
         ply_y = self.player_screen_y
@@ -1802,24 +1970,13 @@ class RoadRenderer:
             # Clean grey asphalt matching Road Fighter #737572
             pygame.draw.rect(surface, (115, 117, 114), (r_left, y, r_w, slice_h))
             
-            # Authentic Road Fighter striped guardrails (/ / / /)
+            # Pre-rendered Authentic Road Fighter striped guardrails (/ / / /)
+            sub_y = int(world_y) % 36
             # Left Guardrail (10px wide with outer dark border and diagonal stripes)
-            pygame.draw.rect(surface, (25, 25, 28), (r_left - 10, y, 10, slice_h))
-            cx_l = int(r_left - 9)
-            for dx in range(8):
-                stripe = int(world_y * 0.35 + dx * 1.5) % 18
-                col = (30, 30, 35) if stripe < 6 else (255, 255, 255)
-                pygame.draw.line(surface, col, (cx_l + dx, y), (cx_l + dx, y + slice_h - 1))
-            pygame.draw.line(surface, (15, 15, 18), (r_left - 10, y), (r_left - 10, y + slice_h - 1))
+            surface.blit(self.stage3_guardrail_pat, (r_left - 10, y), (0, sub_y, 10, slice_h))
             
             # Right Guardrail (10px wide with outer dark border and diagonal stripes)
-            pygame.draw.rect(surface, (25, 25, 28), (r_right, y, 10, slice_h))
-            cx_r = int(r_right + 1)
-            for dx in range(8):
-                stripe = int(world_y * 0.35 + dx * 1.5) % 18
-                col = (30, 30, 35) if stripe < 6 else (255, 255, 255)
-                pygame.draw.line(surface, col, (cx_r + dx, y), (cx_r + dx, y + slice_h - 1))
-            pygame.draw.line(surface, (15, 15, 18), (r_right + 9, y), (r_right + 9, y + slice_h - 1))
+            surface.blit(self.stage3_guardrail_pat, (r_right, y), (0, sub_y, 10, slice_h))
 
             # Dynamic continuous dashed white lane dividers
             dash_cycle = (int(y + self.track_distance)) % 60
@@ -1836,6 +1993,8 @@ class RoadRenderer:
 
         # Palm Trees on Left Beach Sand with 3D Drop Shadows
         for px, py in self.stage3_palms:
+            if abs(py - self.track_distance) > 1400:
+                continue
             scr_y = ply_y - (py - self.track_distance)
             if -120 <= scr_y <= scr_h + 120 and self.sprite_palm:
                 r_l, _ = self.get_road_edges(3, py)
@@ -1912,6 +2071,8 @@ class RoadRenderer:
         # Scenery: Pines & Boulders with 3D Drop Shadows
         for item in self.stage4_scenery:
             px, py = item["pos"]
+            if abs(py - self.track_distance) > 1400:
+                continue
             is_pine = item["is_pine"]
             scr_y = ply_y - (py - self.track_distance)
             if -100 <= scr_y <= scr_h + 100:
@@ -1939,17 +2100,14 @@ class RoadRenderer:
         # 1. Midnight / Twilight Night Sky Base
         pygame.draw.rect(surface, (10, 14, 24), (GAME_X, 0, GAME_W, scr_h))
         
-        # 2. Elevated Expressway Concrete Deck across Entire Viewport
-        self.draw_tiled_texture(surface, self.tex_concrete, (GAME_X, 0, GAME_W, scr_h))
-        
-        # Nighttime atmospheric shading on concrete
-        night_shading = pygame.Surface((int(GAME_W), scr_h), pygame.SRCALPHA)
-        night_shading.fill((10, 14, 26, 185))
-        surface.blit(night_shading, (GAME_X, 0))
+        # 2. Elevated Expressway Concrete Deck with Pre-baked Night Shading
+        self.draw_tiled_texture(surface, self.tex_night_concrete or self.tex_concrete, (GAME_X, 0, GAME_W, scr_h))
         
         # 3. Skyscraper Silhouettes in Background Verges
         for b in self.stage5_buildings:
             bx, by, bw, bh = b["x"], b["y"], b["w"], b["h"]
+            if abs(by - self.track_distance) > 1600:
+                continue
             scr_y = ply_y - (by - self.track_distance)
             if -bh <= scr_y <= scr_h + 50:
                 # Building facade
@@ -2076,19 +2234,16 @@ class RoadRenderer:
         # 1. Dark Volcanic Twilight Sky & Basalt Bedrock Base
         pygame.draw.rect(surface, (18, 12, 16), (GAME_X, 0, GAME_W, scr_h))
         
-        # 2. Volcanic Rock Ground across Entire Terrain
-        self.draw_tiled_texture(surface, self.tex_rock_ground, (GAME_X, 0, GAME_W, scr_h))
-        
-        # Dark volcanic ash shading overlay across entire terrain
-        ash_overlay = pygame.Surface((int(GAME_W), scr_h), pygame.SRCALPHA)
-        ash_overlay.fill((25, 12, 16, 175))
-        surface.blit(ash_overlay, (GAME_X, 0))
+        # 2. Volcanic Rock Ground with Pre-baked Ash Shading
+        self.draw_tiled_texture(surface, self.tex_volcanic_rock or self.tex_rock_ground, (GAME_X, 0, GAME_W, scr_h))
         
         # 3. Glowing Magma Vents / Caldera Fissures in the verges
         import time
         pulse = 0.5 + 0.5 * math.sin(time.time() * 3.5)
         for vent in self.stage6_magma_vents:
             vx, vy, vr = vent["x"], vent["y"], vent["radius"]
+            if abs(vy - self.track_distance) > 1400:
+                continue
             scr_y = ply_y - (vy - self.track_distance)
             if -40 <= scr_y <= scr_h + 40:
                 r_l, r_r = self.get_road_edges(6, vy)
@@ -2104,6 +2259,8 @@ class RoadRenderer:
         # 4. Scorched Trees & Basalt Crags with 3D Drop Shadows
         for item in self.stage6_scenery:
             px, py = item["pos"]
+            if abs(py - self.track_distance) > 1400:
+                continue
             is_pine = item["is_pine"]
             scr_y = ply_y - (py - self.track_distance)
             if -100 <= scr_y <= scr_h + 100:
@@ -2165,19 +2322,16 @@ class RoadRenderer:
         # 1. Polar Twilight Sky & Glacial Bedrock Base
         pygame.draw.rect(surface, (10, 16, 28), (GAME_X, 0, GAME_W, scr_h))
         
-        # 2. Frozen Rock Ground across Entire Terrain
-        self.draw_tiled_texture(surface, self.tex_rock_ground, (GAME_X, 0, GAME_W, scr_h))
-        
-        # Frost & Snowfield overlay (sub-zero glacial white-cyan tint) across entire terrain
-        frost_overlay = pygame.Surface((int(GAME_W), scr_h), pygame.SRCALPHA)
-        frost_overlay.fill((210, 235, 255, 195))
-        surface.blit(frost_overlay, (GAME_X, 0))
+        # 2. Frozen Rock Ground with Pre-baked Glacial Snowfield Tint
+        self.draw_tiled_texture(surface, self.tex_glacial_rock or self.tex_rock_ground, (GAME_X, 0, GAME_W, scr_h))
         
         # 3. Crystalline Ice Spires / Frozen Formations in the verges
         import time
         now = time.time()
         for crystal in self.stage7_ice_crystals:
             cx, cy = crystal["x"], crystal["y"]
+            if abs(cy - self.track_distance) > 1400:
+                continue
             ch, cw = crystal["height"], crystal["width"]
             scr_y = ply_y - (cy - self.track_distance)
             if -60 <= scr_y <= scr_h + 60:
@@ -2226,6 +2380,8 @@ class RoadRenderer:
         # 4. Snowy Evergreens & Snow-Capped Boulders with 3D Drop Shadows
         for item in self.stage7_scenery:
             px, py = item["pos"]
+            if abs(py - self.track_distance) > 1400:
+                continue
             is_pine = item["is_pine"]
             scr_y = ply_y - (py - self.track_distance)
             if -100 <= scr_y <= scr_h + 100:
@@ -2316,19 +2472,16 @@ class RoadRenderer:
         # 1. Spring Twilight Sky (deep violet-rose gradient base)
         pygame.draw.rect(surface, (28, 18, 38), (GAME_X, 0, GAME_W, scr_h))
         
-        # 2. Fresh Spring Turf Grass across Entire Terrain
-        self.draw_tiled_texture(surface, self.tex_grass, (GAME_X, 0, GAME_W, scr_h))
-        
-        # Twilight Spring Rose-tint overlay across entire terrain
-        verge_overlay = pygame.Surface((int(GAME_W), scr_h), pygame.SRCALPHA)
-        verge_overlay.fill((55, 20, 42, 60))
-        surface.blit(verge_overlay, (GAME_X, 0))
+        # 2. Fresh Spring Turf Grass with Pre-baked Rose Tint
+        self.draw_tiled_texture(surface, self.tex_sakura_grass or self.tex_grass, (GAME_X, 0, GAME_W, scr_h))
         
         # 3. Traditional Japanese Stone Lanterns (ishidōrō) along roadside
         import time
         now = time.time()
         for lantern in self.stage8_lanterns:
             lx, ly = lantern["pos"]
+            if abs(ly - self.track_distance) > 1400:
+                continue
             lh = lantern["h"]
             scr_y = ply_y - (ly - self.track_distance)
             if -60 <= scr_y <= scr_h + 60:
@@ -2370,6 +2523,8 @@ class RoadRenderer:
         # 4. Blooming Cherry Blossom Trees (Sakura Trees) with 3D Drop Shadows
         for item in self.stage8_sakura_trees:
             tx, ty = item["pos"]
+            if abs(ty - self.track_distance) > 1400:
+                continue
             scale = item["scale"]
             tone = item["tone"]
             scr_y = ply_y - (ty - self.track_distance)
@@ -2380,19 +2535,9 @@ class RoadRenderer:
                     tx = min(tx, r_l - margin)
                 else:
                     tx = max(tx, r_r + margin)
-                # 3D Drop Shadow: Multi-lobed blossom canopy shadow on grass
-                sh_w = int(88 * scale)
-                sh_h = int(50 * scale)
-                sh_surf = pygame.Surface((sh_w + 20, sh_h + 20), pygame.SRCALPHA)
-                puffs = [(-22, -10, 22), (22, -8, 22), (0, -18, 26), (14, 6, 18), (-12, 4, 18)]
-                cx_s = (sh_w + 20) // 2
-                cy_s = (sh_h + 20) // 2
-                for ox, oy, r in puffs:
-                    pygame.draw.circle(sh_surf, (0, 0, 0, 35), (cx_s + int(ox * 0.7), cy_s + int(oy * 0.7)), int(r * scale * 0.75 + 4))
-                for ox, oy, r in puffs:
-                    pygame.draw.circle(sh_surf, (0, 0, 0, 80), (cx_s + int(ox * 0.7), cy_s + int(oy * 0.7)), int(r * scale * 0.75))
-                pygame.draw.ellipse(sh_surf, (0, 0, 0, 130), (cx_s - int(24 * scale), cy_s - 2, int(28 * scale), int(12 * scale)))
-                surface.blit(sh_surf, (tx + int(18 * scale) - sh_w // 2, scr_y + int(14 * scale) - sh_h // 2))
+                # 3D Drop Shadow: Multi-lobed blossom canopy shadow on grass (pre-rendered)
+                if self.shadow_sakura:
+                    surface.blit(self.shadow_sakura, (tx + int(18 * scale) - 64, scr_y + int(14 * scale) - 44))
 
                 # Fallen petals patch on ground beneath tree
                 petal_spread = int(32 * scale)
@@ -2502,17 +2647,14 @@ class RoadRenderer:
         # 1. Sunset Canyon Dusk Sky (rich crimson-amber twilight base)
         pygame.draw.rect(surface, (54, 22, 26), (GAME_X, 0, GAME_W, scr_h))
         
-        # 2. Sandstone Desert Terrain across Entire Viewport
-        self.draw_tiled_texture(surface, self.tex_rock_ground, (GAME_X, 0, GAME_W, scr_h))
-        
-        # Warm sunset amber wash overlay across entire terrain
-        sand_overlay = pygame.Surface((int(GAME_W), scr_h), pygame.SRCALPHA)
-        sand_overlay.fill((190, 75, 35, 140))
-        surface.blit(sand_overlay, (GAME_X, 0))
+        # 2. Sandstone Desert Terrain with Pre-baked Sunset Amber Wash
+        self.draw_tiled_texture(surface, self.tex_canyon_rock or self.tex_rock_ground, (GAME_X, 0, GAME_W, scr_h))
         
         # 3. Distant Sandstone Mesas & Buttes
         for mesa in self.stage9_mesas:
             mx, my = mesa["pos"]
+            if abs(my - self.track_distance) > 1400:
+                continue
             mw, mh = mesa["w"], mesa["h"]
             col_idx = mesa["col_idx"]
             scr_y = ply_y - (my - self.track_distance)
@@ -2553,6 +2695,8 @@ class RoadRenderer:
         # 4. Towering Saguaro Cacti along Roadside with 3D Drop Shadows
         for cactus in self.stage9_cacti:
             cx, cy = cactus["pos"]
+            if abs(cy - self.track_distance) > 1400:
+                continue
             ch = cactus["h"]
             arms = cactus["arms"]
             arm_y = cactus["arm_y"]
@@ -2564,14 +2708,9 @@ class RoadRenderer:
                     cx = min(cx, r_l - margin)
                 else:
                     cx = max(cx, r_r + margin)
-                # 3D Saguaro Cactus Drop Shadow on desert sand
-                sh_surf = pygame.Surface((int(ch + 30), int(ch * 0.7)), pygame.SRCALPHA)
-                pygame.draw.line(sh_surf, (0, 0, 0, 80), (8, 8), (int(ch * 0.75), int(ch * 0.42)), 6)
-                pygame.draw.line(sh_surf, (0, 0, 0, 75), (int(ch * 0.35), int(ch * 0.20)), (int(ch * 0.35) - 6, int(ch * 0.32)), 4)
-                if arms >= 2:
-                    pygame.draw.line(sh_surf, (0, 0, 0, 75), (int(ch * 0.50), int(ch * 0.28)), (int(ch * 0.50) + 12, int(ch * 0.22)), 4)
-                pygame.draw.ellipse(sh_surf, (0, 0, 0, 125), (0, 2, 16, 10))
-                surface.blit(sh_surf, (cx - 6, scr_y - 6))
+                # 3D Saguaro Cactus Drop Shadow on desert sand (pre-rendered)
+                if self.shadow_cactus:
+                    surface.blit(self.shadow_cactus, (cx - 6, scr_y - 6))
 
                 # Main trunk
                 pygame.draw.rect(surface, (36, 78, 45), (cx - 5, scr_y - ch, 10, ch), border_radius=4)
@@ -2666,11 +2805,8 @@ class RoadRenderer:
         # 1. Dark Championship Circuit Sky & Base
         pygame.draw.rect(surface, (14, 18, 28), (GAME_X, 0, GAME_W, scr_h))
 
-        # 2. Championship Manicured Racing Turf across Entire Viewport
-        self.draw_tiled_texture(surface, self.tex_grass, (GAME_X, 0, GAME_W, scr_h))
-        turf_overlay = pygame.Surface((int(GAME_W), scr_h), pygame.SRCALPHA)
-        turf_overlay.fill((16, 68, 30, 85))
-        surface.blit(turf_overlay, (GAME_X, 0))
+        # 2. Championship Manicured Racing Turf with Pre-baked Dark Tint
+        self.draw_tiled_texture(surface, self.tex_racing_turf or self.tex_grass, (GAME_X, 0, GAME_W, scr_h))
 
         # 3. Track Slices (Bottom to Top / Back to Front): Runoffs, Barriers, Asphalt, Kerbs, Lines
         slice_h = 6
@@ -2787,6 +2923,8 @@ class RoadRenderer:
         # 4a. Corner Runoff Tire Walls
         for tw_obj in self.stage10_tire_walls:
             tx, ty = tw_obj["pos"]
+            if abs(ty - self.track_distance) > 1400:
+                continue
             tw = tw_obj["w"]
             side = tw_obj["side"]
             style = tw_obj["style"]
@@ -2823,6 +2961,8 @@ class RoadRenderer:
         # 4b. Pit Lane & Team Garages with Pit Wall & Mechanics
         for pb in self.stage10_pit_buildings:
             py = pb["y"]
+            if abs(py - self.track_distance) > 1400:
+                continue
             team = pb["team"]
             col = pb["col"]
             pit_b = pb["pit_board"]
@@ -2880,6 +3020,8 @@ class RoadRenderer:
         # 4c. Trackside Corner Marshal Posts with Animated Waving Flags
         for mp in self.stage10_marshal_posts:
             mx, my = mp["pos"]
+            if abs(my - self.track_distance) > 1400:
+                continue
             side = mp["side"]
             flag_col = mp["flag_col"]
             scr_y = ply_y - (my - self.track_distance)
@@ -2916,6 +3058,8 @@ class RoadRenderer:
         # 4d. Braking Distance Marker Boards (150m, 100m, 50m)
         for db in self.stage10_distance_boards:
             by = db["y"]
+            if abs(by - self.track_distance) > 1400:
+                continue
             side = db["side"]
             b_key = db["key"]
             scr_y = ply_y - (by - self.track_distance)
@@ -2935,6 +3079,8 @@ class RoadRenderer:
         # 4e. Trackside Safety Catch Fences & Standing Embankment Crowds
         for crowd in self.stage10_trackside_crowds:
             cx, cy = crowd["pos"]
+            if abs(cy - self.track_distance) > 1400:
+                continue
             side = crowd["side"]
             cw = crowd["w"]
             b_key = crowd["banner_key"]
@@ -2995,12 +3141,11 @@ class RoadRenderer:
         # 4f. Stadium Grandstands with 84 Animated Cheering Fans, Flags & Camera Flashes
         for stand in self.stage10_grandstands:
             gx, gy = stand["pos"]
+            if abs(gy - self.track_distance) > 1400:
+                continue
             side = stand["side"]
             gw, gh = stand["w"], stand["h"]
             brand = stand["brand"]
-            rows = stand["rows"]
-            cols = stand["cols"]
-            spec = stand["spectators"]
             scr_y = ply_y - (gy - self.track_distance)
             if -100 <= scr_y <= scr_h + 100:
                 r_l, r_r = self.get_road_edges(10, gy)
@@ -3014,62 +3159,17 @@ class RoadRenderer:
                     (gx + gw * 0.54, scr_y + 14), (gx - gw * 0.40, scr_y + 14)
                 ])
 
-                # Grandstand Structural Concrete Framework
-                pygame.draw.rect(surface, (30, 34, 44), (int(gx - gw * 0.48), int(scr_y - gh + 14), int(gw * 0.96), int(gh - 18)))
-                
-                # 6 Seating Tiers
-                for r in range(rows):
-                    tier_y = scr_y - gh + 22 + r * 9
-                    tier_col = (45, 52, 66) if r % 2 == 0 else (36, 42, 54)
-                    pygame.draw.rect(surface, tier_col, (int(gx - gw * 0.46), int(tier_y), int(gw * 0.92), 9))
-
-                # Cheering Spectators (6 rows x 14 columns = 84 fans)
-                c_step = (gw * 0.86) / max(1, cols - 1)
-                for r, r_spec in enumerate(spec):
-                    tier_y = scr_y - gh + 20 + r * 9
-                    for col_i, sp in enumerate(r_spec):
-                        sx = gx - gw * 0.43 + col_i * c_step
-                        cheer_y = math.sin(now * 4.6 + sp["phase"] + col_i * 0.28) * 2.2
-                        sy = tier_y + cheer_y
-                        # Shirt
-                        pygame.draw.rect(surface, sp["shirt"], (int(sx - 2), int(sy + 3), 5, 5), border_radius=1)
-                        # Head
-                        pygame.draw.circle(surface, sp["skin"], (int(sx), int(sy)), 2)
-                        # Arms
-                        if cheer_y < -0.7:
-                            pygame.draw.line(surface, sp["skin"], (sx - 2, sy + 3), (sx - 4, sy), 1)
-                            pygame.draw.line(surface, sp["skin"], (sx + 2, sy + 3), (sx + 4, sy), 1)
-                        # Waving flag on front tiers
-                        if sp["has_flag"] and (r == 0 or r == 1):
-                            f_wave = math.sin(now * 6.0 + sp["phase"]) * 0.35
-                            f_dx = int(math.cos(f_wave) * 7)
-                            f_dy = int(math.sin(f_wave) * 4)
-                            pygame.draw.line(surface, (25, 25, 25), (sx + 2, sy), (sx + 4 + f_dx, sy - 5 + f_dy), 1)
-                            f_surf = c.get(sp["flag"])
-                            if f_surf:
-                                surface.blit(f_surf, (int(sx + 3 + f_dx), int(sy - 11 + f_dy)))
-                        # Camera flash sparkles across the stadium tiers
-                        if math.sin(now * 4.2 + sp["phase"] * 11.3) > 0.975:
-                            pygame.draw.circle(surface, (255, 255, 255), (int(sx), int(sy)), 3)
-                            pygame.draw.line(surface, (255, 255, 255), (sx - 4, sy), (sx + 4, sy), 1)
-                            pygame.draw.line(surface, (255, 255, 255), (sx, sy - 4), (sx, sy + 4), 1)
-
-                # Cantilevered Aerodynamic Canopy Roof
-                pygame.draw.rect(surface, (48, 56, 72), (int(gx - gw * 0.5), int(scr_y - gh), int(gw), 14), border_radius=3)
-                pygame.draw.line(surface, (135, 155, 190), (gx - gw * 0.5, scr_y - gh), (gx + gw * 0.5, scr_y - gh), 2)
-                # Roof support truss pillars
-                for tp_i in range(4):
-                    tpx = gx - gw * 0.44 + tp_i * (gw * 0.88 / 3)
-                    pygame.draw.line(surface, (70, 80, 100), (tpx, scr_y - gh + 14), (tpx, scr_y - gh + 22), 2)
-
-                # Front Sponsor Header Banner
-                b_surf = c.get("banner_" + brand)
-                if b_surf:
-                    surface.blit(b_surf, (int(gx - 75), int(scr_y - 12)))
+                # Fast blit pre-rendered grandstand frame
+                stand_frame_idx = int(now * 4.5) % 4
+                b_frames = self.stage10_stand_frames.get(brand)
+                if b_frames:
+                    surface.blit(b_frames[stand_frame_idx], (int(gx - gw * 0.5), int(scr_y - gh)))
 
         # 4g. Overhead Race Gantries & Sponsor Footbridges (Span across the entire road)
         for gan in self.stage10_gantries:
             gy = gan["y"]
+            if abs(gy - self.track_distance) > 1400:
+                continue
             g_type = gan["type"]
             g_title = gan["title"]
             scr_y = ply_y - (gy - self.track_distance)
@@ -3146,6 +3246,8 @@ class RoadRenderer:
         # 4h. Towering Floodlights & Sweeping Atmospheric Searchlights
         for light in self.stage10_searchlights:
             sx, sy = light["pos"]
+            if abs(sy - self.track_distance) > 1400:
+                continue
             ph = light["phase"]
             spd = light["sweep_speed"]
             scr_y = ply_y - (sy - self.track_distance)
@@ -3169,8 +3271,9 @@ class RoadRenderer:
                 # Sweeping volumetric light beam
                 sweep_ang = math.sin(now * spd + ph) * 0.52
                 beam_dx = math.sin(sweep_ang) * 240
-                # Fading multi-layered radiant beam
-                beam_surf = pygame.Surface((320, 240), pygame.SRCALPHA)
+                # Reusable radiant beam surface
+                beam_surf = self.stage10_beam_surf
+                beam_surf.fill((0, 0, 0, 0))
                 bx0 = 160
                 by0 = 210
                 bx1 = int(160 + beam_dx * 0.75)
@@ -3198,14 +3301,14 @@ class RoadRenderer:
         
         # Cosmic Aurora ribbons in the upper sky
         aurora_h = int(scr_h * 0.45)
+        a_surf = self.stage11_aurora_ribbon
         for ay in range(0, aurora_h, 8):
             t_a = ay / aurora_h
-            a_surf = pygame.Surface((int(GAME_W), 8), pygame.SRCALPHA)
             r = int(60 + 120 * (0.5 + 0.5 * math.sin(now + ay * 0.03)))
             g = int(30 + 80 * (0.5 + 0.5 * math.cos(now * 0.8 + ay * 0.02)))
             b = int(140 + 90 * (0.5 + 0.5 * math.sin(now * 1.2 + ay * 0.04)))
             alpha = int(75 * (1.0 - t_a))
-            pygame.draw.rect(a_surf, (r, g, b, alpha), (0, 0, int(GAME_W), 8))
+            a_surf.fill((r, g, b, alpha))
             surface.blit(a_surf, (GAME_X, ay))
 
         # Twinkling Cosmic Stars
@@ -3258,6 +3361,8 @@ class RoadRenderer:
         # 3. Glowing Prismatic Crystals along Roadside with 3D Drop Shadows
         for cry in self.stage11_crystals:
             cx, cy = cry["pos"]
+            if abs(cy - self.track_distance) > 1400:
+                continue
             ccol = cry["color"]
             scr_y = ply_y - (cy - self.track_distance)
             if -80 <= scr_y <= scr_h + 80:
@@ -3292,6 +3397,8 @@ class RoadRenderer:
         # 4. Floating Cyber-Torii Arches Spanning the Road
         for tor in self.stage11_torii:
             ty = tor["y"]
+            if abs(ty - self.track_distance) > 1400:
+                continue
             tcol = tor["color"]
             scr_y = ply_y - (ty - self.track_distance)
             if -120 <= scr_y <= scr_h + 120:
@@ -3314,6 +3421,8 @@ class RoadRenderer:
         # 5. Holographic Gantries with Japanese / Romanji Mastery Text
         for gan in self.stage11_gantries:
             gy = gan["y"]
+            if abs(gy - self.track_distance) > 1400:
+                continue
             msg = gan["text"]
             scr_y = ply_y - (gy - self.track_distance)
             if -100 <= scr_y <= scr_h + 100:
@@ -3346,7 +3455,10 @@ class RoadRenderer:
             
             # Checkered Banner
             if self.tex_finish_banner:
-                surface.blit(pygame.transform.scale(self.tex_finish_banner, (int(r_w), 40)), (r_left, finish_y - 20))
+                if getattr(self, '_cached_finish_banner_w', None) != int(r_w):
+                    self._cached_finish_banner = pygame.transform.scale(self.tex_finish_banner, (int(r_w), 40))
+                    self._cached_finish_banner_w = int(r_w)
+                surface.blit(self._cached_finish_banner, (r_left, finish_y - 20))
                 
             # Goal Posts
             post_l = r_left - 18.0
