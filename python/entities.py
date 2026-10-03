@@ -29,6 +29,9 @@ class PlayerCar:
         self.font_cjk = font_cjk
         self.is_sparking = False
         self.spark_side = 0 # -1 left, +1 right
+        # Hiragana Fighter cosmetics (enabled by the engine only in Hiragana mode)
+        self.hiragana_extras = False
+        self.lean = 0.0
         
         # Load sprite
         spr_path = get_asset_path("sprites/player_car.png")
@@ -103,6 +106,13 @@ class PlayerCar:
         else:
             self.rotation = 0.0
 
+        # Hiragana Fighter: slight cosmetic lean into the turn (hitbox unaffected)
+        if self.hiragana_extras:
+            target = steer_axis * 0.07 if self.speed_kmh > 20.0 else 0.0
+            self.lean += (target - self.lean) * min(1.0, 10.0 * delta)
+        else:
+            self.lean = 0.0
+
     def check_road_bounds(self, road_edges: tuple[float, float]):
         r_left, r_right = road_edges
         left_bound = r_left + (self.WIDTH * 0.5)
@@ -158,12 +168,22 @@ class PlayerCar:
         surface.blit(self.shadow_surf, (int(round(self.x - self.WIDTH * 0.5 + 6)), int(round(self.y - self.HEIGHT * 0.5 + 8))))
 
         surf_to_draw = self.composite_sprite
-        if abs(self.rotation) > 0.005:
-            deg = -math.degrees(self.rotation)
+        total_rot = self.rotation + self.lean
+        if abs(total_rot) > 0.005:
+            deg = -math.degrees(total_rot)
             surf_to_draw = pygame.transform.rotozoom(self.composite_sprite, deg, 1.0)
             
         rect = surf_to_draw.get_rect(center=(int(round(self.x)), int(round(self.y))))
         surface.blit(surf_to_draw, rect)
+
+        # Hiragana Fighter: glowing brake lights at the tail
+        if self.hiragana_extras and self.is_braking and self.speed_kmh > 5.0:
+            tail_y = int(round(self.y + self.HEIGHT * 0.5)) - 6
+            for sx in (-30, 30):
+                px = int(round(self.x)) + sx
+                pygame.draw.circle(surface, (150, 10, 10), (px, tail_y), 11)
+                pygame.draw.circle(surface, (255, 50, 40), (px, tail_y), 7)
+                pygame.draw.circle(surface, (255, 190, 170), (px, tail_y), 3)
             
         # 3. Guardrail Sparks
         if self.is_sparking:
@@ -237,6 +257,30 @@ class TrafficCar:
         self.shadow_surf = pygame.Surface((int(self.WIDTH + 16), int(self.HEIGHT + 16)), pygame.SRCALPHA)
         pygame.draw.rect(self.shadow_surf, (0, 0, 0, 65), (0, 0, int(self.WIDTH + 9), int(self.HEIGHT + 9)), border_radius=22)
         pygame.draw.rect(self.shadow_surf, (0, 0, 0, 105), (3, 3, int(self.WIDTH + 2), int(self.HEIGHT + 2)), border_radius=20)
+
+        # Hiragana Fighter rival personality (cruiser = classic behaviour)
+        self.behavior = "cruiser"
+        self.weave_timer = random.uniform(1.0, 3.0)
+        self.near_missed = False
+
+    def set_behavior(self, behavior: str):
+        """Assign a rival personality and stamp a small colour-coded badge on the hood."""
+        self.behavior = behavior
+        if behavior == "weaver":
+            self.lane_change_speed = 0.5  # slow, readable swerve instead of a snap
+        badge_col = {"weaver": (0, 215, 255), "speedster": (255, 130, 25), "truck": (170, 175, 185)}.get(behavior)
+        if not badge_col:
+            return
+        cx, cy = int(self.WIDTH * 0.5), 24
+        pygame.draw.rect(self.sprite, (12, 16, 24), (cx - 18, cy - 8, 36, 16), border_radius=4)
+        pygame.draw.rect(self.sprite, badge_col, (cx - 18, cy - 8, 36, 16), 2, border_radius=4)
+        if behavior == "weaver":      # zig-zag
+            pygame.draw.lines(self.sprite, badge_col, False, [(cx - 11, cy + 3), (cx - 4, cy - 3), (cx + 3, cy + 3), (cx + 10, cy - 3)], 2)
+        elif behavior == "speedster":  # double chevron
+            for dx in (-6, 5):
+                pygame.draw.lines(self.sprite, badge_col, False, [(cx + dx - 4, cy + 4), (cx + dx, cy - 4), (cx + dx + 4, cy + 4)], 2)
+        else:                          # slow truck: heavy bar
+            pygame.draw.rect(self.sprite, badge_col, (cx - 11, cy - 3, 22, 6), border_radius=2)
 
     @classmethod
     def _get_texture(cls, color: str) -> pygame.Surface:

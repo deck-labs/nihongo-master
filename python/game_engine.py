@@ -25,6 +25,7 @@ from road_renderer import RoadRenderer
 from entities import PlayerCar, TrafficCar
 from hud_renderer import HudRenderer
 from update_manager import UpdateManager
+from hiragana_extras import HiraganaExtras
 
 class GameEngine:
     def __init__(self, start_stage: int = 1, skip_title: bool = False, custom_dist: float = 0.0,
@@ -139,6 +140,7 @@ class GameEngine:
         self.traffic_bump_sfx_timer = 0.0
         
         self.traffic_cars: list[TrafficCar] = []
+        self.extras = HiraganaExtras()
         
         if self.is_title_screen:
             self.player.speed_kmh = 0.0
@@ -306,6 +308,8 @@ class GameEngine:
         
         self.road.game_mode = self.game_mode
         self.road.rebuild_stage11_gantries(self.game_mode)
+        self.extras.reset(stage_num)
+        self.player.hiragana_extras = (self.game_mode == "hiragana")
         if stage_num == 11:
             self.secret_deck = list(get_gauntlet_kana(self.game_mode))
             random.shuffle(self.secret_deck)
@@ -529,6 +533,13 @@ class GameEngine:
             if car.is_active and abs(car.world_y - spawn_world_y) < 220.0:
                 if car.lane_idx in available_lanes:
                     available_lanes.remove(car.lane_idx)
+
+        # Hiragana Fighter: don't drop rivals on top of road hazards
+        blocked = self.extras.lanes_blocked(self, spawn_world_y)
+        if blocked:
+            unblocked = [l for l in available_lanes if l not in blocked]
+            if unblocked:
+                available_lanes = unblocked
                     
         if available_lanes:
             lane_idx = random.choice(available_lanes)
@@ -541,6 +552,7 @@ class GameEngine:
         col = random.choice(TRAFFIC_COLORS)
         
         car = TrafficCar(pick_romaji, spawn_world_y, lane_idx, spd, col, self.font_latin)
+        self.extras.assign_behavior(self, car)
         self.traffic_cars.append(car)
 
     def menu_up(self):
@@ -1370,11 +1382,15 @@ class GameEngine:
         # Gas / Turbo ALWAYS takes priority over brake to prevent phantom or stuck braking
         if turbo_down and brake_down:
             brake_down = False
+
+        # Hiragana Fighter: oil-slick steering, turbo heat (identity functions in Katakana)
+        steer = self.extras.modify_steer(self, steer, delta)
+        turbo_down = self.extras.gate_turbo(self, turbo_down, delta)
             
         self.player.handle_input(steer, turbo_down, brake_down, delta)
         
-        # 2. Track Progress
-        dist_step = self.player.speed_kmh * 6.0 * GAME_SPEED_SCALE * delta
+        # 2. Track Progress (slipstream draft gives a small boost in Hiragana mode)
+        dist_step = self.player.speed_kmh * 6.0 * GAME_SPEED_SCALE * delta * self.extras.track_multiplier(self)
         self.track_distance += dist_step
         self.score += dist_step * 0.1
         
@@ -1547,6 +1563,7 @@ class GameEngine:
                     self.audio.play_match()
                     self.match_timer = 2.0
                     car.trigger_match()
+                    self.extras.on_match(self, car)
                     self.pick_new_target_kana()
                 else:
                     # MISMATCH CRASH! Spinout, damage recorded, and 15% penalty
@@ -1558,6 +1575,7 @@ class GameEngine:
                         self.audio.play_crash()
                     
                     car.trigger_crash()
+                    self.extras.on_crash(self, car)
                     
                     # Classic arcade lateral bounce impulse applied to BOTH player and traffic car
                     bounce = 24.0
@@ -1572,6 +1590,9 @@ class GameEngine:
         if self.match_timer > 0.0:
             self.match_timer = max(0.0, self.match_timer - delta)
 
+        # 7e. Hiragana Fighter extras (hazards, weavers, drafting, FX); no-op in Katakana
+        self.extras.update(self, delta, dist_step)
+
         # 8. Audio & Road Sync
         self.road.track_distance = self.track_distance
         self.audio.update_engine(self.player.speed_kmh, self.player.is_turbo)
@@ -1581,6 +1602,7 @@ class GameEngine:
         
         # 1. Road & Environment
         self.road.render(self.virtual_screen, self.current_stage, self.track_distance, player_screen_y=self.player_screen_y)
+        self.extras.render_back(self, self.virtual_screen)
         
         # 2. Traffic Cars
         for car in self.traffic_cars:
@@ -1588,6 +1610,7 @@ class GameEngine:
             
         # 3. Player Car
         self.player.render(self.virtual_screen)
+        self.extras.render_front(self, self.virtual_screen)
         
         # 4. HUD Panels
         self.hud.render_left_panel(self.virtual_screen, self.current_stage, self.track_distance, STAGE_TRACK_LENGTH)
@@ -1632,6 +1655,7 @@ class GameEngine:
             self.hud.render_game_over_overlay(self.virtual_screen)
 
         # 6. Presentation with Aspect-Ratio Adaptive Scaling
+        self.extras.apply_shake(self)
         self._present_to_screen()
         pygame.display.flip()
 
