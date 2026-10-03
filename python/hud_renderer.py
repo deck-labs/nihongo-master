@@ -87,6 +87,8 @@ class HudRenderer:
         
         st_name = STAGE_NAMES.get(stage, "HIGHWAY")
         txt_name = self.font_stage_name.render(st_name, True, COLOR_CYAN)
+        if txt_name.get_width() > 220:
+            txt_name = self.font_caption.render(st_name, True, COLOR_CYAN)
         surface.blit(txt_name, txt_name.get_rect(center=(140, 76)))
         
         txt_tele = self.font_caption.render("ALL-KANA GAUNTLET" if stage == 11 else "TRACK TELEMETRY", True, (180, 220, 250))
@@ -148,7 +150,7 @@ class HudRenderer:
         txt_you = self.font_caption.render("YOU", True, (0, 0, 0))
         surface.blit(txt_you, txt_you.get_rect(center=you_rect.center))
 
-        txt_dh = self.font_caption.render("REMAINING DISTANCE", True, (210, 235, 255))
+        txt_dh = self.font_desc.render("REMAINING DISTANCE", True, (210, 235, 255))
         surface.blit(txt_dh, txt_dh.get_rect(center=(card_x + card_w // 2, card_y + 22)))
 
         remaining_m = int(max(0.0, (max_dist - track_dist) * 0.1))
@@ -212,7 +214,7 @@ class HudRenderer:
         
         # Subtitle instruction
         if stage == 11:
-            txt_sub = self.font_caption.render(f"MATCH TRAFFIC FOR ALL {TOTAL_GAUNTLET_KANA} KANA! (+100 PTS / +35% FUEL)", True, (255, 240, 180))
+            txt_sub = self.font_caption.render(f"MATCH ALL {TOTAL_GAUNTLET_KANA} KANA! (+100 PTS / +35% FUEL)", True, (255, 240, 180))
         else:
             txt_sub = self.font_caption.render("MATCH TRAFFIC ROOF ROMAJI TO REFUEL +30%", True, (230, 242, 255))
         sub_r = txt_sub.get_rect(center=(rx + rw // 2, box_y + 220))
@@ -319,7 +321,12 @@ class HudRenderer:
             surface.blit(txt_b1, txt_b1.get_rect(center=badge_rect.center))
         
         env_note = STAGE_ENV_NOTES.get(stage, "")
-        txt_env = self.font_caption.render(env_note, True, (190, 220, 250))
+        txt_env = self.font_desc.render(env_note, True, (190, 220, 250))
+        max_env_w = rw - 48
+        if txt_env.get_width() > max_env_w:
+            while txt_env.get_width() > max_env_w and len(env_note) > 4:
+                env_note = env_note[:-4] + "..."
+                txt_env = self.font_desc.render(env_note, True, (190, 220, 250))
         surface.blit(txt_env, (rx + 24, score_y + 110))
         
         # 5. Controls Guide Deck (Dynamically scaled to 16:10 canvas)
@@ -334,7 +341,7 @@ class HudRenderer:
         pygame.draw.line(surface, (0, 140, 210), (rx + 20, ctrl_y + 44), (rx + rw - 20, ctrl_y + 44), 1)
         
         mode_str = "HIRAGANA" if game_mode == "hiragana" else "KATAKANA"
-        goal_msg = f"BONUS GOAL: CONQUER ALL {TOTAL_GAUNTLET_KANA} {mode_str} & DAKUTEN!" if stage == 11 else f"TARGET GOAL: 36,000 M // {TOTAL_STAGES} TOTAL STAGES"
+        goal_msg = f"BONUS GOAL: MASTER ALL {TOTAL_GAUNTLET_KANA} {mode_str} & DAKUTEN!" if stage == 11 else f"TARGET GOAL: 36,000 M // {TOTAL_STAGES} TOTAL STAGES"
         lines = [
             "STEER: [A / D] / [LEFT / RIGHT] / D-PAD / ANALOG STICK",
             "TURBO BOOST: [W] / [UP] / [SPACE] / GAMEPAD [A] / [RT]",

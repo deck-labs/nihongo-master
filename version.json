@@ -1,11 +1,11 @@
 {
-  "version": "1.3.1",
-  "tag_name": "v1.3.1",
-  "name": "Nihongo Master v1.3.1 - HUD Box Boundary Fix & Turbo Heat Balancing",
+  "version": "1.3.2",
+  "tag_name": "v1.3.2",
+  "name": "Nihongo Master v1.3.2 - Global Text Boundary Audit & Score Telemetry Overflow Fix",
   "release_date": "2026-10-04",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.3.1/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.3.1/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.3.1: Fixed HUD pill box bounds in Hiragana Fighter. Unified pill dimensions (270x36) and centered layout so that COMBO, TURBO HEAT, and OVERHEAT! text and gauge bars never exceed box borders. Rebalanced turbo heat rate with 50% less heat accumulation (~9.1s of sustained turbo before overheat) and faster cooldown. Enhanced left stage telemetry and goal badge margins."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.3.2/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.3.2/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.3.2: Comprehensive text boundary audit across every UI container in the game. Fixed tactical score telemetry box where environmental notes were cut off by the right border (Stage 1 Broad Highway, Stage 8 Sakura Boulevard, and Stage 11 Secret Stage). Streamlined stage telemetry notes and added auto-scaling and ellipsis boundary guards. Refined distance card title font, Stage 11 chamber subtitle, and Stage 8 left panel header with generous lateral margins."
 }
 
