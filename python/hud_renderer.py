@@ -89,7 +89,7 @@ class HudRenderer:
         txt_name = self.font_stage_name.render(st_name, True, COLOR_CYAN)
         surface.blit(txt_name, txt_name.get_rect(center=(140, 76)))
         
-        txt_tele = self.font_caption.render("ALL-KANA GAUNTLET" if stage == 11 else "GPS TRACK TELEMETRY", True, (180, 220, 250))
+        txt_tele = self.font_caption.render("ALL-KANA GAUNTLET" if stage == 11 else "TRACK TELEMETRY", True, (180, 220, 250))
         surface.blit(txt_tele, txt_tele.get_rect(center=(140, 112)))
         
         # Dedicated Bottom Distance Telemetry Card
@@ -108,7 +108,7 @@ class HudRenderer:
         track_len = track_bot - track_top
         
         # Goal Badge
-        goal_rect = pygame.Rect(95, track_top - 30, 120, 26)
+        goal_rect = pygame.Rect(90, track_top - 30, 130, 26)
         pygame.draw.rect(surface, (10, 20, 36), goal_rect, border_radius=4)
         pygame.draw.rect(surface, COLOR_GOLD, goal_rect, 2, border_radius=4)
         txt_goal = self.font_caption.render("★ GOAL ★", True, COLOR_GOLD)
