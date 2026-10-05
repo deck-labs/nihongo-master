@@ -1,11 +1,11 @@
 {
-  "version": "1.3.2",
-  "tag_name": "v1.3.2",
-  "name": "Nihongo Master v1.3.2 - Global Text Boundary Audit & Score Telemetry Overflow Fix",
-  "release_date": "2026-10-04",
+  "version": "1.3.3",
+  "tag_name": "v1.3.3",
+  "name": "Nihongo Master v1.3.3 - Turbo Overheating Mechanic Removed",
+  "release_date": "2026-10-05",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.3.2/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.3.2/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.3.2: Comprehensive text boundary audit across every UI container in the game. Fixed tactical score telemetry box where environmental notes were cut off by the right border (Stage 1 Broad Highway, Stage 8 Sakura Boulevard, and Stage 11 Secret Stage). Streamlined stage telemetry notes and added auto-scaling and ellipsis boundary guards. Refined distance card title font, Stage 11 chamber subtitle, and Stage 8 left panel header with generous lateral margins."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.3.3/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.3.3/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.3.3: Removed the turbo overheating mechanic and heat HUD pill from Hiragana Fighter as requested. Players can now freely utilize turbo boost without heat accumulation or lockout distractions, keeping full focus on the Japanese kana learning experience and arcade racing action."
 }
 

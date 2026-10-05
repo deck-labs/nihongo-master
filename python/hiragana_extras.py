@@ -4,7 +4,6 @@ Hiragana-Fighter-only gameplay & graphics extras (Road Fighter style):
   * Road hazards (oil slicks, traffic cones) with advance warning
   * Rival personalities (cruiser / weaver / speedster / truck)
   * Slipstream drafting, near-miss bonus, match combo multiplier
-  * Turbo heat / overheat
   * Pooled particles, speed lines, screen shake, floating text, HUD chips
 
 Every public hook is a no-op unless engine.game_mode == "hiragana", so the
@@ -21,9 +20,6 @@ from game_config import (
 from entities import TrafficCar, get_latin_font
 
 OIL_SLIP_TIME = 1.2
-HEAT_RATE = 0.11          # turbo heat per second (~9.1 s of continuous turbo, 50% reduction)
-HEAT_COOL = 0.50          # cooling per second when not using turbo
-OVERHEAT_RESUME = 0.40    # turbo re-enabled once heat falls below this
 DRAFT_BOOST = 1.10        # track speed multiplier while slipstreaming
 MAX_PARTICLES = 120
 
@@ -162,22 +158,6 @@ class HiraganaExtras:
         return steer
 
     def gate_turbo(self, engine, turbo_down: bool, delta: float) -> bool:
-        if not self.active(engine):
-            return turbo_down
-        if self.overheated:
-            self.heat = max(0.0, self.heat - HEAT_COOL * delta)
-            if self.heat <= OVERHEAT_RESUME:
-                self.overheated = False
-            return False
-        if turbo_down:
-            self.heat = min(1.0, self.heat + HEAT_RATE * delta)
-            if self.heat >= 1.0:
-                self.overheated = True
-                self._float(engine.player.x, engine.player.y - 100, "OVERHEAT!", (255, 70, 50))
-                self._burst(engine.player.x, engine.player.y + 60, 14, [(210, 210, 215), (150, 150, 160)], 120.0, 0.7, 10, 0.9)
-                return False
-        else:
-            self.heat = max(0.0, self.heat - HEAT_COOL * delta)
         return turbo_down
 
     def track_multiplier(self, engine) -> float:
@@ -454,7 +434,7 @@ class HiraganaExtras:
         for x, y0, y, life, text, color in self.floaters:
             self._text(surface, text, x, y, color, 26, shadow=True)
 
-        # Combo + turbo heat chips in the top-left of the playfield with arcade pill backing
+        # Combo chip in the top-left of the playfield with arcade pill backing
         cx, cy = GAME_X + 20, 20
         pill_w, pill_h = 270, 36
         mult = min(4, 1 + self.combo // 2)
@@ -464,36 +444,6 @@ class HiraganaExtras:
             pygame.draw.rect(surface, (255, 215, 0), pill_rect, 2, border_radius=6)
             combo_str = f"COMBO {self.combo}  [x{mult}]"
             self._text(surface, combo_str, pill_rect.centerx, pill_rect.centery, (255, 225, 60), 22, left=False)
-            cy += 44
-        if self.heat > 0.04 or self.overheated:
-            pill_rect = pygame.Rect(cx, cy, pill_w, pill_h)
-            pygame.draw.rect(surface, (12, 18, 28), pill_rect, border_radius=6)
-            border_c = (255, 60, 50) if self.overheated else ((255, 190, 40) if self.heat > 0.65 else (0, 210, 255))
-            pygame.draw.rect(surface, border_c, pill_rect, 2, border_radius=6)
-
-            label = "OVERHEAT!" if self.overheated else "TURBO HEAT"
-            if self.overheated:
-                col = (255, 60, 50) if int(self.t * 8) % 2 == 0 else (255, 150, 60)
-            else:
-                col = (0, 220, 255) if self.heat < 0.65 else (255, 190, 40)
-
-            # Balanced layout: gauge bar + gap + text label, perfectly centered in pill
-            bar_w, bar_h = 90, 10
-            gap = 12
-            label_w, _ = get_latin_font(15).size(label)
-            total_content_w = bar_w + gap + label_w
-            start_x = cx + (pill_w - total_content_w) // 2
-
-            bar_x = start_x
-            bar_y = cy + (pill_h - bar_h) // 2
-            pygame.draw.rect(surface, (20, 30, 45), (bar_x, bar_y, bar_w, bar_h), border_radius=3)
-            pygame.draw.rect(surface, (40, 60, 80), (bar_x, bar_y, bar_w, bar_h), 1, border_radius=3)
-            fill = int(bar_w * self.heat)
-            if fill > 0:
-                pygame.draw.rect(surface, col, (bar_x, bar_y, fill, bar_h), border_radius=3)
-
-            label_x = bar_x + bar_w + gap
-            self._text(surface, label, label_x, pill_rect.centery, col, 15, left=True)
 
     def _text(self, surface, text, x, y, color, size, left=False, shadow=False):
         key = (text, color, size)
