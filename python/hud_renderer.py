@@ -403,7 +403,7 @@ class HudRenderer:
             {
                 "id": "katakana",
                 "title": "KATAKANA ARCADE",
-                "tag": "TURBO ROAD RACER",
+                "tag": "CLASSIC ROAD RACER",
                 "kana": "カタカナ レーサー",
                 "menu_idx": 1,
                 "col": (255, 175, 45)
@@ -530,7 +530,7 @@ class HudRenderer:
             theme_col = (0, 225, 255)
         elif game_mode == "katakana":
             mode_badge = "KATAKANA ARCADE"
-            mode_sub = "TURBO ROAD RACER // カタカナ レーサー"
+            mode_sub = "CLASSIC ROAD RACER // カタカナ レーサー"
             theme_col = (255, 175, 45)
         elif game_mode == "katakana_cards":
             mode_badge = "3D KATAKANA CARDS"

@@ -29,8 +29,9 @@ class PlayerCar:
         self.font_cjk = font_cjk
         self.is_sparking = False
         self.spark_side = 0 # -1 left, +1 right
-        # Hiragana Fighter cosmetics (enabled by the engine only in Hiragana mode)
+        # Arcade Fighter cosmetics (lean into turns, brake lights) for Hiragana & Katakana
         self.hiragana_extras = False
+        self.arcade_extras = False
         self.lean = 0.0
         
         # Load sprite
@@ -106,8 +107,8 @@ class PlayerCar:
         else:
             self.rotation = 0.0
 
-        # Hiragana Fighter: slight cosmetic lean into the turn (hitbox unaffected)
-        if self.hiragana_extras:
+        # Arcade Fighter: slight cosmetic lean into the turn (hitbox unaffected)
+        if (self.hiragana_extras or self.arcade_extras):
             target = steer_axis * 0.07 if self.speed_kmh > 20.0 else 0.0
             self.lean += (target - self.lean) * min(1.0, 10.0 * delta)
         else:
@@ -176,8 +177,8 @@ class PlayerCar:
         rect = surf_to_draw.get_rect(center=(int(round(self.x)), int(round(self.y))))
         surface.blit(surf_to_draw, rect)
 
-        # Hiragana Fighter: glowing brake lights at the tail
-        if self.hiragana_extras and self.is_braking and self.speed_kmh > 5.0:
+        # Arcade Fighter: glowing brake lights at the tail
+        if (self.hiragana_extras or self.arcade_extras) and self.is_braking and self.speed_kmh > 5.0:
             tail_y = int(round(self.y + self.HEIGHT * 0.5)) - 6
             for sx in (-30, 30):
                 px = int(round(self.x)) + sx

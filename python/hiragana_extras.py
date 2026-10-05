@@ -1,13 +1,12 @@
 """
 hiragana_extras.py
-Hiragana-Fighter-only gameplay & graphics extras (Road Fighter style):
+Arcade Racer gameplay & graphics extras (Road Fighter style) for Hiragana & Katakana:
   * Road hazards (oil slicks, traffic cones) with advance warning
   * Rival personalities (cruiser / weaver / speedster / truck)
   * Slipstream drafting, near-miss bonus, match combo multiplier
   * Pooled particles, speed lines, screen shake, floating text, HUD chips
 
-Every public hook is a no-op unless engine.game_mode == "hiragana", so the
-Katakana arcade is completely unaffected.
+Active for both Hiragana and Katakana Arcade racers.
 """
 
 import math
@@ -122,7 +121,7 @@ class HiraganaExtras:
 
     @staticmethod
     def active(engine) -> bool:
-        return engine.game_mode == "hiragana"
+        return engine.game_mode in ("hiragana", "katakana")
 
     # ------------------------------------------------------- rival behaviours
     def assign_behavior(self, engine, car: TrafficCar):

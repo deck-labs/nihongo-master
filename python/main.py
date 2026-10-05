@@ -108,7 +108,8 @@ def main():
         start_menu=args.menu,
         start_stageclear=args.stageclear,
         detected_res=(actual_w, actual_h),
-        aspect_mode=args.aspect
+        aspect_mode=args.aspect,
+        game_mode=args.mode if args.mode else "hiragana"
     )
     if args.mode:
         engine.game_mode = args.mode
@@ -118,13 +119,17 @@ def main():
             engine.title_menu_index = 3
         elif args.mode == "katakana":
             engine.title_menu_index = 1
-            init_k = "ア"
-            engine.player.update_kana(init_k)
+            if engine.is_title_screen:
+                engine.player.update_kana("ア")
+            engine.player.hiragana_extras = True
+            engine.player.arcade_extras = True
             engine.road.rebuild_stage11_gantries(args.mode)
         else:
             engine.title_menu_index = 0
-            init_k = "あ"
-            engine.player.update_kana(init_k)
+            if engine.is_title_screen:
+                engine.player.update_kana("あ")
+            engine.player.hiragana_extras = True
+            engine.player.arcade_extras = True
             engine.road.rebuild_stage11_gantries(args.mode)
 
     if args.titlemenu > 0:

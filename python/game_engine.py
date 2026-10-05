@@ -30,7 +30,8 @@ from hiragana_extras import HiraganaExtras
 class GameEngine:
     def __init__(self, start_stage: int = 1, skip_title: bool = False, custom_dist: float = 0.0,
                  start_paused: bool = False, start_menu: bool = False, start_stageclear: bool = False,
-                 detected_res: tuple[int, int] | None = None, aspect_mode: str = "auto"):
+                 detected_res: tuple[int, int] | None = None, aspect_mode: str = "auto",
+                 game_mode: str = "hiragana"):
         self.screen = pygame.display.get_surface()
         self.clock = pygame.time.Clock()
         self.running = True
@@ -101,7 +102,7 @@ class GameEngine:
         self.hide_cursor()
         
         # Game State & Mode
-        self.game_mode = "hiragana"
+        self.game_mode = game_mode
         self.hiragana_secret_stage_unlocked = False
         self.katakana_secret_stage_unlocked = False
         self.current_stage = start_stage
@@ -123,7 +124,7 @@ class GameEngine:
             self.update_mgr.check_for_updates()
 
         # Flawless Run & Secret Stage State
-        self._load_unlocks()
+        self._load_unlocks(explicit_mode=game_mode)
         self.run_started_from_stage_1 = (start_stage == 1)
         self.flawless_run = self.run_started_from_stage_1
         self.damage_taken = False
@@ -183,7 +184,7 @@ class GameEngine:
             pass
         return os.path.join(cfg_dir, "unlocks.json")
 
-    def _load_unlocks(self):
+    def _load_unlocks(self, explicit_mode: str | None = None):
         try:
             p = self._get_unlocks_path()
             if os.path.exists(p):
@@ -193,7 +194,7 @@ class GameEngine:
                     self.katakana_secret_stage_unlocked = bool(data.get("katakana_secret_stage_unlocked", False))
                     if data.get("secret_stage_unlocked", False) or self.hiragana_secret_stage_unlocked:
                         self.katakana_secret_stage_unlocked = True
-                    if "last_mode" in data and data["last_mode"] in ("hiragana", "katakana"):
+                    if explicit_mode is None and "last_mode" in data and data["last_mode"] in ("hiragana", "katakana"):
                         self.game_mode = data["last_mode"]
             else:
                 # Import legacy unlocks
@@ -233,12 +234,18 @@ class GameEngine:
         if self.game_mode in ("hiragana", "katakana"):
             init_k = "ア" if self.game_mode == "katakana" else "あ"
             self.player.update_kana(init_k)
+            self.player.hiragana_extras = True
+            self.player.arcade_extras = True
             self.road.rebuild_stage11_gantries(self.game_mode)
         elif self.game_mode in ("cards", "hiragana_cards"):
+            self.player.hiragana_extras = False
+            self.player.arcade_extras = False
             if self.selected_stage > CARD_TOTAL_STAGES:
                 self.selected_stage = 1
                 self.current_stage = 1
         elif self.game_mode == "katakana_cards":
+            self.player.hiragana_extras = False
+            self.player.arcade_extras = False
             if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
                 self.selected_stage = 1
                 self.current_stage = 1
@@ -317,7 +324,8 @@ class GameEngine:
         self.road.game_mode = self.game_mode
         self.road.rebuild_stage11_gantries(self.game_mode)
         self.extras.reset(stage_num)
-        self.player.hiragana_extras = (self.game_mode == "hiragana")
+        self.player.hiragana_extras = (self.game_mode in ("hiragana", "katakana"))
+        self.player.arcade_extras = (self.game_mode in ("hiragana", "katakana"))
         if stage_num == 11:
             self.secret_deck = list(get_gauntlet_kana(self.game_mode))
             random.shuffle(self.secret_deck)
