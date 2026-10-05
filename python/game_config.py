@@ -22,7 +22,7 @@ ROAD_WIDTH = GAME_W - (ROAD_MARGIN * 2.0)  # 640.0 px wide 4-lane highway
 PLAYER_SCREEN_Y = 960.0  # 1200 - 240.0
 
 # Version & Release Metadata
-GAME_VERSION = "1.3.4"
+GAME_VERSION = "1.4.0"
 GITHUB_REPO = "deck-labs/nihongo-master"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/deck-labs/nihongo-master/main/version.json"
 RELEASES_API_URL = "https://api.github.com/repos/deck-labs/nihongo-master/releases/latest"
@@ -169,6 +169,103 @@ CARD_STAGE_INFO = {
         "kana_preview": ["と", "う", "き", "ょ", "に", "ほ"]
     }
 }
+
+# ==============================================================================
+# 3D KATAKANA CARDS STAGE CONFIGURATIONS (8 Stages - Godot & Blender Engine)
+# ==============================================================================
+KATAKANA_CARD_TOTAL_STAGES = 8
+
+KATAKANA_CARD_STAGE_INFO = {
+    1: {
+        "title": "BASIC LOANWORDS",
+        "japanese": "基本外来語（ア・イ・ウ・エ・オ）",
+        "difficulty": 1,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
+        "words": ["ドア (Door)", "エア (Air)", "アイス (Ice Cream)", "メモ (Memo)", "バス (Bus)"],
+        "summary": "Master fundamental Katakana loanwords across 3 sets (9 words). Set 1: Pure Vowels • Set 2: Everyday Basics • Set 3: Living & Nature.",
+        "kana_preview": ["ア", "イ", "ウ", "エ", "オ"]
+    },
+    2: {
+        "title": "KA, SA, TA SYLLABLES",
+        "japanese": "カ・サ・タ・ナ行（子音基礎）",
+        "difficulty": 2,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
+        "words": ["カメラ (Camera)", "タクシー (Taxi)", "トマト (Tomato)", "バナナ (Banana)", "ホテル (Hotel)"],
+        "summary": "Expand into core consonant lines across 3 sets (9 words). Decoys include phonetic distractors to sharpen reading speed.",
+        "kana_preview": ["カ", "サ", "タ", "ナ", "ラ", "マ"]
+    },
+    3: {
+        "title": "SHI/TSU & SO/N TRAPS",
+        "japanese": "類似文字識別（シ/ツ・ソ/ン・ノ/メ）",
+        "difficulty": 3,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
+        "words": ["シャツ (Shirt)", "ツナ (Tuna)", "ソース (Sauce)", "パン (Bread)", "メロン (Melon)"],
+        "summary": "Conquer the famous Katakana lookalikes (シ vs ツ, ソ vs ン, ノ vs メ) across 3 sets (9 words) with targeted trap cards.",
+        "kana_preview": ["シ", "ツ", "ソ", "ン", "ノ", "メ"]
+    },
+    4: {
+        "title": "VOICED CONSONANTS (DAKUTEN)",
+        "japanese": "濁音（ガ・ザ・ダ・バ・ゴ）",
+        "difficulty": 4,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
+        "words": ["ガス (Gas)", "ゼロ (Zero)", "ビデオ (Video)", "ドラム (Drum)", "ギター (Guitar)"],
+        "summary": "Identify voiced Dakuten marks across 3 sets (9 words). Decoy cards feature unvoiced counterparts to test mark awareness.",
+        "kana_preview": ["ガ", "ギ", "ザ", "ダ", "バ", "ゴ"]
+    },
+    5: {
+        "title": "HANDAKUTEN & CHOONPU",
+        "japanese": "半濁音・長音「ー」（パ行・伸ばす音）",
+        "difficulty": 5,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
+        "words": ["パン (Bread)", "ピアノ (Piano)", "コーヒー (Coffee)", "ケーキ (Cake)", "チーズ (Cheese)"],
+        "summary": "Practice P-sounds (パ行) and the essential long vowel dash (ー) across 3 sets (9 words) in common cafe and sport words.",
+        "kana_preview": ["パ", "ピ", "プ", "ー", "コ", "ケ"]
+    },
+    6: {
+        "title": "SOKUON DOUBLE STOPS",
+        "japanese": "促音「ッ」・詰まる音",
+        "difficulty": 6,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
+        "words": ["コップ (Cup)", "ベッド (Bed)", "サッカー (Soccer)", "ロケット (Rocket)", "チケット (Ticket)"],
+        "summary": "Master the small 'ッ' glottal double consonant across 3 sets (9 words). Decoys pit full 'ツ' against small 'ッ'.",
+        "kana_preview": ["ッ", "ツ", "コ", "プ", "ベ", "ド"]
+    },
+    7: {
+        "title": "FOREIGN SOUNDS & YOON",
+        "japanese": "外来音・拗音（ファ/フィ/シェ/チェ/ティ）",
+        "difficulty": 7,
+        "sets": 3,
+        "total_words": 9,
+        "goal": 3,
+        "words": ["カフェ (Cafe)", "パーティー (Party)", "チョコ (Chocolate)", "フィルム (Film)", "シェフ (Chef)"],
+        "summary": "Specialized modern foreign phonemes (ファ, フィ, ティ, ディ, シェ, チェ) across 3 sets (9 words) for international loanwords.",
+        "kana_preview": ["フ", "ェ", "ィ", "テ", "シ", "チ"]
+    },
+    8: {
+        "title": "GRAND MASTER GAUNTLET",
+        "japanese": "免許皆伝・最終試練",
+        "difficulty": 8,
+        "sets": 3,
+        "total_words": 10,
+        "goal": 4,
+        "words": ["ハンバーガー (Hamburger)", "レストラン (Restaurant)", "パスポート (Passport)", "エレベーター (Elevator)", "テーマパーク (Theme Park)"],
+        "summary": "The ultimate test of Katakana fluency across 3 sets (10 words). Complex multi-syllable loanwords with all modifier traps.",
+        "kana_preview": ["ハ", "ン", "バ", "ー", "ガ", "レ"]
+    }
+}
+
 
 # ==============================================================================
 # HIRAGANA SYLLABARY DEFINITIONS (46 Core + 20 Dakuten + 5 Handakuten = 71 Total)

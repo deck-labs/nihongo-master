@@ -12,6 +12,7 @@ var words_completed: int = 0
 var total_words_solved: int = 0
 var total_attempts: int = 0
 
+var current_mode: String = "hiragana"
 var current_word: Dictionary = {}
 var used_words: Array = []
 var hand_cards: Array[Card3D] = []
@@ -35,6 +36,7 @@ var last_moving_pos: Vector2 = Vector2.ZERO
 @onready var confetti_particles: CPUParticles3D = $ConfettiParticles
 
 # UI References
+@onready var top_title_label: Label = $HUD/TopBar/Margin/HBox/Title
 @onready var top_set_label: Label = $HUD/TopBar/Margin/HBox/VBoxCenter/SetTitle
 @onready var top_progress_label: Label = $HUD/TopBar/Margin/HBox/WordsCount
 @onready var pips_container: HBoxContainer = $HUD/TopBar/Margin/HBox/VBoxCenter/Pips
@@ -70,7 +72,9 @@ func _ready():
 	_hide_mouse()
 	mouse_startup_grace_timer = 1.0
 	_init_card_instances()
-	_parse_cmdline_stage()
+	_parse_cmdline_args()
+	if top_title_label:
+		top_title_label.text = "KATAKANA CARDS" if current_mode == "katakana" else "HIRAGANA CARDS"
 	start_stage(current_stage_index)
 
 func _hide_mouse():
@@ -85,18 +89,24 @@ func _show_mouse(pos: Vector2):
 	last_moving_pos = pos
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
-func _parse_cmdline_stage():
+func _parse_cmdline_args():
+	var env_mode = OS.get_environment("NIHONGO_CARD_MODE").to_lower()
+	if env_mode in ["hiragana", "katakana"]:
+		current_mode = env_mode
+
 	var env_st = OS.get_environment("NIHONGO_CARD_STAGE")
 	if env_st != "" and env_st.is_valid_int():
 		current_stage_index = clampi(env_st.to_int(), 1, MAX_STAGES)
-		return
 
 	var args = OS.get_cmdline_args()
 	for i in range(args.size()):
-		if args[i] == "--stage" and i + 1 < args.size():
+		if args[i] == "--mode" and i + 1 < args.size():
+			var m = args[i + 1].to_lower()
+			if m in ["hiragana", "katakana"]:
+				current_mode = m
+		elif args[i] == "--stage" and i + 1 < args.size():
 			if args[i + 1].is_valid_int():
 				current_stage_index = clampi(args[i + 1].to_int(), 1, MAX_STAGES)
-				return
 
 func _init_card_instances():
 	for i in range(8):
@@ -123,7 +133,7 @@ func start_set(set_idx: int):
 	next_round()
 
 func next_round():
-	var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index)
+	var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index, current_mode)
 	var pool = []
 	for w in set_cfg["words"]:
 		if not used_words.has(w["romaji"]):
@@ -148,36 +158,26 @@ func _deal_8_card_hand():
 	selected_cards.clear()
 	var target_chars: Array = current_word["kana"].duplicate()
 	var needed = target_chars.size()
-	var decoy_count = 8 - needed
+	var decoy_count = max(0, 8 - needed)
 
-	var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index)
+	var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index, current_mode)
 	var decoy_mode = set_cfg.get("decoy_mode", "random")
 
 	var decoys: Array = []
+	var conf_map = WordsData.get_confusable_map(current_mode)
 
 	# 1. Intelligent decoy selection based on set decoy mode & confusables
 	if decoy_mode in ["similar", "lookalike", "dakuten", "handakuten", "sokuon", "advanced", "master"]:
 		for c in target_chars:
-			if WordsData.CONFUSABLE_MAP.has(c):
-				var conf = WordsData.CONFUSABLE_MAP[c]
+			if conf_map.has(c):
+				var conf = conf_map[c]
 				if not target_chars.has(conf) and not decoys.has(conf):
 					decoys.append(conf)
 					if decoys.size() >= decoy_count:
 						break
 
 	# 2. Complete remaining decoy quota from stage-appropriate pool
-	var pool: Array = []
-	if current_stage_index >= 7 or decoy_mode == "master" or decoy_mode == "advanced":
-		pool = WordsData.SOKUON_POOL + WordsData.HANDAKUTEN_POOL + WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
-	elif current_stage_index == 6 or decoy_mode == "sokuon":
-		pool = WordsData.SOKUON_POOL + WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
-	elif current_stage_index == 5 or decoy_mode == "handakuten":
-		pool = WordsData.HANDAKUTEN_POOL + WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
-	elif current_stage_index == 4 or decoy_mode == "dakuten":
-		pool = WordsData.DAKUTEN_POOL + WordsData.GOJUON_POOL
-	else:
-		pool = WordsData.GOJUON_POOL.duplicate()
-
+	var pool: Array = WordsData.get_pools(current_stage_index, decoy_mode, current_mode)
 	pool.shuffle()
 	for c in pool:
 		if decoys.size() >= decoy_count:
@@ -469,7 +469,7 @@ func _process(delta: float):
 
 	if current_state == State.CORRECT:
 		if state_timer >= 1.2:
-			var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index)
+			var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index, current_mode)
 			var set_goal = set_cfg.get("goal", 3)
 			if words_completed >= set_goal:
 				if current_set_index < WordsData.SETS_PER_STAGE:
@@ -477,7 +477,7 @@ func _process(delta: float):
 					state_timer = 0.0
 					_hide_overlays()
 					set_clear_title.text = "SET %d/3 COMPLETE!" % current_set_index
-					var next_set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index + 1)
+					var next_set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index + 1, current_mode)
 					set_clear_sub.text = "Next: %s\nPress (A) / Space to Continue" % next_set_cfg.get("name", "Next Set")
 					modal_set_clear.visible = true
 					if sfx_fanfare: sfx_fanfare.play()
@@ -487,8 +487,9 @@ func _process(delta: float):
 					_hide_overlays()
 					var acc = (float(total_words_solved) / max(1, total_attempts)) * 100.0
 					stage_clear_stats.text = "Words Solved: %d  |  Total Attempts: %d  |  Accuracy: %.1f%%" % [total_words_solved, total_attempts, acc]
+					var mode_name = "KATAKANA" if current_mode == "katakana" else "HIRAGANA"
 					if current_stage_index >= MAX_STAGES:
-						stage_clear_title.text = "GRAND MASTER CHAMPION!"
+						stage_clear_title.text = "GRAND MASTER %s CHAMPION!" % mode_name
 						stage_clear_prompt.text = "All 8 Stages Cleared! Press (A) / Enter to Play Again • (B) to Exit"
 					else:
 						stage_clear_title.text = "STAGE %02d CLEAR!" % current_stage_index
@@ -512,10 +513,12 @@ func _process(delta: float):
 func _update_hud():
 	if current_word.is_empty():
 		return
-	var stage_cfg = WordsData.STAGE_DATA.get(current_stage_index, WordsData.STAGE_DATA[1])
-	var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index)
+	var stage_data_map = WordsData.KATAKANA_STAGE_DATA if current_mode == "katakana" else WordsData.STAGE_DATA
+	var stage_cfg = stage_data_map.get(current_stage_index, stage_data_map[1])
+	var set_cfg = WordsData.get_stage_set_data(current_stage_index, current_set_index, current_mode)
 	var set_goal = set_cfg.get("goal", 3)
-	top_set_label.text = "STAGE %02d/%02d: %s   [SET %d/3: %s]" % [current_stage_index, MAX_STAGES, stage_cfg["name"].to_upper(), current_set_index, set_cfg["name"].to_upper()]
+	var mode_label = "KATAKANA" if current_mode == "katakana" else "HIRAGANA"
+	top_set_label.text = "%s - STAGE %02d/%02d: %s   [SET %d/3: %s]" % [mode_label, current_stage_index, MAX_STAGES, stage_cfg["name"].to_upper(), current_set_index, set_cfg["name"].to_upper()]
 	top_progress_label.text = "SET WORDS: %d/%d" % [words_completed, set_goal]
 	
 	romaji_label.text = "  ".join(current_word["romaji"].split())

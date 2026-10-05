@@ -1,11 +1,11 @@
 ; Engine configuration file.
-; Godot 4.7 Hiragana Cards Project
+; Godot 4.7 Nihongo Cards (3D Hiragana & Katakana)
 
 config_version=5
 
 [application]
 
-config/name="Hiragana Cards"
+config/name="Nihongo Cards (3D Hiragana & Katakana)"
 run/main_scene="res://scenes/card_table.tscn"
 config/features=PackedStringArray("4.7", "Compatibility")
 config/icon="res://assets/fonts/NotoSansCJK-Bold.ttc"

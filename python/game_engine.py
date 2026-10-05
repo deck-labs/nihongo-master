@@ -18,7 +18,7 @@ from game_config import (
     STAGE_KANA, TRAFFIC_COLORS, COLOR_BG, COLOR_BEZEL,
     compute_aspect_ratio, get_asset_path, get_virtual_dimensions,
     get_stage_kana, get_gauntlet_kana, ALL_71_HIRAGANA, ALL_71_KATAKANA,
-    CARD_TOTAL_STAGES
+    CARD_TOTAL_STAGES, KATAKANA_CARD_TOTAL_STAGES
 )
 from audio_system import AudioSystem
 from road_renderer import RoadRenderer
@@ -226,7 +226,7 @@ class GameEngine:
             print(f"Note: Could not save unlocks: {e}")
 
     def toggle_game_mode(self):
-        modes = ["hiragana", "katakana", "cards"]
+        modes = ["hiragana", "katakana", "cards", "katakana_cards"]
         cur_idx = modes.index(self.game_mode) if self.game_mode in modes else 0
         self.game_mode = modes[(cur_idx + 1) % len(modes)]
         self.audio.play_match()
@@ -234,6 +234,14 @@ class GameEngine:
             init_k = "ア" if self.game_mode == "katakana" else "あ"
             self.player.update_kana(init_k)
             self.road.rebuild_stage11_gantries(self.game_mode)
+        elif self.game_mode in ("cards", "hiragana_cards"):
+            if self.selected_stage > CARD_TOTAL_STAGES:
+                self.selected_stage = 1
+                self.current_stage = 1
+        elif self.game_mode == "katakana_cards":
+            if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
+                self.selected_stage = 1
+                self.current_stage = 1
         if self.selected_stage == 11 and not self.secret_stage_unlocked:
             self.selected_stage = 1
             self.current_stage = 1
@@ -338,7 +346,7 @@ class GameEngine:
         self.player.wobble_timer = 0.0
 
     def start_game_from_title(self):
-        if self.game_mode == "cards":
+        if self.game_mode in ("cards", "hiragana_cards", "katakana_cards"):
             self.launch_card_game(self.selected_stage)
             return
         self.is_title_screen = False
@@ -353,9 +361,11 @@ class GameEngine:
         self.audio.start_engine()
 
     def launch_card_game(self, start_stage: int = 1):
-        """Seamlessly launch Godot 3D Hiragana Card Game."""
+        """Seamlessly launch Godot 3D Card Game (Hiragana or Katakana)."""
         self.audio.stop_title_music(fade_ms=300)
         self.audio.play_fanfare()
+
+        mode_arg = "katakana" if self.game_mode == "katakana_cards" else "hiragana"
 
         candidates = [
             os.path.join(os.environ.get("APPDIR", ""), "usr/bin/hiragana_cards"),
@@ -369,23 +379,24 @@ class GameEngine:
             if cand == "godot":
                 proj_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "godot_cards"))
                 if os.path.isdir(proj_path):
-                    cmd = ["godot", "--fullscreen", "--path", proj_path, "--stage", str(start_stage)]
+                    cmd = ["godot", "--fullscreen", "--path", proj_path, "--stage", str(start_stage), "--mode", mode_arg]
                     break
             elif os.path.isfile(cand) and os.access(cand, os.X_OK):
-                cmd = [cand, "--fullscreen", "--stage", str(start_stage)]
+                cmd = [cand, "--fullscreen", "--stage", str(start_stage), "--mode", mode_arg]
                 break
 
         if not cmd:
-            print("[NihongoMaster] Error: Godot Hiragana Cards binary not found.")
+            print("[NihongoMaster] Error: Godot Cards binary not found.")
             self.return_to_title()
             self.audio.play_title_music()
             return
 
-        print(f"[NihongoMaster] Launching Godot 3D Hiragana Cards: {cmd} (Stage {start_stage})")
+        print(f"[NihongoMaster] Launching Godot 3D Cards ({mode_arg}): {cmd} (Stage {start_stage})")
         try:
             import subprocess
             env = os.environ.copy()
             env["NIHONGO_CARD_STAGE"] = str(start_stage)
+            env["NIHONGO_CARD_MODE"] = mode_arg
             env["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
             subprocess.run(cmd, env=env)
         except Exception as e:
@@ -424,8 +435,10 @@ class GameEngine:
         self.stage_clear_timer = 0.0
         if self.game_mode == "katakana":
             self.title_menu_index = 1
-        elif self.game_mode == "cards":
+        elif self.game_mode in ("cards", "hiragana_cards"):
             self.title_menu_index = 2
+        elif self.game_mode == "katakana_cards":
+            self.title_menu_index = 3
         else:
             self.title_menu_index = 0
         self.audio.stop_all()
@@ -564,8 +577,13 @@ class GameEngine:
             self.audio.play_pause()
         elif self.is_title_screen:
             if self.is_stage_select:
-                if self.game_mode == "cards":
+                if self.game_mode in ("cards", "hiragana_cards"):
                     max_st = CARD_TOTAL_STAGES
+                    self.selected_stage = (self.selected_stage - 2 + max_st) % max_st + 1
+                    self.current_stage = self.selected_stage
+                    self.audio.play_pause()
+                elif self.game_mode == "katakana_cards":
+                    max_st = KATAKANA_CARD_TOTAL_STAGES
                     self.selected_stage = (self.selected_stage - 2 + max_st) % max_st + 1
                     self.current_stage = self.selected_stage
                     self.audio.play_pause()
@@ -576,7 +594,7 @@ class GameEngine:
                     self.road.current_stage = self.selected_stage
                     self.audio.play_pause()
             else:
-                self.title_menu_index = (self.title_menu_index - 1 + 6) % 6
+                self.title_menu_index = (self.title_menu_index - 1 + 7) % 7
                 if self.title_menu_index == 0:
                     self.game_mode = "hiragana"
                 elif self.title_menu_index == 1:
@@ -584,6 +602,10 @@ class GameEngine:
                 elif self.title_menu_index == 2:
                     self.game_mode = "cards"
                     if self.selected_stage > CARD_TOTAL_STAGES:
+                        self.selected_stage = 1
+                elif self.title_menu_index == 3:
+                    self.game_mode = "katakana_cards"
+                    if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
                         self.selected_stage = 1
                 self.audio.play_pause()
 
@@ -596,8 +618,13 @@ class GameEngine:
             self.audio.play_pause()
         elif self.is_title_screen:
             if self.is_stage_select:
-                if self.game_mode == "cards":
+                if self.game_mode in ("cards", "hiragana_cards"):
                     max_st = CARD_TOTAL_STAGES
+                    self.selected_stage = (self.selected_stage % max_st) + 1
+                    self.current_stage = self.selected_stage
+                    self.audio.play_pause()
+                elif self.game_mode == "katakana_cards":
+                    max_st = KATAKANA_CARD_TOTAL_STAGES
                     self.selected_stage = (self.selected_stage % max_st) + 1
                     self.current_stage = self.selected_stage
                     self.audio.play_pause()
@@ -608,7 +635,7 @@ class GameEngine:
                     self.road.current_stage = self.selected_stage
                     self.audio.play_pause()
             else:
-                self.title_menu_index = (self.title_menu_index + 1) % 6
+                self.title_menu_index = (self.title_menu_index + 1) % 7
                 if self.title_menu_index == 0:
                     self.game_mode = "hiragana"
                 elif self.title_menu_index == 1:
@@ -616,6 +643,10 @@ class GameEngine:
                 elif self.title_menu_index == 2:
                     self.game_mode = "cards"
                     if self.selected_stage > CARD_TOTAL_STAGES:
+                        self.selected_stage = 1
+                elif self.title_menu_index == 3:
+                    self.game_mode = "katakana_cards"
+                    if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
                         self.selected_stage = 1
                 self.audio.play_pause()
 
@@ -629,8 +660,13 @@ class GameEngine:
                 self.adjust_volume(-0.05)
         elif self.is_title_screen:
             if self.is_stage_select:
-                if self.game_mode == "cards":
+                if self.game_mode in ("cards", "hiragana_cards"):
                     max_st = CARD_TOTAL_STAGES
+                    self.selected_stage = (self.selected_stage - 2 + max_st) % max_st + 1
+                    self.current_stage = self.selected_stage
+                    self.audio.play_pause()
+                elif self.game_mode == "katakana_cards":
+                    max_st = KATAKANA_CARD_TOTAL_STAGES
                     self.selected_stage = (self.selected_stage - 2 + max_st) % max_st + 1
                     self.current_stage = self.selected_stage
                     self.audio.play_pause()
@@ -641,8 +677,8 @@ class GameEngine:
                     self.road.current_stage = self.selected_stage
                     self.audio.play_pause()
             else:
-                if self.title_menu_index in (0, 1, 2):
-                    self.title_menu_index = (self.title_menu_index - 1 + 3) % 3
+                if self.title_menu_index in (0, 1, 2, 3):
+                    self.title_menu_index = (self.title_menu_index - 1 + 4) % 4
                     if self.title_menu_index == 0:
                         self.game_mode = "hiragana"
                     elif self.title_menu_index == 1:
@@ -650,6 +686,10 @@ class GameEngine:
                     elif self.title_menu_index == 2:
                         self.game_mode = "cards"
                         if self.selected_stage > CARD_TOTAL_STAGES:
+                            self.selected_stage = 1
+                    elif self.title_menu_index == 3:
+                        self.game_mode = "katakana_cards"
+                        if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
                             self.selected_stage = 1
                     self.audio.play_pause()
 
@@ -663,8 +703,13 @@ class GameEngine:
                 self.adjust_volume(0.05)
         elif self.is_title_screen:
             if self.is_stage_select:
-                if self.game_mode == "cards":
+                if self.game_mode in ("cards", "hiragana_cards"):
                     max_st = CARD_TOTAL_STAGES
+                    self.selected_stage = (self.selected_stage % max_st) + 1
+                    self.current_stage = self.selected_stage
+                    self.audio.play_pause()
+                elif self.game_mode == "katakana_cards":
+                    max_st = KATAKANA_CARD_TOTAL_STAGES
                     self.selected_stage = (self.selected_stage % max_st) + 1
                     self.current_stage = self.selected_stage
                     self.audio.play_pause()
@@ -675,8 +720,8 @@ class GameEngine:
                     self.road.current_stage = self.selected_stage
                     self.audio.play_pause()
             else:
-                if self.title_menu_index in (0, 1, 2):
-                    self.title_menu_index = (self.title_menu_index + 1) % 3
+                if self.title_menu_index in (0, 1, 2, 3):
+                    self.title_menu_index = (self.title_menu_index + 1) % 4
                     if self.title_menu_index == 0:
                         self.game_mode = "hiragana"
                     elif self.title_menu_index == 1:
@@ -684,6 +729,10 @@ class GameEngine:
                     elif self.title_menu_index == 2:
                         self.game_mode = "cards"
                         if self.selected_stage > CARD_TOTAL_STAGES:
+                            self.selected_stage = 1
+                    elif self.title_menu_index == 3:
+                        self.game_mode = "katakana_cards"
+                        if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
                             self.selected_stage = 1
                     self.audio.play_pause()
 
@@ -829,10 +878,16 @@ class GameEngine:
                     self.is_stage_select = True
                     self.audio.play_pause()
                 elif self.title_menu_index == 3:
-                    self.toggle_volume_menu()
+                    self.game_mode = "katakana_cards"
+                    if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
+                        self.selected_stage = 1
+                    self.is_stage_select = True
+                    self.audio.play_pause()
                 elif self.title_menu_index == 4:
-                    self.open_update_dialog()
+                    self.toggle_volume_menu()
                 elif self.title_menu_index == 5:
+                    self.open_update_dialog()
+                elif self.title_menu_index == 6:
                     self.quit_game()
         elif self.is_stage_clear:
             if self.current_stage == 11:
@@ -977,8 +1032,8 @@ class GameEngine:
                                 self.menu_left()
                             elif pygame.Rect(cx + 310, 758, 220, 56).collidepoint(mx, my):
                                 self.menu_right()
-                        elif self.game_mode == "cards":
-                            n_stages = CARD_TOTAL_STAGES
+                        elif self.game_mode in ("cards", "hiragana_cards", "katakana_cards"):
+                            n_stages = KATAKANA_CARD_TOTAL_STAGES if self.game_mode == "katakana_cards" else CARD_TOTAL_STAGES
                             pill_w, pill_h, gap = 110, 46, 14
                             total_w = n_stages * pill_w + (n_stages - 1) * gap
                             start_x = cx - total_w // 2
@@ -1002,10 +1057,10 @@ class GameEngine:
                             self.menu_back()
                     else:
                         # Title screen mouse clicks
-                        # 1. 3 Game cards at top
+                        # 1. 4 Game cards at top
                         cards_y = int(self.virtual_height * 0.14) + 60 + 46
-                        card_w, card_h = 440, 114
-                        centers_x = [cx - 480, cx, cx + 480]
+                        card_w, card_h = 400, 114
+                        centers_x = [cx - 636, cx - 212, cx + 212, cx + 636]
                         for i, c_x in enumerate(centers_x):
                             if pygame.Rect(c_x - card_w // 2, cards_y, card_w, card_h).collidepoint(mx, my):
                                 self.title_menu_index = i
@@ -1017,16 +1072,20 @@ class GameEngine:
                                     self.game_mode = "cards"
                                     if self.selected_stage > CARD_TOTAL_STAGES:
                                         self.selected_stage = 1
+                                elif i == 3:
+                                    self.game_mode = "katakana_cards"
+                                    if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
+                                        self.selected_stage = 1
                                 self.is_stage_select = True
                                 self.audio.play_pause()
 
-                        # 2. Direct 6 menu items below divider
+                        # 2. Direct 7 menu items below divider
                         div_y = cards_y + card_h + 30
-                        menu_y_start = div_y + 54
-                        spacing = 68
-                        for idx in range(6):
+                        menu_y_start = div_y + 50
+                        spacing = 58
+                        for idx in range(7):
                             y_pos = menu_y_start + idx * spacing
-                            if (y_pos - 28) <= my <= (y_pos + 28) and (cx - 360) <= mx <= (cx + 360):
+                            if (y_pos - 24) <= my <= (y_pos + 24) and (cx - 360) <= mx <= (cx + 360):
                                 self.title_menu_index = idx
                                 self.menu_confirm()
                 elif self.is_volume_menu_open:

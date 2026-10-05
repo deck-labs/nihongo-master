@@ -1,11 +1,11 @@
 {
-  "version": "1.3.4",
-  "tag_name": "v1.3.4",
-  "name": "Nihongo Master v1.3.4 - Update Dialog Button Boundary Fix & Clean Car Hoods",
+  "version": "1.4.0",
+  "tag_name": "v1.4.0",
+  "name": "Nihongo Master v1.4.0 - 3D Katakana Cards",
   "release_date": "2026-10-05",
   "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.3.4/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.3.4/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.3.4: Resolved update dialog button text overflow with expanded button padding and clean button typography. Removed cosmetic hood badge overlays on rival traffic cars in Hiragana Fighter, restoring authentic clean vehicle sprites while maintaining rival AI behaviors."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.4.0/Nihongo_Master-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.4.0/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.4.0: Added complete 3D Katakana Cards game mode powered by Godot 4 and Blender 3D! Includes authentic 8-stage, 3-set progressive Katakana vocabulary curriculum (~137 loanwords), targeted decoy kana pools (Gojūon, Dakuten, Handakuten, Chōonpu ー, Sokuon ッ, and confusable pairs like シ/ツ and ソ/ン), updated 4-game Title Screen, and dedicated Stage Select screen."
 }
 

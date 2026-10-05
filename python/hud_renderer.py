@@ -10,7 +10,7 @@ from game_config import (
     SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_STAGES, SECRET_STAGE, STAGE_NAMES, STAGE_ENV_NOTES,
     COLOR_PANEL_BG, COLOR_PANEL_BORDER, COLOR_GOLD, COLOR_CYAN, COLOR_WHITE,
     GAME_VERSION, TOTAL_GAUNTLET_KANA, get_stage_kana, get_asset_path,
-    CARD_TOTAL_STAGES, CARD_STAGE_INFO
+    CARD_TOTAL_STAGES, CARD_STAGE_INFO, KATAKANA_CARD_TOTAL_STAGES, KATAKANA_CARD_STAGE_INFO
 )
 
 class HudRenderer:
@@ -390,7 +390,7 @@ class HudRenderer:
         t_k = self.font_kana_title.render(sub_text, True, COLOR_CYAN)
         surface.blit(t_k, t_k.get_rect(center=(cx, sub_y)))
 
-        # 2. Visibly Display All 3 Selectable Games Side-by-Side
+        # 2. Visibly Display All 4 Selectable Games Side-by-Side
         games_data = [
             {
                 "id": "hiragana",
@@ -412,22 +412,30 @@ class HudRenderer:
                 "id": "cards",
                 "title": "3D HIRAGANA CARDS",
                 "tag": "3D GODOT & BLENDER",
-                "kana": "カード バトル (STAGE 1)",
+                "kana": "ひらがな カード",
                 "menu_idx": 2,
                 "col": COLOR_GOLD
+            },
+            {
+                "id": "katakana_cards",
+                "title": "3D KATAKANA CARDS",
+                "tag": "3D GODOT & BLENDER",
+                "kana": "カタカナ カード",
+                "menu_idx": 3,
+                "col": (255, 110, 160)
             }
         ]
 
         cards_y = sub_y + 46
-        card_w, card_h = 440, 114
-        centers_x = [cx - 480, cx, cx + 480]
+        card_w, card_h = 400, 114
+        centers_x = [cx - 636, cx - 212, cx + 212, cx + 636]
 
         is_blink = (int(time.time() * 1000) // 200) % 2 == 0
 
         for i, g in enumerate(games_data):
             c_center_x = centers_x[i]
             c_rect = pygame.Rect(c_center_x - card_w // 2, cards_y, card_w, card_h)
-            is_active_game = (game_mode == g["id"])
+            is_active_game = (game_mode == g["id"] or (g["id"] == "cards" and game_mode == "hiragana_cards"))
             is_focused = (menu_index == g["menu_idx"])
 
             # Card background
@@ -468,17 +476,18 @@ class HudRenderer:
         div_y = cards_y + card_h + 30
         pygame.draw.line(surface, (0, 140, 220), (cx - 720, div_y), (cx + 720, div_y), 2)
         
-        # 3. Direct Menu Items (6 visible options)
-        menu_y_start = div_y + 54
-        spacing = 68
+        # 3. Direct Menu Items (7 visible options)
+        menu_y_start = div_y + 50
+        spacing = 58
 
         menu_items = [
             ("HIRAGANA ARCADE", 0),
             ("KATAKANA ARCADE", 1),
             ("3D HIRAGANA CARDS", 2),
-            ("OPTIONS", 3),
-            ("CHECK FOR UPDATES", 4),
-            ("QUIT", 5)
+            ("3D KATAKANA CARDS", 3),
+            ("OPTIONS", 4),
+            ("CHECK FOR UPDATES", 5),
+            ("QUIT", 6)
         ]
 
         for label, idx in menu_items:
@@ -523,9 +532,13 @@ class HudRenderer:
             mode_badge = "KATAKANA ARCADE"
             mode_sub = "TURBO ROAD RACER // カタカナ レーサー"
             theme_col = (255, 175, 45)
+        elif game_mode == "katakana_cards":
+            mode_badge = "3D KATAKANA CARDS"
+            mode_sub = "3D GODOT & BLENDER BATTLE // カタカナ カード"
+            theme_col = (255, 110, 160)
         else:
             mode_badge = "3D HIRAGANA CARDS"
-            mode_sub = "3D GODOT & BLENDER BATTLE // カード バトル"
+            mode_sub = "3D GODOT & BLENDER BATTLE // ひらがな カード"
             theme_col = COLOR_GOLD
 
         # Current Version Running Indicator (Upper-Left)
@@ -683,8 +696,11 @@ class HudRenderer:
             surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
 
         else:
-            # 3D Hiragana Cards: 8-Stage Ribbon
-            n_stages = CARD_TOTAL_STAGES
+            # 3D Cards Mode (Hiragana or Katakana): 8-Stage Ribbon
+            is_katakana_card = (game_mode == "katakana_cards")
+            n_stages = KATAKANA_CARD_TOTAL_STAGES if is_katakana_card else CARD_TOTAL_STAGES
+            card_info_dict = KATAKANA_CARD_STAGE_INFO if is_katakana_card else CARD_STAGE_INFO
+            card_theme_col = (255, 110, 160) if is_katakana_card else COLOR_GOLD
             pill_w = 110
             pill_h = 46
             gap = 14
@@ -698,11 +714,12 @@ class HudRenderer:
                 is_cur = (st == selected_stage)
 
                 if is_cur:
-                    pygame.draw.rect(surface, (36, 42, 28), p_rect, border_radius=8)
-                    b_col = COLOR_WHITE if is_blink else COLOR_GOLD
+                    bg_col = (46, 28, 38) if is_katakana_card else (36, 42, 28)
+                    pygame.draw.rect(surface, bg_col, p_rect, border_radius=8)
+                    b_col = COLOR_WHITE if is_blink else card_theme_col
                     pygame.draw.rect(surface, b_col, p_rect, 3, border_radius=8)
                     lbl = f"{st:02d}"
-                    txt_p = self.font_sub.render(lbl, True, COLOR_GOLD)
+                    txt_p = self.font_sub.render(lbl, True, card_theme_col)
                 else:
                     pygame.draw.rect(surface, (14, 20, 32), p_rect, border_radius=8)
                     pygame.draw.rect(surface, (70, 95, 130), p_rect, 2, border_radius=8)
@@ -711,7 +728,7 @@ class HudRenderer:
 
                 surface.blit(txt_p, txt_p.get_rect(center=p_rect.center))
 
-            # 3D Hiragana Cards Showcase Panel
+            # 3D Cards Showcase Panel
             card_w = 1180
             card_h = 440
             card_x = cx - card_w // 2
@@ -719,14 +736,14 @@ class HudRenderer:
             c_rect = pygame.Rect(card_x, card_y, card_w, card_h)
 
             pygame.draw.rect(surface, (12, 18, 30), c_rect, border_radius=14)
-            pygame.draw.rect(surface, COLOR_GOLD, c_rect, 3, border_radius=14)
+            pygame.draw.rect(surface, card_theme_col, c_rect, 3, border_radius=14)
 
             # Retrieve stage configuration
-            info = CARD_STAGE_INFO.get(selected_stage, CARD_STAGE_INFO[1])
+            info = card_info_dict.get(selected_stage, card_info_dict[1])
 
             # Stage Name & Subtitle
             st_title = f"STAGE {selected_stage:02d} : {info['title']}"
-            txt_st_title = self.font_menu.render(st_title, True, COLOR_GOLD)
+            txt_st_title = self.font_menu.render(st_title, True, card_theme_col)
             surface.blit(txt_st_title, txt_st_title.get_rect(center=(cx, card_y + 44)))
 
             stars = "★" * info["difficulty"] + "☆" * (8 - info["difficulty"])
@@ -746,7 +763,7 @@ class HudRenderer:
 
             # Target Kana preview
             k_preview = "      ".join(info["kana_preview"])
-            txt_k = self.font_kana_title.render(k_preview, True, COLOR_GOLD)
+            txt_k = self.font_kana_title.render(k_preview, True, card_theme_col)
             surface.blit(txt_k, txt_k.get_rect(center=(cx, card_y + 225)))
 
             # Sample words
@@ -781,7 +798,7 @@ class HudRenderer:
             # Start Battle Button (Highlighted)
             btn_start = pygame.Rect(cx - 280, btn_y, 560, 56)
             pygame.draw.rect(surface, (22, 38, 62), btn_start, border_radius=10)
-            st_bcol = COLOR_WHITE if is_blink else COLOR_GOLD
+            st_bcol = COLOR_WHITE if is_blink else card_theme_col
             pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
             txt_st = self.font_btn.render("► START BATTLE (A / ENTER) ◄", True, st_bcol)
             surface.blit(txt_st, txt_st.get_rect(center=btn_start.center))

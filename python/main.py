@@ -14,7 +14,7 @@ from game_config import (
 
 def main():
     parser = argparse.ArgumentParser(description="Nihongo Master (Python Edition)")
-    parser.add_argument("--mode", type=str, default=None, choices=["hiragana", "katakana", "cards"], help="Game mode (hiragana, katakana, or cards)")
+    parser.add_argument("--mode", type=str, default=None, choices=["hiragana", "katakana", "cards", "hiragana_cards", "katakana_cards"], help="Game mode (hiragana, katakana, cards, hiragana_cards, or katakana_cards)")
     parser.add_argument("--stage", type=int, default=None, help="Stage to start on (1-11)")
     parser.add_argument("--trackdist", type=float, default=0.0, help="Initial track distance")
     parser.add_argument("--title", action="store_true", help="Force title screen")
@@ -112,8 +112,18 @@ def main():
     )
     if args.mode:
         engine.game_mode = args.mode
-        if args.mode != "cards":
-            init_k = "ア" if args.mode == "katakana" else "あ"
+        if args.mode in ("cards", "hiragana_cards"):
+            engine.title_menu_index = 2
+        elif args.mode == "katakana_cards":
+            engine.title_menu_index = 3
+        elif args.mode == "katakana":
+            engine.title_menu_index = 1
+            init_k = "ア"
+            engine.player.update_kana(init_k)
+            engine.road.rebuild_stage11_gantries(args.mode)
+        else:
+            engine.title_menu_index = 0
+            init_k = "あ"
             engine.player.update_kana(init_k)
             engine.road.rebuild_stage11_gantries(args.mode)
 
