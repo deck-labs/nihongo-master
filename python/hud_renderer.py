@@ -1136,10 +1136,10 @@ class HudRenderer:
             t_sub = self.font_caption.render("No new updates found in the GitHub repository.", True, (180, 210, 240))
             surface.blit(t_sub, t_sub.get_rect(center=(cx, cy + 68)))
             
-            btn_ok = pygame.Rect(cx - 240, y + h - 70, 480, 50)
+            btn_ok = pygame.Rect(cx - 240, y + h - 72, 480, 52)
             pygame.draw.rect(surface, (18, 32, 52), btn_ok, border_radius=8)
             pygame.draw.rect(surface, (0, 180, 240), btn_ok, 2, border_radius=8)
-            t_btn = self.font_sub.render("OK  [ENTER] / [A] / [B]", True, COLOR_GOLD)
+            t_btn = self.font_sub_btn.render("OK  [ENTER / A / B]", True, COLOR_GOLD)
             surface.blit(t_btn, t_btn.get_rect(center=btn_ok.center))
             
         elif state == update_mgr.STATE_UPDATE_AVAILABLE:
@@ -1174,16 +1174,16 @@ class HudRenderer:
             surface.blit(t_safe, (c_box.left + 16, c_box.top + c_box.height - 28))
             
             # Dual interactive buttons: Install vs Cancel
-            btn_inst = pygame.Rect(cx - 390, y + h - 70, 360, 50)
+            btn_inst = pygame.Rect(cx - 420, y + h - 72, 400, 52)
             pygame.draw.rect(surface, (15, 55, 35), btn_inst, border_radius=8)
             pygame.draw.rect(surface, (60, 220, 120), btn_inst, 2, border_radius=8)
-            t_inst = self.font_sub.render("INSTALL NOW  [A] / [ENTER]", True, (90, 255, 160))
+            t_inst = self.font_sub_btn.render("INSTALL NOW  [A / ENTER]", True, (90, 255, 160))
             surface.blit(t_inst, t_inst.get_rect(center=btn_inst.center))
 
-            btn_canc = pygame.Rect(cx + 30, y + h - 70, 360, 50)
+            btn_canc = pygame.Rect(cx + 20, y + h - 72, 400, 52)
             pygame.draw.rect(surface, (45, 22, 22), btn_canc, border_radius=8)
             pygame.draw.rect(surface, (220, 75, 75), btn_canc, 2, border_radius=8)
-            t_canc = self.font_sub.render("CANCEL  [B] / [ESC]", True, (255, 170, 170))
+            t_canc = self.font_sub_btn.render("CANCEL  [B / ESC]", True, (255, 170, 170))
             surface.blit(t_canc, t_canc.get_rect(center=btn_canc.center))
             
         elif state == update_mgr.STATE_DOWNLOADING:
@@ -1225,16 +1225,16 @@ class HudRenderer:
             t_steam = self.font_caption.render("All Steam shortcuts, desktop launchers, and scripts will run this version.", True, (80, 230, 150))
             surface.blit(t_steam, t_steam.get_rect(center=(cx, cy + 76)))
             
-            btn_rst = pygame.Rect(cx - 390, y + h - 70, 360, 50)
+            btn_rst = pygame.Rect(cx - 420, y + h - 72, 400, 52)
             pygame.draw.rect(surface, (18, 48, 75), btn_rst, border_radius=8)
             pygame.draw.rect(surface, (0, 220, 255), btn_rst, 2, border_radius=8)
-            t_rst = self.font_sub.render("RESTART GAME  [A] / [ENTER]", True, COLOR_GOLD)
+            t_rst = self.font_sub_btn.render("RESTART GAME  [A / ENTER]", True, COLOR_GOLD)
             surface.blit(t_rst, t_rst.get_rect(center=btn_rst.center))
 
-            btn_cls = pygame.Rect(cx + 30, y + h - 70, 360, 50)
+            btn_cls = pygame.Rect(cx + 20, y + h - 72, 400, 52)
             pygame.draw.rect(surface, (30, 35, 48), btn_cls, border_radius=8)
             pygame.draw.rect(surface, (140, 170, 200), btn_cls, 2, border_radius=8)
-            t_cls = self.font_sub.render("CLOSE  [B] / [ESC]", True, (210, 230, 250))
+            t_cls = self.font_sub_btn.render("CLOSE  [B / ESC]", True, (210, 230, 250))
             surface.blit(t_cls, t_cls.get_rect(center=btn_cls.center))
             
         elif state == update_mgr.STATE_ERROR:
@@ -1253,8 +1253,8 @@ class HudRenderer:
             t_sub = self.font_caption.render("Please verify your internet connection and try again.", True, (180, 210, 240))
             surface.blit(t_sub, t_sub.get_rect(center=(cx, cy + 76)))
             
-            btn_err = pygame.Rect(cx - 240, y + h - 70, 480, 50)
+            btn_err = pygame.Rect(cx - 240, y + h - 72, 480, 52)
             pygame.draw.rect(surface, (45, 20, 25), btn_err, border_radius=8)
             pygame.draw.rect(surface, (240, 75, 75), btn_err, 2, border_radius=8)
-            t_err = self.font_sub.render("CLOSE  [ENTER] / [A] / [B]", True, (255, 190, 190))
+            t_err = self.font_sub_btn.render("CLOSE  [ENTER / A / B]", True, (255, 190, 190))
             surface.blit(t_err, t_err.get_rect(center=btn_err.center))

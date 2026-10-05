@@ -933,8 +933,8 @@ class GameEngine:
                     state = self.update_mgr.state
                     
                     if state == UpdateManager.STATE_UPDATE_AVAILABLE:
-                        btn_inst = pygame.Rect(cx - 390, modal_y + modal_h - 70, 360, 50)
-                        btn_canc = pygame.Rect(cx + 30, modal_y + modal_h - 70, 360, 50)
+                        btn_inst = pygame.Rect(cx - 420, modal_y + modal_h - 72, 400, 52)
+                        btn_canc = pygame.Rect(cx + 20, modal_y + modal_h - 72, 400, 52)
                         if btn_inst.collidepoint(mx, my):
                             self.menu_confirm()
                         elif btn_canc.collidepoint(mx, my):
@@ -942,8 +942,8 @@ class GameEngine:
                         elif not modal_rect.collidepoint(mx, my):
                             self.close_update_dialog()
                     elif state == UpdateManager.STATE_SUCCESS:
-                        btn_rst = pygame.Rect(cx - 390, modal_y + modal_h - 70, 360, 50)
-                        btn_cls = pygame.Rect(cx + 30, modal_y + modal_h - 70, 360, 50)
+                        btn_rst = pygame.Rect(cx - 420, modal_y + modal_h - 72, 400, 52)
+                        btn_cls = pygame.Rect(cx + 20, modal_y + modal_h - 72, 400, 52)
                         if btn_rst.collidepoint(mx, my):
                             self.menu_confirm()
                         elif btn_cls.collidepoint(mx, my):
@@ -951,7 +951,7 @@ class GameEngine:
                         elif not modal_rect.collidepoint(mx, my):
                             self.close_update_dialog()
                     elif state in (UpdateManager.STATE_UP_TO_DATE, UpdateManager.STATE_ERROR):
-                        btn_ok = pygame.Rect(cx - 240, modal_y + modal_h - 70, 480, 50)
+                        btn_ok = pygame.Rect(cx - 240, modal_y + modal_h - 72, 480, 52)
                         if btn_ok.collidepoint(mx, my):
                             self.close_update_dialog()
                         elif not modal_rect.collidepoint(mx, my):

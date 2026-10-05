@@ -264,23 +264,10 @@ class TrafficCar:
         self.near_missed = False
 
     def set_behavior(self, behavior: str):
-        """Assign a rival personality and stamp a small colour-coded badge on the hood."""
+        """Assign a rival personality."""
         self.behavior = behavior
         if behavior == "weaver":
             self.lane_change_speed = 0.5  # slow, readable swerve instead of a snap
-        badge_col = {"weaver": (0, 215, 255), "speedster": (255, 130, 25), "truck": (170, 175, 185)}.get(behavior)
-        if not badge_col:
-            return
-        cx, cy = int(self.WIDTH * 0.5), 24
-        pygame.draw.rect(self.sprite, (12, 16, 24), (cx - 18, cy - 8, 36, 16), border_radius=4)
-        pygame.draw.rect(self.sprite, badge_col, (cx - 18, cy - 8, 36, 16), 2, border_radius=4)
-        if behavior == "weaver":      # zig-zag
-            pygame.draw.lines(self.sprite, badge_col, False, [(cx - 11, cy + 3), (cx - 4, cy - 3), (cx + 3, cy + 3), (cx + 10, cy - 3)], 2)
-        elif behavior == "speedster":  # double chevron
-            for dx in (-6, 5):
-                pygame.draw.lines(self.sprite, badge_col, False, [(cx + dx - 4, cy + 4), (cx + dx, cy - 4), (cx + dx + 4, cy + 4)], 2)
-        else:                          # slow truck: heavy bar
-            pygame.draw.rect(self.sprite, badge_col, (cx - 11, cy - 3, 22, 6), border_radius=2)
 
     @classmethod
     def _get_texture(cls, color: str) -> pygame.Surface:
