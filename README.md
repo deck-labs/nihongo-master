@@ -1,18 +1,19 @@
 # Nihongo Master (日本語 マスター)
 
 [![Language](https://img.shields.io/badge/Language-Python%203.13-blue.svg)](https://www.python.org/)
-[![Engine](https://img.shields.io/badge/Engine-Pygame%202.6%20%2F%20SDL2-yellow.svg)](https://www.pygame.org/)
+[![Engine](https://img.shields.io/badge/Engine-Pygame%202.6%20%2F%20Godot%204.7-yellow.svg)](https://godotengine.org/)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%2F%20SteamOS%20(Steam%20Deck)-orange.svg)](https://store.steampowered.com/steamdeck)
+[![Version](https://img.shields.io/badge/Release-v1.5.0-blueviolet.svg)](https://github.com/deck-labs/nihongo-master/releases/tag/v1.5.0)
 [![Characters](https://img.shields.io/badge/Characters-142%20Total%20Kana%20(71%20Hiragana%20%2B%2071%20Katakana)-brightgreen.svg)](#-syllabus--stage-overview)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
-[![Download AppImage](https://img.shields.io/badge/Download-Latest%20AppImage-00C853?style=flat&logo=appimage&logoColor=white)](https://github.com/deck-labs/nihongo-master/releases/download/v1.0.0/Nihongo_Master-x86_64.AppImage)
+[![Download AppImage](https://img.shields.io/badge/Download-v1.5.0%20AppImage-00C853?style=flat&logo=appimage&logoColor=white)](https://github.com/deck-labs/nihongo-master/releases/download/v1.5.0/Nihongo_Master-v1.5.0-x86_64.AppImage)
 
-The definitive retro Japanese arcade learning experience merging **Hiragana Master** and **Katakana Master** into a single unified high-speed racer. Choose between Hiragana and Katakana right from the home screen, fine-tune audio and display options, and master Japanese reading at speeds up to 264 KM/H!
+The definitive retro Japanese arcade learning suite bundling three distinct game modes for both **Hiragana** and **Katakana** into a single cohesive experience for Steam Deck and Linux.
 
 <div align="center">
 
-<a href="https://github.com/deck-labs/nihongo-master/releases/download/v1.0.0/Nihongo_Master-x86_64.AppImage">
-  <img src="https://img.shields.io/badge/⬇%20DOWNLOAD%20APPIMAGE-v1.0.0%20(Linux%20%2F%20Steam%20Deck)-00C853?style=for-the-badge&logo=appimage&logoColor=white" height="46" alt="Download AppImage">
+<a href="https://github.com/deck-labs/nihongo-master/releases/download/v1.5.0/Nihongo_Master-v1.5.0-x86_64.AppImage">
+  <img src="https://img.shields.io/badge/⬇%20DOWNLOAD%20APPIMAGE-v1.5.0%20(Linux%20%2F%20Steam%20Deck)-00C853?style=for-the-badge&logo=appimage&logoColor=white" height="46" alt="Download AppImage">
 </a>
 
 <br>
@@ -22,27 +23,31 @@ The definitive retro Japanese arcade learning experience merging **Hiragana Mast
 
 ---
 
-## ✨ Key Features
+## ✨ 3 Games in 1 Bundle
 
-1. **Unified 2-in-1 Arcade Learning**:
-   - Seamlessly switch between **Hiragana Master** and **Katakana Master** on the home screen.
-   - Separate progress tracking and unlocks for both syllabaries (with auto-import from legacy save files!).
-2. **Complete 142-Character Japanese Kana Syllabus**:
-   - **71 Hiragana**: 46 Core + 20 Voiced Dakuten (゛) + 5 Semi-Voiced Handakuten (゜).
-   - **71 Katakana**: 46 Core + 20 Voiced Dakuten (゛) + 5 Semi-Voiced Handakuten (゜).
-3. **10 Distinct Stages + Secret Rainbow Skyway (Stage 11)**:
-   - Race through 36,000-meter courses from Cedar Forests to Tokyo Neon Metropolises and Mount Fuji.
-   - Conquer Stage 10 without damage to unlock the secret **Rainbow Skyway** 71-Kana Gauntlet!
-4. **Enhanced Vehicle Scale & Readability (+15% Scale)**:
-   - Orthographic 3D race cars with high-visibility 30pt Japanese font rendering on illuminated roof decal plates.
-   - Dual-exhaust turbo flames, dynamic suspension wobble, and authentic vehicle ground contact shadows.
-5. **Overdrive Speed Tuning (+10% Boost)**:
-   - High-speed thrills: 176 KM/H cruise speed and 264 KM/H turbo overdrive with agile steering responsiveness.
-6. **In-Game Audio & Display Options**:
-   - Independent Master, Engine, and SFX volume sliders (comfortably initialized to 30% default).
-   - Display aspect ratio controls: Auto 16:10 Native (Steam Deck / Widescreen) or Full Stretch.
-7. **Seamless In-Game Auto-Updater**:
-   - Background GitHub updater checking for new versions directly from the title screen with live download progress and hot-swappable atomic binary replacement.
+1. **🏎️ Retro Arcade Racers (Hiragana & Katakana Fighter)**:
+   - High-speed retro highway racer built with Pygame & SDL2.
+   - 10 distinct campaign stages + secret **Rainbow Skyway** (Stage 11) 71-Kana Gauntlet.
+   - Slipstream drafting (`DRAFT BOOST`), near-miss bonuses, oil slick hazards, rival traffic archetypes, and authentic tire smoke & turbo flame particles.
+   - Cruise at 176 KM/H and overdrive turbo boost up to 264 KM/H!
+
+2. **🃏 3D Cards Table (Godot 4 3D)**:
+   - Tactile 3D Japanese flashcard game with wooden tatami table aesthetics.
+   - 8 progressive stages per Kana mode with authentic vocabulary words and English translations.
+   - Interactive card-flipping physics, smooth analog stick navigation, and score combo streaks.
+
+3. **🎯 The Gallery Sniper (射的ギャラリー - Godot 4 2D)**:
+   - Festive Japanese festival shooting gallery with 8 progressive difficulty stages.
+   - Dynamic target motion physics scaling with each stage: stationary targets, harmonic bobbing, lateral swaying, shelf patrol bouncing, and high-speed sinusoidal wave gauntlet.
+   - Analog joystick and mouse crosshair targeting with realistic recoil impulse physics.
+   - Distractor decoy targets (scaling from 3 to 7) and English vocabulary meanings (`“ apple ”`).
+   - Dedicated in-game Pause Menu and Stage Clear celebration modal with marksman accuracy tracking.
+
+4. **⚙️ Unified Architecture & Quality of Life**:
+   - Symmetrical 6-card Main Menu carousel for instantaneous switching between all 6 subgames.
+   - Independent Master, Engine, and SFX volume sliders.
+   - 16:10 native aspect ratio standard optimized for Steam Deck (1280x800 / 1920x1200).
+   - In-game background updater with live download progress and atomic binary replacement.
 
 ---
 
@@ -55,9 +60,9 @@ curl -sSL https://raw.githubusercontent.com/deck-labs/nihongo-master/main/downlo
 
 ### 📥 Manual Download
 ```bash
-curl -L -o Nihongo_Master-x86_64.AppImage https://github.com/deck-labs/nihongo-master/releases/download/v1.0.0/Nihongo_Master-x86_64.AppImage
-chmod +x Nihongo_Master-x86_64.AppImage
-./Nihongo_Master-x86_64.AppImage
+curl -L -o Nihongo_Master-v1.5.0-x86_64.AppImage https://github.com/deck-labs/nihongo-master/releases/download/v1.5.0/Nihongo_Master-v1.5.0-x86_64.AppImage
+chmod +x Nihongo_Master-v1.5.0-x86_64.AppImage
+./Nihongo_Master-v1.5.0-x86_64.AppImage
 ```
 
 ---

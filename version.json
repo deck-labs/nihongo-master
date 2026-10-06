@@ -3,9 +3,9 @@
   "tag_name": "v1.5.0",
   "name": "Nihongo Master v1.5.0 - The Gallery Sniper & Unified Pause Menus",
   "release_date": "2026-10-06",
-  "appimage_filename": "Nihongo_Master-x86_64.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.0/Nihongo_Master-x86_64.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.0/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.5.0: Added 3rd game: The Gallery Sniper (射的ギャラリー). Includes dual Kana practice modes (Hiragana & Katakana), 15 authentic vocabulary words per mode, dynamic distractor decoy targets, arcade bullseyes, mouse and analog gamepad crosshair navigation with recoil physics, and a fully featured Pause Menu modal (Resume, Restart Round, Switch Kana, Return to Title). Main Menu expanded to 6 symmetrical game cards with seamless subgame switching."
+  "appimage_filename": "Nihongo_Master-v1.5.0-x86_64.AppImage",
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.0/Nihongo_Master-v1.5.0-x86_64.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.0/Nihongo_Master-v1.5.0-x86_64.AppImage",
+  "changelog": "v1.5.0: Added 3rd game: The Gallery Sniper (射的ギャラリー). Includes dual Kana practice modes (Hiragana & Katakana), 8 progressive difficulty stages with motion physics, dynamic distractor decoy targets, arcade bullseyes, mouse and analog gamepad crosshair navigation with recoil physics, and a fully featured Pause Menu modal (Resume, Restart Round, Switch Kana, Return to Title). Main Menu expanded to 6 symmetrical game cards with seamless subgame switching."
 }
 

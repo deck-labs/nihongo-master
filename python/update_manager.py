@@ -107,20 +107,35 @@ class UpdateManager:
             return os.path.abspath(sys.argv[0])
 
         # 3. Standard Steam Deck / Linux downloads location
-        downloads_path = os.path.expanduser("~/Downloads/Nihongo_Master-x86_64.AppImage")
-        if os.path.isfile(downloads_path):
-            return os.path.abspath(downloads_path)
+        downloads_dir = os.path.expanduser("~/Downloads")
+        if os.path.isdir(downloads_dir):
+            # Prioritize versioned or unversioned AppImages currently in Downloads
+            preferred_names = [
+                f"Nihongo_Master-v{GAME_VERSION}-x86_64.AppImage",
+                "Nihongo_Master-x86_64.AppImage"
+            ]
+            for cand_name in preferred_names:
+                p = os.path.join(downloads_dir, cand_name)
+                if os.path.isfile(p):
+                    return os.path.abspath(p)
+            for fname in os.listdir(downloads_dir):
+                if fname.startswith("Nihongo_Master") and fname.endswith(".AppImage"):
+                    p = os.path.join(downloads_dir, fname)
+                    if os.path.isfile(p):
+                        return os.path.abspath(p)
 
         # 4. Local workspace copy fallback
-        app_path = "/home/deck/Applications/nihongo-master/Nihongo_Master-x86_64.AppImage"
-        if os.path.isfile(app_path):
-            return app_path
+        app_candidates = [
+            f"/home/deck/Applications/nihongo-master/Nihongo_Master-v{GAME_VERSION}-x86_64.AppImage",
+            "/home/deck/Applications/nihongo-master/Nihongo_Master-x86_64.AppImage",
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", f"Nihongo_Master-v{GAME_VERSION}-x86_64.AppImage")),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Nihongo_Master-x86_64.AppImage"))
+        ]
+        for p in app_candidates:
+            if os.path.isfile(p):
+                return p
 
-        local_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Nihongo_Master-x86_64.AppImage"))
-        if os.path.isfile(local_path):
-            return local_path
-
-        return downloads_path
+        return os.path.join(downloads_dir, f"Nihongo_Master-v{GAME_VERSION}-x86_64.AppImage")
 
     def check_for_updates(self, force: bool = False):
         """Start asynchronous update check."""
@@ -184,10 +199,19 @@ class UpdateManager:
                     tag = rel.get("tag_name", "").lstrip("vV")
                     assets = rel.get("assets", [])
                     d_url = None
+                    expected_versioned = f"Nihongo_Master-v{tag}-x86_64.AppImage"
+                    # Priority 1: Match versioned AppImage name
                     for a in assets:
-                        if a.get("name") == "Nihongo_Master-x86_64.AppImage":
+                        if a.get("name") == expected_versioned:
                             d_url = a.get("browser_download_url")
                             break
+                    # Priority 2: Match unversioned AppImage name
+                    if not d_url:
+                        for a in assets:
+                            if a.get("name") == "Nihongo_Master-x86_64.AppImage":
+                                d_url = a.get("browser_download_url")
+                                break
+                    # Priority 3: Any AppImage asset
                     if not d_url:
                         for a in assets:
                             if a.get("name", "").endswith(".AppImage"):
@@ -198,7 +222,7 @@ class UpdateManager:
                         "name": rel.get("name", f"Release {tag}"),
                         "changelog": rel.get("body", "Updated release on GitHub."),
                         "download_url": d_url,
-                        "fallback_raw_url": f"https://github.com/{GITHUB_REPO}/releases/download/v{tag}/Nihongo_Master-x86_64.AppImage"
+                        "fallback_raw_url": f"https://github.com/{GITHUB_REPO}/releases/download/v{tag}/{expected_versioned}"
                     })
         except Exception:
             pass
