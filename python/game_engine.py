@@ -5,6 +5,7 @@ Main arcade game loop, event management, physics, collision, and state transitio
 
 import os
 import sys
+import time
 import math
 import random
 import json
