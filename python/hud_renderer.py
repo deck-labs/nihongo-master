@@ -390,12 +390,12 @@ class HudRenderer:
         t_k = self.font_kana_title.render(sub_text, True, COLOR_CYAN)
         surface.blit(t_k, t_k.get_rect(center=(cx, sub_y)))
 
-        # 2. Visibly Display All 4 Selectable Games Side-by-Side
+        # 2. Visibly Display All 6 Selectable Games Side-by-Side
         games_data = [
             {
                 "id": "hiragana",
                 "title": "HIRAGANA ARCADE",
-                "tag": "CLASSIC ROAD RACER",
+                "tag": "ROAD RACER",
                 "kana": "ひらがな レーサー",
                 "menu_idx": 0,
                 "col": (0, 225, 255)
@@ -403,7 +403,7 @@ class HudRenderer:
             {
                 "id": "katakana",
                 "title": "KATAKANA ARCADE",
-                "tag": "CLASSIC ROAD RACER",
+                "tag": "ROAD RACER",
                 "kana": "カタカナ レーサー",
                 "menu_idx": 1,
                 "col": (255, 175, 45)
@@ -411,7 +411,7 @@ class HudRenderer:
             {
                 "id": "cards",
                 "title": "3D HIRAGANA CARDS",
-                "tag": "3D GODOT & BLENDER",
+                "tag": "3D BATTLE",
                 "kana": "ひらがな カード",
                 "menu_idx": 2,
                 "col": COLOR_GOLD
@@ -419,23 +419,42 @@ class HudRenderer:
             {
                 "id": "katakana_cards",
                 "title": "3D KATAKANA CARDS",
-                "tag": "3D GODOT & BLENDER",
+                "tag": "3D BATTLE",
                 "kana": "カタカナ カード",
                 "menu_idx": 3,
                 "col": (255, 110, 160)
+            },
+            {
+                "id": "hiragana_sniper",
+                "title": "HIRAGANA SNIPER",
+                "tag": "2D SNIPER",
+                "kana": "ひらがな 射的",
+                "menu_idx": 4,
+                "col": (255, 80, 80)
+            },
+            {
+                "id": "katakana_sniper",
+                "title": "KATAKANA SNIPER",
+                "tag": "2D SNIPER",
+                "kana": "カタカナ 射的",
+                "menu_idx": 5,
+                "col": (0, 240, 180)
             }
+
         ]
 
         cards_y = sub_y + 46
-        card_w, card_h = 400, 114
-        centers_x = [cx - 636, cx - 212, cx + 212, cx + 636]
+        card_w, card_h = 280, 114
+        centers_x = [cx - 750, cx - 450, cx - 150, cx + 150, cx + 450, cx + 750]
 
         is_blink = (int(time.time() * 1000) // 200) % 2 == 0
 
         for i, g in enumerate(games_data):
             c_center_x = centers_x[i]
             c_rect = pygame.Rect(c_center_x - card_w // 2, cards_y, card_w, card_h)
-            is_active_game = (game_mode == g["id"] or (g["id"] == "cards" and game_mode == "hiragana_cards"))
+            is_active_game = (game_mode == g["id"] or 
+                              (g["id"] == "cards" and game_mode == "hiragana_cards") or
+                              (g["id"] == "hiragana_sniper" and game_mode in ("sniper", "hiragana_sniper")))
             is_focused = (menu_index == g["menu_idx"])
 
             # Card background
@@ -464,7 +483,7 @@ class HudRenderer:
 
             # Game Title
             t_col = COLOR_WHITE if (is_focused and is_blink) else (COLOR_GOLD if is_focused else (COLOR_WHITE if is_active_game else (170, 195, 220)))
-            txt_title = self.font_sub.render(g["title"], True, t_col)
+            txt_title = self.font_sub_btn.render(g["title"], True, t_col)
             surface.blit(txt_title, txt_title.get_rect(center=(c_center_x, cards_y + 54)))
 
             # Game Subtitle / Kana
@@ -473,21 +492,23 @@ class HudRenderer:
             surface.blit(txt_desc, txt_desc.get_rect(center=(c_center_x, cards_y + 86)))
 
         # Divider line
-        div_y = cards_y + card_h + 30
-        pygame.draw.line(surface, (0, 140, 220), (cx - 720, div_y), (cx + 720, div_y), 2)
+        div_y = cards_y + card_h + 24
+        pygame.draw.line(surface, (0, 140, 220), (cx - 750, div_y), (cx + 750, div_y), 2)
         
-        # 3. Direct Menu Items (7 visible options)
-        menu_y_start = div_y + 50
-        spacing = 58
+        # 3. Direct Menu Items (9 visible options)
+        menu_y_start = div_y + 38
+        spacing = 46
 
         menu_items = [
             ("HIRAGANA ARCADE", 0),
             ("KATAKANA ARCADE", 1),
             ("3D HIRAGANA CARDS", 2),
             ("3D KATAKANA CARDS", 3),
-            ("OPTIONS", 4),
-            ("CHECK FOR UPDATES", 5),
-            ("QUIT", 6)
+            ("HIRAGANA SNIPER", 4),
+            ("KATAKANA SNIPER", 5),
+            ("OPTIONS", 6),
+            ("CHECK FOR UPDATES", 7),
+            ("QUIT", 8)
         ]
 
         for label, idx in menu_items:
@@ -511,7 +532,7 @@ class HudRenderer:
 
         # Footer
         txt_foot = self.font_caption.render("▲/▼ / ◀/▶: CHOOSE GAME   [ENTER] / [A] / [START]: SELECT GAME   [SELECT + START]: QUIT", True, (210, 235, 255))
-        surface.blit(txt_foot, txt_foot.get_rect(center=(cx, surface_h - 60)))
+        surface.blit(txt_foot, txt_foot.get_rect(center=(cx, surface_h - 52)))
 
     def render_stage_select_screen(self, surface: pygame.Surface, selected_stage: int,
                                    game_mode: str = "hiragana", secret_unlocked: bool = False):
@@ -536,10 +557,19 @@ class HudRenderer:
             mode_badge = "3D KATAKANA CARDS"
             mode_sub = "3D GODOT & BLENDER BATTLE // カタカナ カード"
             theme_col = (255, 110, 160)
-        else:
+        elif game_mode in ("cards", "hiragana_cards"):
             mode_badge = "3D HIRAGANA CARDS"
             mode_sub = "3D GODOT & BLENDER BATTLE // ひらがな カード"
             theme_col = COLOR_GOLD
+        elif game_mode == "katakana_sniper":
+            mode_badge = "KATAKANA SNIPER"
+            mode_sub = "2D GALLERY TARGET SHOOTER // カタカナ 射的"
+            theme_col = (0, 240, 180)
+        else:
+            mode_badge = "HIRAGANA SNIPER"
+            mode_sub = "2D GALLERY TARGET SHOOTER // ひらがな 射的"
+            theme_col = (255, 80, 80)
+
 
         # Current Version Running Indicator (Upper-Left)
         ver_text = f"VERSION {GAME_VERSION}"

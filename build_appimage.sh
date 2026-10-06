@@ -55,6 +55,16 @@ cp "$DIR/godot_cards/build/hiragana_cards.pck" "$APPDIR/usr/bin/hiragana_cards.p
 cp "$DIR/godot_cards/build/hiragana_cards.pck" "$APPDIR/usr/bin/hiragana_cards.x86_64.pck"
 chmod +x "$APPDIR/usr/bin/hiragana_cards.x86_64" "$APPDIR/usr/bin/hiragana_cards"
 
+# Copy Godot 2D The Gallery Sniper binary & pack into AppDir
+echo "=== Bundling Godot 2D The Gallery Sniper ==="
+"$DIR/gallery_sniper/build_gallery_sniper.sh"
+cp "$DIR/gallery_sniper/build/gallery_sniper.x86_64" "$APPDIR/usr/bin/gallery_sniper.x86_64"
+cp "$DIR/gallery_sniper/build/gallery_sniper.x86_64" "$APPDIR/usr/bin/gallery_sniper"
+cp "$DIR/gallery_sniper/build/gallery_sniper.pck" "$APPDIR/usr/bin/gallery_sniper.pck"
+cp "$DIR/gallery_sniper/build/gallery_sniper.pck" "$APPDIR/usr/bin/gallery_sniper.x86_64.pck"
+chmod +x "$APPDIR/usr/bin/gallery_sniper.x86_64" "$APPDIR/usr/bin/gallery_sniper"
+
+
 # Generate High-Res 256x256 Icon
 "$VENV_PATH/bin/python" -c "
 import pygame

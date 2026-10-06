@@ -1,0 +1,395 @@
+[gd_scene load_steps=8 format=3 uid="uid://gallery_main_01"]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/Crosshair.gd" id="2_crosshair"]
+[ext_resource type="FontFile" path="res://assets/fonts/NotoSansCJK-Bold.ttc" id="3_font"]
+[ext_resource type="AudioStream" path="res://assets/audio/correct.wav" id="4_correct"]
+[ext_resource type="AudioStream" path="res://assets/audio/incorrect.wav" id="5_incorrect"]
+[ext_resource type="AudioStream" path="res://assets/audio/select.wav" id="6_select"]
+[ext_resource type="AudioStream" path="res://assets/audio/fanfare.wav" id="7_fanfare"]
+
+[node name="Main" type="Node2D"]
+process_mode = 3
+script = ExtResource("1_main")
+
+[node name="Environment" type="Node2D" parent="."]
+
+[node name="Backdrop" type="ColorRect" parent="Environment"]
+offset_right = 1280.0
+offset_bottom = 800.0
+mouse_filter = 2
+color = Color(0.08, 0.1, 0.16, 1)
+
+[node name="StripesPattern" type="Node2D" parent="Environment"]
+
+[node name="Stripe1" type="ColorRect" parent="Environment/StripesPattern"]
+offset_top = 180.0
+offset_right = 1280.0
+offset_bottom = 184.0
+mouse_filter = 2
+color = Color(0.2, 0.25, 0.38, 0.5)
+
+[node name="BoothShelf1" type="ColorRect" parent="Environment"]
+offset_left = 100.0
+offset_top = 350.0
+offset_right = 1180.0
+offset_bottom = 368.0
+mouse_filter = 2
+color = Color(0.35, 0.22, 0.15, 1)
+
+[node name="BoothShelfTrim1" type="ColorRect" parent="Environment"]
+offset_left = 95.0
+offset_top = 346.0
+offset_right = 1185.0
+offset_bottom = 350.0
+mouse_filter = 2
+color = Color(0.85, 0.65, 0.25, 1)
+
+[node name="BoothShelf2" type="ColorRect" parent="Environment"]
+offset_left = 100.0
+offset_top = 510.0
+offset_right = 1180.0
+offset_bottom = 528.0
+mouse_filter = 2
+color = Color(0.35, 0.22, 0.15, 1)
+
+[node name="BoothShelfTrim2" type="ColorRect" parent="Environment"]
+offset_left = 95.0
+offset_top = 506.0
+offset_right = 1185.0
+offset_bottom = 510.0
+mouse_filter = 2
+color = Color(0.85, 0.65, 0.25, 1)
+
+[node name="BoothShelf3" type="ColorRect" parent="Environment"]
+offset_left = 100.0
+offset_top = 670.0
+offset_right = 1180.0
+offset_bottom = 688.0
+mouse_filter = 2
+color = Color(0.35, 0.22, 0.15, 1)
+
+[node name="BoothShelfTrim3" type="ColorRect" parent="Environment"]
+offset_left = 95.0
+offset_top = 666.0
+offset_right = 1185.0
+offset_bottom = 670.0
+mouse_filter = 2
+color = Color(0.85, 0.65, 0.25, 1)
+
+[node name="CounterLedge" type="ColorRect" parent="Environment"]
+offset_top = 750.0
+offset_right = 1280.0
+offset_bottom = 800.0
+mouse_filter = 2
+color = Color(0.18, 0.11, 0.08, 1)
+
+[node name="CounterTrim" type="ColorRect" parent="Environment"]
+offset_top = 746.0
+offset_right = 1280.0
+offset_bottom = 750.0
+mouse_filter = 2
+color = Color(0.85, 0.65, 0.25, 1)
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="Shelf1_Point1" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(240, 305)
+
+[node name="Shelf1_Point2" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(440, 305)
+
+[node name="Shelf1_Point3" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(640, 305)
+
+[node name="Shelf1_Point4" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(840, 305)
+
+[node name="Shelf1_Point5" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1040, 305)
+
+[node name="Shelf2_Point1" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(200, 465)
+
+[node name="Shelf2_Point2" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(420, 465)
+
+[node name="Shelf2_Point3" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(640, 465)
+
+[node name="Shelf2_Point4" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(860, 465)
+
+[node name="Shelf2_Point5" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1080, 465)
+
+[node name="Shelf3_Point1" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(240, 625)
+
+[node name="Shelf3_Point2" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(440, 625)
+
+[node name="Shelf3_Point3" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(640, 625)
+
+[node name="Shelf3_Point4" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(840, 625)
+
+[node name="Shelf3_Point5" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1040, 625)
+
+[node name="TargetsContainer" type="Node2D" parent="."]
+process_mode = 1
+
+[node name="Audio" type="Node" parent="."]
+process_mode = 3
+
+[node name="CorrectPlayer" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("4_correct")
+volume_db = -4.0
+
+[node name="IncorrectPlayer" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("5_incorrect")
+volume_db = -2.0
+
+[node name="ShotPlayer" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("6_select")
+volume_db = -2.0
+
+[node name="FanfarePlayer" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("7_fanfare")
+volume_db = -2.0
+
+[node name="UI" type="CanvasLayer" parent="."]
+process_mode = 3
+
+[node name="HeaderPanel" type="ColorRect" parent="UI"]
+offset_right = 1280.0
+offset_bottom = 180.0
+mouse_filter = 2
+color = Color(0.06, 0.08, 0.14, 0.96)
+
+[node name="HeaderGoldBorder" type="ColorRect" parent="UI"]
+offset_top = 176.0
+offset_right = 1280.0
+offset_bottom = 180.0
+mouse_filter = 2
+color = Color(0.95, 0.75, 0.2, 1)
+
+[node name="GameTitleLabel" type="Label" parent="UI"]
+offset_left = 32.0
+offset_top = 14.0
+offset_right = 400.0
+offset_bottom = 44.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.95, 0.75, 0.2, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+text = "THE GALLERY SNIPER (射的ギャラリー)"
+
+[node name="WordsCountLabel" type="Label" parent="UI"]
+offset_left = 32.0
+offset_top = 50.0
+offset_right = 250.0
+offset_bottom = 85.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 22
+text = "CLEARED: 0"
+
+[node name="PauseButton" type="Button" parent="UI"]
+offset_left = 1090.0
+offset_top = 10.0
+offset_right = 1250.0
+offset_bottom = 44.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 14
+text = "[START] ⏸ PAUSE"
+
+[node name="ScoreLabel" type="Label" parent="UI"]
+offset_left = 980.0
+offset_top = 48.0
+offset_right = 1248.0
+offset_bottom = 85.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.5, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 26
+text = "SCORE: 0"
+horizontal_alignment = 2
+
+[node name="HiraganaTab" type="Button" parent="UI"]
+offset_left = 360.0
+offset_top = 12.0
+offset_right = 620.0
+offset_bottom = 48.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 16
+text = "[LB] ひらがな (HIRAGANA)"
+
+[node name="KatakanaTab" type="Button" parent="UI"]
+offset_left = 640.0
+offset_top = 12.0
+offset_right = 900.0
+offset_bottom = 48.0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 16
+text = "[RB] カタカナ (KATAKANA)"
+
+[node name="TargetWordLabel" type="Label" parent="UI"]
+offset_left = 340.0
+offset_top = 54.0
+offset_right = 940.0
+offset_bottom = 100.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 32
+text = "RINGO"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SpellingProgressLabel" type="Label" parent="UI"]
+offset_left = 340.0
+offset_top = 102.0
+offset_right = 940.0
+offset_bottom = 172.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.1, 0.15, 0.3, 1)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 52
+text = "＿  ＿  ＿"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FooterBar" type="ColorRect" parent="UI"]
+offset_top = 766.0
+offset_right = 1280.0
+offset_bottom = 800.0
+mouse_filter = 2
+color = Color(0.04, 0.05, 0.08, 0.9)
+
+[node name="InstructionLabel" type="Label" parent="UI"]
+offset_top = 768.0
+offset_right = 1280.0
+offset_bottom = 798.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 14
+text = "AIM: STICK / MOUSE  |  SHOOT: (A) / RT / CLICK  |  [START] / ESC: PAUSE MENU  |  [LB] / [RB] / TAB: KANA"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PauseModal" type="Control" parent="UI"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BackdropDim" type="ColorRect" parent="UI/PauseModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.06, 0.12, 0.82)
+
+[node name="ModalPanel" type="PanelContainer" parent="UI/PauseModal"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -220.0
+offset_right = 260.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="UI/PauseModal/ModalPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 25
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 25
+
+[node name="VBox" type="VBoxContainer" parent="UI/PauseModal/ModalPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Title" type="Label" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 32
+text = "PAUSED (ポーズ)"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 0.8)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 15
+text = "THE GALLERY SNIPER"
+horizontal_alignment = 1
+
+[node name="HSeparator1" type="HSeparator" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="BtnResume" type="Button" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "▶  RESUME GAME   [(A) / START / ESC]"
+
+[node name="BtnRestart" type="Button" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "↺  RESTART ROUND   [(B) / R]"
+
+[node name="BtnSwitchKana" type="Button" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "⇄  SWITCH KANA   [(Y) / TAB]"
+
+[node name="BtnReturnTitle" type="Button" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "✖  RETURN TO TITLE   [(X) / Q]"
+
+[node name="HSeparator2" type="HSeparator" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="HelpHint" type="Label" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 0.85)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 14
+text = "D-PAD: Navigate  •  (A): Select  •  (B) / [START]: Resume"
+horizontal_alignment = 1
+
+[node name="Crosshair" type="Node2D" parent="."]
+process_mode = 1
+script = ExtResource("2_crosshair")

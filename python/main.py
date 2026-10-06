@@ -14,7 +14,7 @@ from game_config import (
 
 def main():
     parser = argparse.ArgumentParser(description="Nihongo Master (Python Edition)")
-    parser.add_argument("--mode", type=str, default=None, choices=["hiragana", "katakana", "cards", "hiragana_cards", "katakana_cards"], help="Game mode (hiragana, katakana, cards, hiragana_cards, or katakana_cards)")
+    parser.add_argument("--mode", type=str, default=None, choices=["hiragana", "katakana", "cards", "hiragana_cards", "katakana_cards", "sniper", "hiragana_sniper", "katakana_sniper"], help="Game mode (hiragana, katakana, cards, sniper, etc.)")
     parser.add_argument("--stage", type=int, default=None, help="Stage to start on (1-11)")
     parser.add_argument("--trackdist", type=float, default=0.0, help="Initial track distance")
     parser.add_argument("--title", action="store_true", help="Force title screen")
@@ -117,6 +117,10 @@ def main():
             engine.title_menu_index = 2
         elif args.mode == "katakana_cards":
             engine.title_menu_index = 3
+        elif args.mode in ("sniper", "hiragana_sniper"):
+            engine.title_menu_index = 4
+        elif args.mode == "katakana_sniper":
+            engine.title_menu_index = 5
         elif args.mode == "katakana":
             engine.title_menu_index = 1
             if engine.is_title_screen:
@@ -126,6 +130,7 @@ def main():
             engine.road.rebuild_stage11_gantries(args.mode)
         else:
             engine.title_menu_index = 0
+
             if engine.is_title_screen:
                 engine.player.update_kana("あ")
             engine.player.hiragana_extras = True

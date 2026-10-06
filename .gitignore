@@ -15,5 +15,6 @@ dist/
 /tmp/
 .DS_Store
 .godot/
-gallery_sniper/
+gallery_sniper/.godot/
+gallery_sniper/build/
 

@@ -357,6 +357,9 @@ class GameEngine:
         if self.game_mode in ("cards", "hiragana_cards", "katakana_cards"):
             self.launch_card_game(self.selected_stage)
             return
+        if self.game_mode in ("sniper", "hiragana_sniper", "katakana_sniper"):
+            self.launch_sniper_game("katakana" if self.game_mode == "katakana_sniper" else "hiragana")
+            return
         self.is_title_screen = False
         self.current_stage = self.selected_stage
         self.run_started_from_stage_1 = (self.selected_stage == 1)
@@ -432,6 +435,66 @@ class GameEngine:
         self._present_to_screen()
         pygame.display.flip()
 
+    def launch_sniper_game(self, mode: str = "hiragana"):
+        """Seamlessly launch Godot The Gallery Sniper (Hiragana or Katakana)."""
+        self.audio.stop_title_music(fade_ms=300)
+        self.audio.play_fanfare()
+
+        candidates = [
+            os.path.join(os.environ.get("APPDIR", ""), "usr/bin/gallery_sniper"),
+            os.path.join(os.environ.get("APPDIR", ""), "usr/bin/gallery_sniper.x86_64"),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "gallery_sniper/build/gallery_sniper.x86_64")),
+            "godot"
+        ]
+
+        cmd = None
+        for cand in candidates:
+            if cand == "godot":
+                proj_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "gallery_sniper"))
+                if os.path.isdir(proj_path):
+                    cmd = ["godot", "--fullscreen", "--path", proj_path, "--mode", mode]
+                    break
+            elif os.path.isfile(cand) and os.access(cand, os.X_OK):
+                cmd = [cand, "--fullscreen", "--mode", mode]
+                break
+
+        if not cmd:
+            print("[NihongoMaster] Error: Godot Gallery Sniper binary not found.")
+            self.return_to_title()
+            self.audio.play_title_music()
+            return
+
+        print(f"[NihongoMaster] Launching Godot Gallery Sniper ({mode}): {cmd}")
+        try:
+            import subprocess
+            env = os.environ.copy()
+            env["NIHONGO_SNIPER_MODE"] = mode
+            env["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
+            subprocess.run(cmd, env=env)
+        except Exception as e:
+            print(f"[NihongoMaster] Error launching gallery sniper: {e}")
+
+        # Ensure Pygame window is un-minimized, restored to foreground, and focused
+        try:
+            from pygame._sdl2.video import Window
+            win = Window.from_display_module()
+            win.restore()
+            win.show()
+            win.focus()
+            if hasattr(self, 'screen') and (self.screen.get_flags() & pygame.FULLSCREEN):
+                win.set_fullscreen(True)
+        except Exception as e:
+            print(f"[NihongoMaster] Window restore notice: {e}")
+
+        pygame.event.pump()
+        pygame.event.clear()
+
+        self.hide_cursor()
+        self.return_to_title()
+        self._present_to_screen()
+        pygame.display.flip()
+
+
     def return_to_title(self):
         self.is_title_screen = True
         self.is_stage_select = False
@@ -447,8 +510,13 @@ class GameEngine:
             self.title_menu_index = 2
         elif self.game_mode == "katakana_cards":
             self.title_menu_index = 3
+        elif self.game_mode in ("sniper", "hiragana_sniper"):
+            self.title_menu_index = 4
+        elif self.game_mode == "katakana_sniper":
+            self.title_menu_index = 5
         else:
             self.title_menu_index = 0
+
         self.audio.stop_all()
         self.audio.play_title_music()
         self.traffic_cars.clear()
@@ -602,7 +670,7 @@ class GameEngine:
                     self.road.current_stage = self.selected_stage
                     self.audio.play_pause()
             else:
-                self.title_menu_index = (self.title_menu_index - 1 + 7) % 7
+                self.title_menu_index = (self.title_menu_index - 1 + 9) % 9
                 if self.title_menu_index == 0:
                     self.game_mode = "hiragana"
                 elif self.title_menu_index == 1:
@@ -615,6 +683,10 @@ class GameEngine:
                     self.game_mode = "katakana_cards"
                     if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
                         self.selected_stage = 1
+                elif self.title_menu_index == 4:
+                    self.game_mode = "hiragana_sniper"
+                elif self.title_menu_index == 5:
+                    self.game_mode = "katakana_sniper"
                 self.audio.play_pause()
 
     def menu_down(self):
@@ -643,7 +715,7 @@ class GameEngine:
                     self.road.current_stage = self.selected_stage
                     self.audio.play_pause()
             else:
-                self.title_menu_index = (self.title_menu_index + 1) % 7
+                self.title_menu_index = (self.title_menu_index + 1) % 9
                 if self.title_menu_index == 0:
                     self.game_mode = "hiragana"
                 elif self.title_menu_index == 1:
@@ -656,6 +728,10 @@ class GameEngine:
                     self.game_mode = "katakana_cards"
                     if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
                         self.selected_stage = 1
+                elif self.title_menu_index == 4:
+                    self.game_mode = "hiragana_sniper"
+                elif self.title_menu_index == 5:
+                    self.game_mode = "katakana_sniper"
                 self.audio.play_pause()
 
     def menu_left(self):
@@ -685,8 +761,8 @@ class GameEngine:
                     self.road.current_stage = self.selected_stage
                     self.audio.play_pause()
             else:
-                if self.title_menu_index in (0, 1, 2, 3):
-                    self.title_menu_index = (self.title_menu_index - 1 + 4) % 4
+                if self.title_menu_index in (0, 1, 2, 3, 4, 5):
+                    self.title_menu_index = (self.title_menu_index - 1 + 6) % 6
                     if self.title_menu_index == 0:
                         self.game_mode = "hiragana"
                     elif self.title_menu_index == 1:
@@ -699,6 +775,10 @@ class GameEngine:
                         self.game_mode = "katakana_cards"
                         if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
                             self.selected_stage = 1
+                    elif self.title_menu_index == 4:
+                        self.game_mode = "hiragana_sniper"
+                    elif self.title_menu_index == 5:
+                        self.game_mode = "katakana_sniper"
                     self.audio.play_pause()
 
     def menu_right(self):
@@ -728,8 +808,8 @@ class GameEngine:
                     self.road.current_stage = self.selected_stage
                     self.audio.play_pause()
             else:
-                if self.title_menu_index in (0, 1, 2, 3):
-                    self.title_menu_index = (self.title_menu_index + 1) % 4
+                if self.title_menu_index in (0, 1, 2, 3, 4, 5):
+                    self.title_menu_index = (self.title_menu_index + 1) % 6
                     if self.title_menu_index == 0:
                         self.game_mode = "hiragana"
                     elif self.title_menu_index == 1:
@@ -742,7 +822,12 @@ class GameEngine:
                         self.game_mode = "katakana_cards"
                         if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
                             self.selected_stage = 1
+                    elif self.title_menu_index == 4:
+                        self.game_mode = "hiragana_sniper"
+                    elif self.title_menu_index == 5:
+                        self.game_mode = "katakana_sniper"
                     self.audio.play_pause()
+
 
     def get_aspect_mode_label(self) -> str:
         if self.aspect_mode == "stretch":
@@ -892,11 +977,18 @@ class GameEngine:
                     self.is_stage_select = True
                     self.audio.play_pause()
                 elif self.title_menu_index == 4:
-                    self.toggle_volume_menu()
+                    self.game_mode = "hiragana_sniper"
+                    self.launch_sniper_game("hiragana")
                 elif self.title_menu_index == 5:
-                    self.open_update_dialog()
+                    self.game_mode = "katakana_sniper"
+                    self.launch_sniper_game("katakana")
                 elif self.title_menu_index == 6:
+                    self.toggle_volume_menu()
+                elif self.title_menu_index == 7:
+                    self.open_update_dialog()
+                elif self.title_menu_index == 8:
                     self.quit_game()
+
         elif self.is_stage_clear:
             if self.current_stage == 11:
                 self.return_to_title()
@@ -1065,35 +1157,47 @@ class GameEngine:
                             self.menu_back()
                     else:
                         # Title screen mouse clicks
-                        # 1. 4 Game cards at top
+                        # 1. 6 Game cards at top
                         cards_y = int(self.virtual_height * 0.14) + 60 + 46
-                        card_w, card_h = 400, 114
-                        centers_x = [cx - 636, cx - 212, cx + 212, cx + 636]
+                        card_w, card_h = 280, 114
+                        centers_x = [cx - 750, cx - 450, cx - 150, cx + 150, cx + 450, cx + 750]
                         for i, c_x in enumerate(centers_x):
                             if pygame.Rect(c_x - card_w // 2, cards_y, card_w, card_h).collidepoint(mx, my):
                                 self.title_menu_index = i
                                 if i == 0:
                                     self.game_mode = "hiragana"
+                                    self.is_stage_select = True
+                                    self.audio.play_pause()
                                 elif i == 1:
                                     self.game_mode = "katakana"
+                                    self.is_stage_select = True
+                                    self.audio.play_pause()
                                 elif i == 2:
                                     self.game_mode = "cards"
                                     if self.selected_stage > CARD_TOTAL_STAGES:
                                         self.selected_stage = 1
+                                    self.is_stage_select = True
+                                    self.audio.play_pause()
                                 elif i == 3:
                                     self.game_mode = "katakana_cards"
                                     if self.selected_stage > KATAKANA_CARD_TOTAL_STAGES:
                                         self.selected_stage = 1
-                                self.is_stage_select = True
-                                self.audio.play_pause()
+                                    self.is_stage_select = True
+                                    self.audio.play_pause()
+                                elif i == 4:
+                                    self.game_mode = "hiragana_sniper"
+                                    self.launch_sniper_game("hiragana")
+                                elif i == 5:
+                                    self.game_mode = "katakana_sniper"
+                                    self.launch_sniper_game("katakana")
 
-                        # 2. Direct 7 menu items below divider
-                        div_y = cards_y + card_h + 30
-                        menu_y_start = div_y + 50
-                        spacing = 58
-                        for idx in range(7):
+                        # 2. Direct 9 menu items below divider
+                        div_y = cards_y + card_h + 24
+                        menu_y_start = div_y + 38
+                        spacing = 46
+                        for idx in range(9):
                             y_pos = menu_y_start + idx * spacing
-                            if (y_pos - 24) <= my <= (y_pos + 24) and (cx - 360) <= mx <= (cx + 360):
+                            if (y_pos - 20) <= my <= (y_pos + 20) and (cx - 360) <= mx <= (cx + 360):
                                 self.title_menu_index = idx
                                 self.menu_confirm()
                 elif self.is_volume_menu_open:
