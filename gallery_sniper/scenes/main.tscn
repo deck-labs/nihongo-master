@@ -239,23 +239,39 @@ text = "[RB] カタカナ (KATAKANA)"
 
 [node name="TargetWordLabel" type="Label" parent="UI"]
 offset_left = 340.0
-offset_top = 54.0
+offset_top = 46.0
 offset_right = 940.0
-offset_bottom = 100.0
+offset_bottom = 80.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 28
 text = "RINGO"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WordMeaningLabel" type="Label" parent="UI"]
+offset_left = 340.0
+offset_top = 78.0
+offset_right = 940.0
+offset_bottom = 106.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 18
+text = "“ apple ”"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SpellingProgressLabel" type="Label" parent="UI"]
 offset_left = 340.0
-offset_top = 102.0
+offset_top = 106.0
 offset_right = 940.0
 offset_bottom = 172.0
 mouse_filter = 2
@@ -264,7 +280,7 @@ theme_override_colors/font_shadow_color = Color(0.1, 0.15, 0.3, 1)
 theme_override_constants/shadow_offset_x = 3
 theme_override_constants/shadow_offset_y = 3
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 52
+theme_override_font_sizes/font_size = 46
 text = "＿  ＿  ＿"
 horizontal_alignment = 1
 vertical_alignment = 1

@@ -11,39 +11,39 @@ var current_mode: KanaMode = KanaMode.HIRAGANA
 
 ## 1. Separate Hiragana Vocabulary Dictionary
 var hiragana_dictionary: Dictionary = {
-	"ringo": ["り", "ん", "ご"],
-	"sakura": ["さ", "く", "ら"],
-	"kuruma": ["く", "る", "ま"],
-	"neko": ["ね", "こ"],
-	"inu": ["い", "ぬ"],
-	"sushi": ["す", "し"],
-	"tori": ["と", "り"],
-	"kame": ["か", "め"],
-	"hana": ["は", "な"],
-	"mizu": ["み", "ず"],
-	"yama": ["や", "ま"],
-	"kawa": ["か", "わ"],
-	"sora": ["そ", "ら"],
-	"tsuki": ["つ", "き"],
-	"hoshi": ["ほ", "し"]
+	"ringo": {"kana": ["り", "ん", "ご"], "meaning": "apple"},
+	"sakura": {"kana": ["さ", "く", "ら"], "meaning": "cherry blossom"},
+	"kuruma": {"kana": ["く", "る", "ま"], "meaning": "car"},
+	"neko": {"kana": ["ね", "こ"], "meaning": "cat"},
+	"inu": {"kana": ["い", "ぬ"], "meaning": "dog"},
+	"sushi": {"kana": ["す", "し"], "meaning": "sushi"},
+	"tori": {"kana": ["と", "り"], "meaning": "bird"},
+	"kame": {"kana": ["か", "め"], "meaning": "turtle"},
+	"hana": {"kana": ["は", "な"], "meaning": "flower"},
+	"mizu": {"kana": ["み", "ず"], "meaning": "water"},
+	"yama": {"kana": ["や", "ま"], "meaning": "mountain"},
+	"kawa": {"kana": ["か", "わ"], "meaning": "river"},
+	"sora": {"kana": ["そ", "ら"], "meaning": "sky"},
+	"tsuki": {"kana": ["つ", "き"], "meaning": "moon"},
+	"hoshi": {"kana": ["ほ", "し"], "meaning": "star"}
 }
 
 ## 2. Separate Katakana Vocabulary Dictionary
 var katakana_dictionary: Dictionary = {
-	"terebi": ["テ", "レ", "ビ"],
-	"ramen": ["ラ", "ー", "メ", "ン"],
-	"kohii": ["コ", "ー", "ヒ", "ー"],
-	"basu": ["バ", "ス"],
-	"kamera": ["カ", "メ", "ラ"],
-	"anime": ["ア", "ニ", "メ"],
-	"pan": ["パ", "ン"],
-	"aisu": ["ア", "イ", "ス"],
-	"keeki": ["ケ", "ー", "キ"],
-	"taoru": ["タ", "オ", "ル"],
-	"doa": ["ド", "ア"],
-	"rajio": ["ラ", "ジ", "オ"],
-	"nooto": ["ノ", "ー", "ト"],
-	"sofaa": ["ソ", "フ", "ァ", "ー"]
+	"terebi": {"kana": ["テ", "レ", "ビ"], "meaning": "television"},
+	"ramen": {"kana": ["ラ", "ー", "メ", "ン"], "meaning": "ramen"},
+	"kohii": {"kana": ["コ", "ー", "ヒ", "ー"], "meaning": "coffee"},
+	"basu": {"kana": ["バ", "ス"], "meaning": "bus"},
+	"kamera": {"kana": ["カ", "メ", "ラ"], "meaning": "camera"},
+	"anime": {"kana": ["ア", "ニ", "メ"], "meaning": "anime"},
+	"pan": {"kana": ["パ", "ン"], "meaning": "bread"},
+	"aisu": {"kana": ["ア", "イ", "ス"], "meaning": "ice cream"},
+	"keeki": {"kana": ["ケ", "ー", "キ"], "meaning": "cake"},
+	"taoru": {"kana": ["タ", "オ", "ル"], "meaning": "towel"},
+	"doa": {"kana": ["ド", "ア"], "meaning": "door"},
+	"rajio": {"kana": ["ラ", "ジ", "オ"], "meaning": "radio"},
+	"nooto": {"kana": ["ノ", "ー", "ト"], "meaning": "notebook"},
+	"sofaa": {"kana": ["ソ", "フ", "ァ", "ー"], "meaning": "sofa"}
 }
 
 ## Hiragana syllabary pool for decoys
@@ -98,6 +98,7 @@ var katakana_cleared: int = 0
 @onready var targets_container: Node2D = $TargetsContainer
 @onready var spawn_points_node: Node2D = $SpawnPoints
 @onready var target_word_label: Label = $UI/TargetWordLabel
+@onready var word_meaning_label: Label = $UI/WordMeaningLabel
 @onready var spelling_progress_label: Label = $UI/SpellingProgressLabel
 @onready var score_label: Label = $UI/ScoreLabel
 @onready var words_count_label: Label = $UI/WordsCountLabel
@@ -179,6 +180,28 @@ func _parse_cmd_line_arguments() -> void:
 ## Returns the active vocabulary dictionary based on current mode
 func get_active_dictionary() -> Dictionary:
 	return hiragana_dictionary if current_mode == KanaMode.HIRAGANA else katakana_dictionary
+
+## Returns the Kana character sequence for the current active word
+func get_current_word_chars() -> Array:
+	var dict = get_active_dictionary()
+	if not dict.has(current_word):
+		return []
+	var val = dict[current_word]
+	if val is Dictionary:
+		return val.get("kana", [])
+	elif val is Array:
+		return val
+	return []
+
+## Returns the English translation meaning for the current active word
+func get_current_word_meaning() -> String:
+	var dict = get_active_dictionary()
+	if not dict.has(current_word):
+		return ""
+	var val = dict[current_word]
+	if val is Dictionary:
+		return val.get("meaning", "")
+	return ""
 
 ## Returns the active syllabary pool for decoys
 func get_active_pool() -> Array[String]:
@@ -380,11 +403,10 @@ func spawn_targets() -> void:
 	for child in targets_container.get_children():
 		child.queue_free()
 	
-	var dict = get_active_dictionary()
-	if current_word == "" or not dict.has(current_word):
+	if current_word == "":
 		return
 	
-	var word_chars: Array = dict[current_word]
+	var word_chars: Array = get_current_word_chars()
 	if current_character_index >= word_chars.size():
 		return
 	
@@ -420,11 +442,10 @@ func spawn_targets() -> void:
 
 ## Evaluates clicked target character
 func _on_target_clicked(clicked_character: String) -> void:
-	var dict = get_active_dictionary()
-	if current_word == "" or not dict.has(current_word):
+	if current_word == "":
 		return
 	
-	var word_chars: Array = dict[current_word]
+	var word_chars: Array = get_current_word_chars()
 	if current_character_index >= word_chars.size():
 		return
 	
@@ -475,11 +496,18 @@ func update_ui() -> void:
 	if current_word == "":
 		return
 	
-	var dict = get_active_dictionary()
-	var word_chars: Array = dict.get(current_word, [])
+	var word_chars: Array = get_current_word_chars()
 	
-	# Target word header
+	# Target word header (romaji)
 	target_word_label.text = current_word.to_upper()
+	
+	# Word translation meaning
+	if word_meaning_label:
+		var meaning = get_current_word_meaning()
+		if meaning != "":
+			word_meaning_label.text = "“ %s ”" % meaning
+		else:
+			word_meaning_label.text = ""
 	
 	# Progress text
 	var progress_parts: Array[String] = []
