@@ -185,9 +185,14 @@ class UpdateManager:
                     assets = rel.get("assets", [])
                     d_url = None
                     for a in assets:
-                        if a.get("name", "").endswith(".AppImage"):
+                        if a.get("name") == "Nihongo_Master-x86_64.AppImage":
                             d_url = a.get("browser_download_url")
                             break
+                    if not d_url:
+                        for a in assets:
+                            if a.get("name", "").endswith(".AppImage"):
+                                d_url = a.get("browser_download_url")
+                                break
                     candidates.append({
                         "version": tag,
                         "name": rel.get("name", f"Release {tag}"),
