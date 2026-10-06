@@ -9,41 +9,139 @@ extends Node2D
 enum KanaMode { HIRAGANA, KATAKANA }
 var current_mode: KanaMode = KanaMode.HIRAGANA
 
-## 1. Separate Hiragana Vocabulary Dictionary
-var hiragana_dictionary: Dictionary = {
-	"ringo": {"kana": ["り", "ん", "ご"], "meaning": "apple"},
-	"sakura": {"kana": ["さ", "く", "ら"], "meaning": "cherry blossom"},
-	"kuruma": {"kana": ["く", "る", "ま"], "meaning": "car"},
-	"neko": {"kana": ["ね", "こ"], "meaning": "cat"},
-	"inu": {"kana": ["い", "ぬ"], "meaning": "dog"},
-	"sushi": {"kana": ["す", "し"], "meaning": "sushi"},
-	"tori": {"kana": ["と", "り"], "meaning": "bird"},
-	"kame": {"kana": ["か", "め"], "meaning": "turtle"},
-	"hana": {"kana": ["は", "な"], "meaning": "flower"},
-	"mizu": {"kana": ["み", "ず"], "meaning": "water"},
-	"yama": {"kana": ["や", "ま"], "meaning": "mountain"},
-	"kawa": {"kana": ["か", "わ"], "meaning": "river"},
-	"sora": {"kana": ["そ", "ら"], "meaning": "sky"},
-	"tsuki": {"kana": ["つ", "き"], "meaning": "moon"},
-	"hoshi": {"kana": ["ほ", "し"], "meaning": "star"}
+const MAX_STAGES: int = 8
+const WORDS_PER_STAGE: int = 3
+var current_stage: int = 1
+var stage_words_cleared: int = 0
+var total_shots_fired: int = 0
+var total_hits_accurate: int = 0
+
+## 1. 8-Stage Hiragana Vocabulary Dictionaries
+var hiragana_stages: Dictionary = {
+	1: {
+		"ao": {"kana": ["あ", "お"], "meaning": "blue"},
+		"ie": {"kana": ["い", "え"], "meaning": "house"},
+		"ue": {"kana": ["う", "え"], "meaning": "above"},
+		"ai": {"kana": ["あ", "い"], "meaning": "love"},
+		"aki": {"kana": ["あ", "き"], "meaning": "autumn"},
+		"umi": {"kana": ["う", "み"], "meaning": "sea"}
+	},
+	2: {
+		"neko": {"kana": ["ね", "こ"], "meaning": "cat"},
+		"inu": {"kana": ["い", "ぬ"], "meaning": "dog"},
+		"tori": {"kana": ["と", "り"], "meaning": "bird"},
+		"kame": {"kana": ["か", "め"], "meaning": "turtle"},
+		"hana": {"kana": ["は", "な"], "meaning": "flower"},
+		"yama": {"kana": ["や", "ま"], "meaning": "mountain"},
+		"kawa": {"kana": ["か", "わ"], "meaning": "river"},
+		"sora": {"kana": ["そ", "ら"], "meaning": "sky"}
+	},
+	3: {
+		"sakura": {"kana": ["さ", "く", "ら"], "meaning": "cherry blossom"},
+		"kuruma": {"kana": ["く", "る", "ま"], "meaning": "car"},
+		"sushi": {"kana": ["す", "し"], "meaning": "sushi"},
+		"tsuki": {"kana": ["つ", "き"], "meaning": "moon"},
+		"hoshi": {"kana": ["ほ", "し"], "meaning": "star"},
+		"mizu": {"kana": ["み", "ず"], "meaning": "water"},
+		"take": {"kana": ["た", "け"], "meaning": "bamboo"}
+	},
+	4: {
+		"ringo": {"kana": ["り", "ん", "ご"], "meaning": "apple"},
+		"kaze": {"kana": ["か", "ぜ"], "meaning": "wind"},
+		"eiga": {"kana": ["え", "い", "が"], "meaning": "movie"},
+		"chizu": {"kana": ["ち", "ず"], "meaning": "map"},
+		"kagi": {"kana": ["か", "ぎ"], "meaning": "key"},
+		"mado": {"kana": ["ま", "ど"], "meaning": "window"}
+	},
+	5: {
+		"sanpo": {"kana": ["さ", "ん", "ぽ"], "meaning": "walk"},
+		"shimbun": {"kana": ["し", "ん", "ぶ", "ん"], "meaning": "newspaper"},
+		"tempura": {"kana": ["て", "ん", "ぷ", "ら"], "meaning": "tempura"},
+		"empitsu": {"kana": ["え", "ん", "ぴ", "つ"], "meaning": "pencil"},
+		"kingyo": {"kana": ["き", "ん", "ぎ", "ょ"], "meaning": "goldfish"}
+	},
+	6: {
+		"kitte": {"kana": ["き", "っ", "て"], "meaning": "postage stamp"},
+		"kippu": {"kana": ["き", "っ", "ぷ"], "meaning": "ticket"},
+		"gakkou": {"kana": ["が", "っ", "こ", "う"], "meaning": "school"},
+		"zasshi": {"kana": ["ざ", "っ", "し"], "meaning": "magazine"},
+		"shippo": {"kana": ["し", "っ", "ぽ"], "meaning": "tail"}
+	},
+	7: {
+		"hikouki": {"kana": ["ひ", "こ", "う", "き"], "meaning": "airplane"},
+		"chikatetsu": {"kana": ["ち", "か", "て", "つ"], "meaning": "subway"},
+		"ongaku": {"kana": ["お", "ん", "が", "く"], "meaning": "music"},
+		"byouin": {"kana": ["び", "ょ", "う", "い", "ん"], "meaning": "hospital"},
+		"ryokou": {"kana": ["り", "ょ", "こ", "う"], "meaning": "travel"}
+	},
+	8: {
+		"nihongo": {"kana": ["に", "ほ", "ん", "ご"], "meaning": "japanese"},
+		"toukyou": {"kana": ["と", "う", "き", "ょ", "う"], "meaning": "tokyo"},
+		"sensei": {"kana": ["せ", "ん", "せ", "い"], "meaning": "teacher"},
+		"arigatou": {"kana": ["あ", "り", "が", "と", "う"], "meaning": "thank you"},
+		"shoubousha": {"kana": ["し", "ょ", "う", "ぼ", "う", "し", "ゃ"], "meaning": "fire engine"}
+	}
 }
 
-## 2. Separate Katakana Vocabulary Dictionary
-var katakana_dictionary: Dictionary = {
-	"terebi": {"kana": ["テ", "レ", "ビ"], "meaning": "television"},
-	"ramen": {"kana": ["ラ", "ー", "メ", "ン"], "meaning": "ramen"},
-	"kohii": {"kana": ["コ", "ー", "ヒ", "ー"], "meaning": "coffee"},
-	"basu": {"kana": ["バ", "ス"], "meaning": "bus"},
-	"kamera": {"kana": ["カ", "メ", "ラ"], "meaning": "camera"},
-	"anime": {"kana": ["ア", "ニ", "メ"], "meaning": "anime"},
-	"pan": {"kana": ["パ", "ン"], "meaning": "bread"},
-	"aisu": {"kana": ["ア", "イ", "ス"], "meaning": "ice cream"},
-	"keeki": {"kana": ["ケ", "ー", "キ"], "meaning": "cake"},
-	"taoru": {"kana": ["タ", "オ", "ル"], "meaning": "towel"},
-	"doa": {"kana": ["ド", "ア"], "meaning": "door"},
-	"rajio": {"kana": ["ラ", "ジ", "オ"], "meaning": "radio"},
-	"nooto": {"kana": ["ノ", "ー", "ト"], "meaning": "notebook"},
-	"sofaa": {"kana": ["ソ", "フ", "ァ", "ー"], "meaning": "sofa"}
+## 2. 8-Stage Katakana Vocabulary Dictionaries
+var katakana_stages: Dictionary = {
+	1: {
+		"doa": {"kana": ["ド", "ア"], "meaning": "door"},
+		"ea": {"kana": ["エ", "ア"], "meaning": "air"},
+		"aisu": {"kana": ["ア", "イ", "ス"], "meaning": "ice cream"},
+		"memo": {"kana": ["メ", "モ"], "meaning": "memo"},
+		"basu": {"kana": ["バ", "ス"], "meaning": "bus"}
+	},
+	2: {
+		"pan": {"kana": ["パ", "ン"], "meaning": "bread"},
+		"keeki": {"kana": ["ケ", "ー", "キ"], "meaning": "cake"},
+		"kohii": {"kana": ["コ", "ー", "ヒ", "ー"], "meaning": "coffee"},
+		"tomato": {"kana": ["ト", "マ", "ト"], "meaning": "tomato"},
+		"banana": {"kana": ["バ", "ナ", "ナ"], "meaning": "banana"}
+	},
+	3: {
+		"terebi": {"kana": ["テ", "レ", "ビ"], "meaning": "television"},
+		"rajio": {"kana": ["ラ", "ジ", "オ"], "meaning": "radio"},
+		"kamera": {"kana": ["カ", "メ", "ラ"], "meaning": "camera"},
+		"taoru": {"kana": ["タ", "オ", "ル"], "meaning": "towel"},
+		"nooto": {"kana": ["ノ", "ー", "ト"], "meaning": "notebook"},
+		"sofaa": {"kana": ["ソ", "フ", "ァ", "ー"], "meaning": "sofa"}
+	},
+	4: {
+		"takushii": {"kana": ["タ", "ク", "シ", "ー"], "meaning": "taxi"},
+		"beru": {"kana": ["ベ", "ル"], "meaning": "bell"},
+		"beddo": {"kana": ["ベ", "ッ", "ド"], "meaning": "bed"},
+		"gorufu": {"kana": ["ゴ", "ル", "フ"], "meaning": "golf"},
+		"bideo": {"kana": ["ビ", "デ", "オ"], "meaning": "video"}
+	},
+	5: {
+		"piano": {"kana": ["ピ", "ア", "ノ"], "meaning": "piano"},
+		"piza": {"kana": ["ピ", "ザ"], "meaning": "pizza"},
+		"pasokon": {"kana": ["パ", "ソ", "コ", "ン"], "meaning": "pc"},
+		"posuto": {"kana": ["ポ", "ス", "ト"], "meaning": "postbox"},
+		"purin": {"kana": ["プ", "リ", "ン"], "meaning": "pudding"}
+	},
+	6: {
+		"ramen": {"kana": ["ラ", "ー", "メ", "ン"], "meaning": "ramen"},
+		"sukeeto": {"kana": ["ス", "ケ", "ー", "ト"], "meaning": "skating"},
+		"supuun": {"kana": ["ス", "プ", "ー", "ン"], "meaning": "spoon"},
+		"koppu": {"kana": ["コ", "ッ", "プ"], "meaning": "cup"},
+		"rokkaa": {"kana": ["ロ", "ッ", "カ", "ー"], "meaning": "locker"}
+	},
+	7: {
+		"anime": {"kana": ["ア", "ニ", "メ"], "meaning": "anime"},
+		"sumaho": {"kana": ["ス", "マ", "ホ"], "meaning": "smartphone"},
+		"hoteru": {"kana": ["ホ", "テ", "ル"], "meaning": "hotel"},
+		"roketto": {"kana": ["ロ", "ケ", "ッ", "ト"], "meaning": "rocket"},
+		"sukii": {"kana": ["ス", "キ", "ー"], "meaning": "skiing"}
+	},
+	8: {
+		"erebeetaa": {"kana": ["エ", "レ", "ベ", "ー", "タ", "ー"], "meaning": "elevator"},
+		"esukareetaa": {"kana": ["エ", "ス", "カ", "レ", "ー", "タ", "ー"], "meaning": "escalator"},
+		"resutoran": {"kana": ["レ", "ス", "ト", "ラ", "ン"], "meaning": "restaurant"},
+		"supaagettii": {"kana": ["ス", "パ", "ゲ", "ッ", "テ", "ィ"], "meaning": "spaghetti"},
+		"konpyuuta": {"kana": ["コ", "ン", "ピ", "ュ", "ー", "タ"], "meaning": "computer"}
+	}
 }
 
 ## Hiragana syllabary pool for decoys
@@ -81,7 +179,8 @@ const KATAKANA_POOL: Array[String] = [
 	"ザ", "ジ", "ズ", "ゼ", "ゾ",
 	"ダ", "デ", "ド",
 	"バ", "ビ", "ブ", "ベ", "ボ",
-	"パ", "ピ", "プ", "ペ", "ポ"
+	"パ", "ピ", "プ", "ペ", "ポ",
+	"ー"
 ]
 
 ## Game state tracking per mode
@@ -102,6 +201,8 @@ var katakana_cleared: int = 0
 @onready var spelling_progress_label: Label = $UI/SpellingProgressLabel
 @onready var score_label: Label = $UI/ScoreLabel
 @onready var words_count_label: Label = $UI/WordsCountLabel
+@onready var stage_badge: Label = $UI/StageBadge
+@onready var stage_words_label: Label = $UI/StageWordsLabel
 @onready var hiragana_tab: Button = $UI/HiraganaTab
 @onready var katakana_tab: Button = $UI/KatakanaTab
 @onready var header_gold_border: ColorRect = $UI/HeaderGoldBorder
@@ -118,6 +219,13 @@ var katakana_cleared: int = 0
 @onready var btn_restart: Button = $UI/PauseModal/ModalPanel/Margin/VBox/BtnRestart
 @onready var btn_switch_kana: Button = $UI/PauseModal/ModalPanel/Margin/VBox/BtnSwitchKana
 @onready var btn_return_title: Button = $UI/PauseModal/ModalPanel/Margin/VBox/BtnReturnTitle
+
+@onready var stage_clear_modal: Control = $UI/StageClearModal
+@onready var stage_clear_title: Label = $UI/StageClearModal/ModalPanel/Margin/VBox/Title
+@onready var stage_clear_subtitle: Label = $UI/StageClearModal/ModalPanel/Margin/VBox/Subtitle
+@onready var stage_clear_stats: Label = $UI/StageClearModal/ModalPanel/Margin/VBox/StatsLabel
+@onready var btn_next_stage: Button = $UI/StageClearModal/ModalPanel/Margin/VBox/BtnNextStage
+@onready var btn_clear_return_title: Button = $UI/StageClearModal/ModalPanel/Margin/VBox/BtnClearReturnTitle
 
 var spawn_points: Array[Marker2D] = []
 
@@ -148,6 +256,12 @@ func _ready() -> void:
 	if btn_return_title:
 		btn_return_title.pressed.connect(_on_return_title_pressed)
 	
+	# Connect Stage Clear modal buttons
+	if btn_next_stage:
+		btn_next_stage.pressed.connect(_on_next_stage_pressed)
+	if btn_clear_return_title:
+		btn_clear_return_title.pressed.connect(_on_return_title_pressed)
+	
 	# Cache all pre-defined Marker2D spawn points
 	for child in spawn_points_node.get_children():
 		if child is Marker2D:
@@ -157,13 +271,17 @@ func _ready() -> void:
 	update_tab_styles()
 	start_new_word()
 
-## Parses command-line arguments and environment variables to set initial mode
+## Parses command-line arguments and environment variables to set initial mode and stage
 func _parse_cmd_line_arguments() -> void:
 	var env_mode = OS.get_environment("NIHONGO_SNIPER_MODE").to_lower()
 	if env_mode == "katakana":
 		current_mode = KanaMode.KATAKANA
 	elif env_mode == "hiragana":
 		current_mode = KanaMode.HIRAGANA
+	
+	var env_st = OS.get_environment("NIHONGO_SNIPER_STAGE")
+	if env_st != "" and env_st.is_valid_int():
+		current_stage = clampi(env_st.to_int(), 1, MAX_STAGES)
 	
 	var args = OS.get_cmdline_user_args()
 	if args.is_empty():
@@ -175,11 +293,37 @@ func _parse_cmd_line_arguments() -> void:
 				current_mode = KanaMode.KATAKANA
 			elif val == "hiragana":
 				current_mode = KanaMode.HIRAGANA
+		elif args[i] == "--stage" and i + 1 < args.size():
+			var val = args[i + 1]
+			if val.is_valid_int():
+				current_stage = clampi(val.to_int(), 1, MAX_STAGES)
 
+## Returns the active stage difficulty parameters (motion type, movement speed, decoy count)
+func get_stage_difficulty_settings(stage: int) -> Dictionary:
+	match stage:
+		1:
+			return {"motion": 0, "speed": 0.0, "decoys": 3} # Stationary Novice
+		2:
+			return {"motion": 1, "speed": 0.0, "decoys": 4} # Gentle Vertical Bobbing
+		3:
+			return {"motion": 2, "speed": 0.0, "decoys": 4} # Horizontal Sway
+		4:
+			return {"motion": 3, "speed": 55.0, "decoys": 5} # Shelf Patrol Movement
+		5:
+			return {"motion": 3, "speed": 80.0, "decoys": 5} # Fast Patrol with Reversals
+		6:
+			return {"motion": 4, "speed": 95.0, "decoys": 6} # Sinusoidal Wave Patrol
+		7:
+			return {"motion": 3, "speed": 120.0, "decoys": 6} # High-Speed Patrol
+		8:
+			return {"motion": 4, "speed": 140.0, "decoys": 7} # Master Wave Gauntlet
+		_:
+			return {"motion": 0, "speed": 0.0, "decoys": 4}
 
-## Returns the active vocabulary dictionary based on current mode
+## Returns the active vocabulary dictionary based on current mode and stage
 func get_active_dictionary() -> Dictionary:
-	return hiragana_dictionary if current_mode == KanaMode.HIRAGANA else katakana_dictionary
+	var stage_dict = hiragana_stages if current_mode == KanaMode.HIRAGANA else katakana_stages
+	return stage_dict.get(current_stage, stage_dict[1])
 
 ## Returns the Kana character sequence for the current active word
 func get_current_word_chars() -> Array:
@@ -234,6 +378,7 @@ func set_mode(new_mode: KanaMode) -> void:
 	current_mode = new_mode
 	if shot_player:
 		shot_player.play()
+	stage_words_cleared = 0
 	update_tab_styles()
 	start_new_word()
 
@@ -263,6 +408,9 @@ func update_tab_styles() -> void:
 
 ## Toggles Pause modal and game state
 func toggle_pause() -> void:
+	if stage_clear_modal and stage_clear_modal.visible:
+		return
+	
 	var new_paused = not get_tree().paused
 	get_tree().paused = new_paused
 	if pause_modal:
@@ -285,6 +433,7 @@ func _on_restart_pressed() -> void:
 	if get_tree().paused:
 		toggle_pause()
 	current_character_index = 0
+	stage_words_cleared = 0
 	if current_mode == KanaMode.HIRAGANA:
 		hiragana_score = 0
 		hiragana_cleared = 0
@@ -299,11 +448,86 @@ func _on_switch_kana_pressed() -> void:
 func _on_return_title_pressed() -> void:
 	if get_tree().paused:
 		get_tree().paused = false
+	if stage_clear_modal:
+		stage_clear_modal.visible = false
 	get_tree().quit()
+
+## Displays the Stage Clear celebration modal
+func show_stage_clear_modal() -> void:
+	if targets_container:
+		for child in targets_container.get_children():
+			child.queue_free()
+	
+	if stage_clear_modal:
+		stage_clear_modal.visible = true
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		if crosshair:
+			crosshair.visible = false
+		
+		var acc = 100
+		if total_shots_fired > 0:
+			acc = int((float(total_hits_accurate) / float(total_shots_fired)) * 100.0)
+		
+		if stage_clear_title:
+			if current_stage >= MAX_STAGES:
+				stage_clear_title.text = "★ GRAND MASTER SNIPER! ★"
+			else:
+				stage_clear_title.text = "STAGE %d CLEARED!" % current_stage
+		
+		if stage_clear_subtitle:
+			if current_stage >= MAX_STAGES:
+				stage_clear_subtitle.text = "ALL 8 STAGES CONQUERED! (全ステージ制覇)"
+			else:
+				stage_clear_subtitle.text = "EXCELLENT MARKSMANSHIP!"
+		
+		if stage_clear_stats:
+			stage_clear_stats.text = "STAGE WORDS: %d/%d  •  ACCURACY: %d%%  •  SCORE: %d" % [WORDS_PER_STAGE, WORDS_PER_STAGE, acc, get_current_score()]
+		
+		if btn_next_stage:
+			if current_stage >= MAX_STAGES:
+				btn_next_stage.text = "►  REPLAY FROM STAGE 1   [(A) / ENTER]"
+			else:
+				btn_next_stage.text = "►  NEXT STAGE (STAGE %02d)   [(A) / ENTER]" % (current_stage + 1)
+			btn_next_stage.grab_focus()
+
+func _on_next_stage_pressed() -> void:
+	if stage_clear_modal:
+		stage_clear_modal.visible = false
+	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
+	if crosshair:
+		crosshair.visible = true
+	
+	if current_stage >= MAX_STAGES:
+		current_stage = 1
+	else:
+		current_stage += 1
+	
+	stage_words_cleared = 0
+	start_new_word()
 
 ## Handles quick desktop / Steam Deck / Gamepad shortcuts
 func _unhandled_input(event: InputEvent) -> void:
-	# 1. When Paused:
+	# 1. When Stage Clear Modal is active:
+	if stage_clear_modal and stage_clear_modal.visible:
+		if event is InputEventKey and event.pressed:
+			match event.keycode:
+				KEY_ENTER, KEY_SPACE:
+					_on_next_stage_pressed()
+					get_viewport().set_input_as_handled()
+				KEY_ESCAPE, KEY_Q, KEY_B:
+					_on_return_title_pressed()
+					get_viewport().set_input_as_handled()
+		elif event is InputEventJoypadButton and event.pressed:
+			match event.button_index:
+				JOY_BUTTON_A, 0:
+					_on_next_stage_pressed()
+					get_viewport().set_input_as_handled()
+				JOY_BUTTON_B, JOY_BUTTON_START, JOY_BUTTON_BACK, JOY_BUTTON_X, 1, 2, 3:
+					_on_return_title_pressed()
+					get_viewport().set_input_as_handled()
+		return
+
+	# 2. When Paused:
 	if get_tree().paused:
 		if event is InputEventKey and event.pressed:
 			match event.keycode:
@@ -332,7 +556,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					get_viewport().set_input_as_handled()
 		return
 
-	# 2. When Playing:
+	# 3. When Playing:
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
 			KEY_ESCAPE, KEY_P:
@@ -363,7 +587,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## Handles gamepad shot trigger hitting a target at crosshair location
 func _on_gamepad_shot(shot_pos: Vector2) -> void:
-	if get_tree().paused:
+	if get_tree().paused or (stage_clear_modal and stage_clear_modal.visible):
 		return
 	var hit_target: Node = null
 	var min_dist: float = 54.0 # Target radius is 48
@@ -377,10 +601,11 @@ func _on_gamepad_shot(shot_pos: Vector2) -> void:
 	if hit_target:
 		_on_target_clicked(hit_target.character)
 	else:
+		total_shots_fired += 1
 		if shot_player:
 			shot_player.play()
 
-## Picks a new random word from active mode dictionary, resets index, updates UI
+## Picks a new random word from active mode stage dictionary, resets index, updates UI
 func start_new_word() -> void:
 	var dict = get_active_dictionary()
 	var keys = dict.keys()
@@ -398,7 +623,7 @@ func start_new_word() -> void:
 	update_ui()
 	spawn_targets()
 
-## Clears existing targets, generates decoys from mode syllabary pool, and spawns targets
+## Clears existing targets, generates decoys from mode syllabary pool, and spawns targets with stage motion
 func spawn_targets() -> void:
 	for child in targets_container.get_children():
 		child.queue_free()
@@ -413,9 +638,10 @@ func spawn_targets() -> void:
 	# 1. Correct next Kana character
 	var correct_char: String = word_chars[current_character_index]
 	
-	# 2. Pick 3 to 4 random decoy characters strictly from active mode pool
+	# 2. Pick decoys based on stage difficulty
+	var diff = get_stage_difficulty_settings(current_stage)
+	var num_decoys: int = diff.get("decoys", 4)
 	var pool = get_active_pool()
-	var num_decoys: int = randi_range(3, 4)
 	var available_decoys: Array[String] = pool.duplicate()
 	available_decoys.erase(correct_char)
 	available_decoys.shuffle()
@@ -426,7 +652,7 @@ func spawn_targets() -> void:
 	
 	chosen_chars.shuffle()
 	
-	# 3. Place at random Marker2D spawn points
+	# 3. Place at random Marker2D spawn points with stage motion
 	var available_points: Array[Marker2D] = spawn_points.duplicate()
 	available_points.shuffle()
 	
@@ -438,6 +664,8 @@ func spawn_targets() -> void:
 		target_instance.position = marker.position
 		targets_container.add_child(target_instance)
 		target_instance.set_character(chosen_chars[i])
+		if target_instance.has_method("setup_motion"):
+			target_instance.setup_motion(diff.get("motion", 0), diff.get("speed", 0.0))
 		target_instance.target_clicked.connect(_on_target_clicked)
 
 ## Evaluates clicked target character
@@ -445,6 +673,7 @@ func _on_target_clicked(clicked_character: String) -> void:
 	if current_word == "":
 		return
 	
+	total_shots_fired += 1
 	var word_chars: Array = get_current_word_chars()
 	if current_character_index >= word_chars.size():
 		return
@@ -452,6 +681,7 @@ func _on_target_clicked(clicked_character: String) -> void:
 	var expected_char: String = word_chars[current_character_index]
 	
 	if clicked_character == expected_char:
+		total_hits_accurate += 1
 		# Correct target shot!
 		if shot_player:
 			shot_player.play()
@@ -471,10 +701,17 @@ func _on_target_clicked(clicked_character: String) -> void:
 			# Full word completed!
 			add_current_score(10)
 			add_current_cleared()
-			if fanfare_player:
-				fanfare_player.play()
+			stage_words_cleared += 1
 			update_ui()
-			get_tree().create_timer(0.45).timeout.connect(start_new_word)
+			
+			if stage_words_cleared >= WORDS_PER_STAGE:
+				if fanfare_player:
+					fanfare_player.play()
+				get_tree().create_timer(0.45).timeout.connect(show_stage_clear_modal)
+			else:
+				if fanfare_player:
+					fanfare_player.play()
+				get_tree().create_timer(0.45).timeout.connect(start_new_word)
 		else:
 			get_tree().create_timer(0.2).timeout.connect(spawn_targets)
 	else:
@@ -523,7 +760,13 @@ func update_ui() -> void:
 	
 	spelling_progress_label.text = progress_str
 	
+	# Stage Badges
+	if stage_badge:
+		stage_badge.text = "STAGE %02d/%02d" % [current_stage, MAX_STAGES]
+	if stage_words_label:
+		stage_words_label.text = "TARGET: %d/%d WORDS" % [mini(stage_words_cleared + 1, WORDS_PER_STAGE), WORDS_PER_STAGE]
+	
 	# Score and Cleared counters for active mode
 	score_label.text = "SCORE: %d" % get_current_score()
 	if words_count_label:
-		words_count_label.text = "CLEARED: %d" % get_current_cleared()
+		words_count_label.text = "TOTAL CLEARED: %d" % get_current_cleared()

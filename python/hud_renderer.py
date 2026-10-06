@@ -10,7 +10,8 @@ from game_config import (
     SCREEN_WIDTH, SCREEN_HEIGHT, TOTAL_STAGES, SECRET_STAGE, STAGE_NAMES, STAGE_ENV_NOTES,
     COLOR_PANEL_BG, COLOR_PANEL_BORDER, COLOR_GOLD, COLOR_CYAN, COLOR_WHITE,
     GAME_VERSION, TOTAL_GAUNTLET_KANA, get_stage_kana, get_asset_path,
-    CARD_TOTAL_STAGES, CARD_STAGE_INFO, KATAKANA_CARD_TOTAL_STAGES, KATAKANA_CARD_STAGE_INFO
+    CARD_TOTAL_STAGES, CARD_STAGE_INFO, KATAKANA_CARD_TOTAL_STAGES, KATAKANA_CARD_STAGE_INFO,
+    SNIPER_TOTAL_STAGES, SNIPER_STAGE_INFO, KATAKANA_SNIPER_TOTAL_STAGES, KATAKANA_SNIPER_STAGE_INFO
 )
 
 class HudRenderer:
@@ -725,7 +726,7 @@ class HudRenderer:
             txt_nx = self.font_sub_btn.render("NEXT STAGE ►", True, (180, 220, 255))
             surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
 
-        else:
+        elif game_mode in ("cards", "hiragana_cards", "katakana_cards"):
             # 3D Cards Mode (Hiragana or Katakana): 8-Stage Ribbon
             is_katakana_card = (game_mode == "katakana_cards")
             n_stages = KATAKANA_CARD_TOTAL_STAGES if is_katakana_card else CARD_TOTAL_STAGES
@@ -831,6 +832,121 @@ class HudRenderer:
             st_bcol = COLOR_WHITE if is_blink else card_theme_col
             pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
             txt_st = self.font_btn.render("► START BATTLE (A / ENTER) ◄", True, st_bcol)
+            surface.blit(txt_st, txt_st.get_rect(center=btn_start.center))
+
+            # Next Button
+            btn_next = pygame.Rect(cx + 310, btn_y, 220, 56)
+            pygame.draw.rect(surface, (16, 25, 40), btn_next, border_radius=10)
+            pygame.draw.rect(surface, (0, 160, 240), btn_next, 2, border_radius=10)
+            txt_nx = self.font_sub_btn.render("NEXT STAGE ►", True, (180, 220, 255))
+            surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
+
+        else:
+            # The Gallery Sniper Mode (Hiragana or Katakana): 8-Stage Ribbon
+            is_katakana_sniper = (game_mode == "katakana_sniper")
+            n_stages = KATAKANA_SNIPER_TOTAL_STAGES if is_katakana_sniper else SNIPER_TOTAL_STAGES
+            sniper_info_dict = KATAKANA_SNIPER_STAGE_INFO if is_katakana_sniper else SNIPER_STAGE_INFO
+            sniper_theme_col = (0, 240, 180) if is_katakana_sniper else (255, 80, 80)
+            pill_w = 110
+            pill_h = 46
+            gap = 14
+            total_w = n_stages * pill_w + (n_stages - 1) * gap
+            start_x = cx - total_w // 2
+            ribbon_y = 216
+
+            for st in range(1, n_stages + 1):
+                px = start_x + (st - 1) * (pill_w + gap)
+                p_rect = pygame.Rect(px, ribbon_y, pill_w, pill_h)
+                is_cur = (st == selected_stage)
+
+                if is_cur:
+                    bg_col = (20, 44, 38) if is_katakana_sniper else (46, 24, 24)
+                    pygame.draw.rect(surface, bg_col, p_rect, border_radius=8)
+                    b_col = COLOR_WHITE if is_blink else sniper_theme_col
+                    pygame.draw.rect(surface, b_col, p_rect, 3, border_radius=8)
+                    lbl = f"{st:02d}"
+                    txt_p = self.font_sub.render(lbl, True, sniper_theme_col)
+                else:
+                    pygame.draw.rect(surface, (14, 20, 32), p_rect, border_radius=8)
+                    pygame.draw.rect(surface, (70, 95, 130), p_rect, 2, border_radius=8)
+                    lbl = f"{st:02d}"
+                    txt_p = self.font_sub.render(lbl, True, (130, 155, 180))
+
+                surface.blit(txt_p, txt_p.get_rect(center=p_rect.center))
+
+            # Sniper Showcase Panel
+            card_w = 1180
+            card_h = 440
+            card_x = cx - card_w // 2
+            card_y = 286
+            c_rect = pygame.Rect(card_x, card_y, card_w, card_h)
+
+            pygame.draw.rect(surface, (12, 18, 30), c_rect, border_radius=14)
+            pygame.draw.rect(surface, sniper_theme_col, c_rect, 3, border_radius=14)
+
+            # Retrieve stage configuration
+            info = sniper_info_dict.get(selected_stage, sniper_info_dict[1])
+
+            # Stage Name & Subtitle
+            st_title = f"STAGE {selected_stage:02d} : {info['title']}"
+            txt_st_title = self.font_menu.render(st_title, True, sniper_theme_col)
+            surface.blit(txt_st_title, txt_st_title.get_rect(center=(cx, card_y + 44)))
+
+            stars = "★" * info["difficulty"] + "☆" * (8 - info["difficulty"])
+            txt_sub_jp = self.font_kana_sub.render(f"{info['japanese']}   |   DIFFICULTY: {stars}", True, (180, 215, 245))
+            surface.blit(txt_sub_jp, txt_sub_jp.get_rect(center=(cx, card_y + 82)))
+
+            # Divider line 1
+            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
+
+            # Section Header
+            txt_sec = self.font_caption.render(f"★ STAGE {selected_stage:02d} TARGETS & GALLERY CHALLENGE ★", True, theme_col)
+            surface.blit(txt_sec, txt_sec.get_rect(center=(cx, card_y + 138)))
+
+            # Summary
+            txt_sum = self.font_kana_body.render(info["summary"], True, COLOR_WHITE)
+            surface.blit(txt_sum, txt_sum.get_rect(center=(cx, card_y + 175)))
+
+            # Target Kana preview
+            k_preview = "      ".join(info["kana_preview"])
+            txt_k = self.font_kana_title.render(k_preview, True, sniper_theme_col)
+            surface.blit(txt_k, txt_k.get_rect(center=(cx, card_y + 225)))
+
+            # Sample words
+            sample_words = info["words"]
+            w_preview = "TARGET WORDS: " + "   •   ".join(sample_words)
+            txt_w = self.font_kana_body.render(w_preview, True, (180, 225, 255))
+            if txt_w.get_width() > card_w - 80:
+                w_preview = "TARGET WORDS: " + "   •   ".join(sample_words[:4]) + "   •   etc."
+                txt_w = self.font_kana_body.render(w_preview, True, (180, 225, 255))
+            surface.blit(txt_w, txt_w.get_rect(center=(cx, card_y + 278)))
+
+            # Controls Hint
+            txt_tips = self.font_caption.render("CONTROLS: Aim [Stick / Mouse]  •  Shoot [(A) / RT / Left-Click]  •  Pause [Start / Esc]", True, (255, 220, 140))
+            surface.blit(txt_tips, txt_tips.get_rect(center=(cx, card_y + 325)))
+
+            # Divider line 2
+            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
+
+            # Specs
+            txt_specs = self.font_caption.render(f"STAGE GOAL: 3 WORDS CLEARED    |    SHELVES: 3 TIERS    |    ENGINE: GODOT 2D SNIPER", True, (160, 200, 235))
+            surface.blit(txt_specs, txt_specs.get_rect(center=(cx, card_y + 400)))
+
+            # Action Buttons
+            btn_y = 758
+            # Prev Button
+            btn_prev = pygame.Rect(cx - 530, btn_y, 220, 56)
+            pygame.draw.rect(surface, (16, 25, 40), btn_prev, border_radius=10)
+            pygame.draw.rect(surface, (0, 160, 240), btn_prev, 2, border_radius=10)
+            txt_pv = self.font_sub_btn.render("◄ PREV STAGE", True, (180, 220, 255))
+            surface.blit(txt_pv, txt_pv.get_rect(center=btn_prev.center))
+
+            # Start Battle Button (Highlighted)
+            btn_start = pygame.Rect(cx - 280, btn_y, 560, 56)
+            pygame.draw.rect(surface, (22, 38, 62), btn_start, border_radius=10)
+            st_bcol = COLOR_WHITE if is_blink else sniper_theme_col
+            pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
+            txt_st = self.font_btn.render("► START SHOOTING (A / ENTER) ◄", True, st_bcol)
             surface.blit(txt_st, txt_st.get_rect(center=btn_start.center))
 
             # Next Button

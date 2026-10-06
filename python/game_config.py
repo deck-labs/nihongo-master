@@ -266,6 +266,149 @@ KATAKANA_CARD_STAGE_INFO = {
     }
 }
 
+# ==============================================================================
+# THE GALLERY SNIPER (HIRAGANA) STAGE CONFIGURATIONS (8 Stages - Godot 2D Engine)
+# ==============================================================================
+SNIPER_TOTAL_STAGES = 8
+
+SNIPER_STAGE_INFO = {
+    1: {
+        "title": "BASIC VOWELS & NOVICE GALLERY",
+        "japanese": "基本母音・静止標的（あ・い・う・え・お）",
+        "difficulty": 1,
+        "words": ["あお (Blue)", "いえ (House)", "うえ (Above)", "あい (Love)", "あき (Autumn)", "うみ (Sea)"],
+        "summary": "Stationary targets on shooting gallery shelves. Master foundational vowels and simple 2-kana terms with 3 decoys.",
+        "kana_preview": ["あ", "い", "う", "え", "お"]
+    },
+    2: {
+        "title": "NATURE & GENTLE BOBBING",
+        "japanese": "自然と動物・揺れる標的（ねこ・いぬ・とり）",
+        "difficulty": 2,
+        "words": ["ねこ (Cat)", "いぬ (Dog)", "とり (Bird)", "かめ (Turtle)", "はな (Flower)", "やま (Mountain)"],
+        "summary": "Targets gently bob vertically on shelves. Identify familiar nature and animal words with 4 decoys.",
+        "kana_preview": ["ね", "い", "と", "か", "は", "や"]
+    },
+    3: {
+        "title": "DAILY LIFE & HORIZONTAL SWAY",
+        "japanese": "日常生活・左右揺動（さくら・くるま・すし）",
+        "difficulty": 3,
+        "words": ["さくら (Cherry Blossom)", "くるま (Car)", "すし (Sushi)", "つき (Moon)", "ほし (Star)", "みず (Water)"],
+        "summary": "Targets sway smoothly from side to side. Form everyday 3-kana terms while tracking floating targets with 5 decoys.",
+        "kana_preview": ["さ", "く", "す", "つ", "ほ", "み"]
+    },
+    4: {
+        "title": "VOICED DAKUTEN & SHELF PATROL",
+        "japanese": "濁音巡回（りんご・かぜ・えいが・まど）",
+        "difficulty": 4,
+        "words": ["りんご (Apple)", "かぜ (Wind)", "えいが (Movie)", "ちず (Map)", "かぎ (Key)", "まど (Window)"],
+        "summary": "Targets patrol along the shelves at moderate speed. Spot voiced Dakuten characters (が・ざ・だ・ば) among unvoiced traps.",
+        "kana_preview": ["が", "ぎ", "ざ", "だ", "ば", "ご"]
+    },
+    5: {
+        "title": "HANDAKUTEN & REVERSAL PATROL",
+        "japanese": "半濁音・撥音・反転巡回（さんぽ・しんぶん）",
+        "difficulty": 5,
+        "words": ["さんぽ (Walk)", "しんぶん (Newspaper)", "てんぷら (Tempura)", "えんぴつ (Pencil)", "きんぎょ (Goldfish)"],
+        "summary": "Faster moving targets with direction reversals. Practice P-sounds (ぱ行) and nasal 'ん' across gallery shelves.",
+        "kana_preview": ["ぱ", "ぴ", "ぷ", "ぺ", "ぽ", "ん"]
+    },
+    6: {
+        "title": "SOKUON & SINUSOIDAL WAVES",
+        "japanese": "促音「っ」・波動巡回（きって・きっぷ・がっこう）",
+        "difficulty": 6,
+        "words": ["きって (Stamp)", "きっぷ (Ticket)", "がっこう (School)", "ざっし (Magazine)", "しっぽ (Tail)"],
+        "summary": "Targets patrol horizontally while undulating vertically in wave formations. Master small 'っ' geminate double stops.",
+        "kana_preview": ["っ", "つ", "き", "て", "が", "こ"]
+    },
+    7: {
+        "title": "ADVANCED COMPOUNDS & RAPID PATROL",
+        "japanese": "上級語彙・高速標的（ひこうき・ちかてつ・おんがく）",
+        "difficulty": 7,
+        "words": ["ひこうき (Airplane)", "ちかてつ (Subway)", "おんがく (Music)", "びょういん (Hospital)", "りょこう (Travel)"],
+        "summary": "High-speed moving targets with variable shelf velocities. Multi-syllable compound vocabulary with 6 decoys.",
+        "kana_preview": ["ひ", "こ", "ち", "お", "び", "り"]
+    },
+    8: {
+        "title": "GRAND MASTER SNIPER GAUNTLET",
+        "japanese": "神業狙撃手・最終試練（にほんご・とうきょう）",
+        "difficulty": 8,
+        "words": ["にほんご (Japanese)", "とうきょう (Tokyo)", "せんせい (Teacher)", "ありがとう (Thank You)", "しょうぼうしゃ (Fire Engine)"],
+        "summary": "The ultimate test of precision and speed! Fast wave patrol targets with erratic maneuvers and 7 decoy traps.",
+        "kana_preview": ["に", "ほ", "と", "う", "せ", "あ"]
+    }
+}
+
+# ==============================================================================
+# THE GALLERY SNIPER (KATAKANA) STAGE CONFIGURATIONS (8 Stages - Godot 2D Engine)
+# ==============================================================================
+KATAKANA_SNIPER_TOTAL_STAGES = 8
+
+KATAKANA_SNIPER_STAGE_INFO = {
+    1: {
+        "title": "BASIC LOANWORDS & NOVICE GALLERY",
+        "japanese": "基本外来語・静止標的（ドア・エア・アイス）",
+        "difficulty": 1,
+        "words": ["ドア (Door)", "エア (Air)", "アイス (Ice Cream)", "メモ (Memo)", "バス (Bus)"],
+        "summary": "Stationary targets on gallery shelves. Master fundamental Katakana loanwords with 3 decoys.",
+        "kana_preview": ["ア", "イ", "ウ", "エ", "オ"]
+    },
+    2: {
+        "title": "CAFE & FOOD & GENTLE BOBBING",
+        "japanese": "カフェと食べ物・揺れる標的（パン・ケーキ・トマト）",
+        "difficulty": 2,
+        "words": ["パン (Bread)", "ケーキ (Cake)", "コーヒー (Coffee)", "トマト (Tomato)", "バナナ (Banana)"],
+        "summary": "Targets bob gently up and down on shelves. Common cafe and dining loanwords with 4 decoys.",
+        "kana_preview": ["パ", "ケ", "コ", "ト", "バ", "ー"]
+    },
+    3: {
+        "title": "HOUSEHOLD & HORIZONTAL SWAY",
+        "japanese": "家庭用品・左右揺動（テレビ・ラジオ・カメラ）",
+        "difficulty": 3,
+        "words": ["テレビ (Television)", "ラジオ (Radio)", "カメラ (Camera)", "タオル (Towel)", "ノート (Notebook)", "ソファー (Sofa)"],
+        "summary": "Targets sway horizontally. Read everyday technology and household loanwords with 5 decoys.",
+        "kana_preview": ["テ", "レ", "ラ", "カ", "タ", "ノ"]
+    },
+    4: {
+        "title": "DAKUTEN LOANWORDS & SHELF PATROL",
+        "japanese": "濁音外来語・巡回標的（タクシー・ベル・ベッド）",
+        "difficulty": 4,
+        "words": ["タクシー (Taxi)", "ベル (Bell)", "ベッド (Bed)", "ゴルフ (Golf)", "ビデオ (Video)"],
+        "summary": "Targets cruise along the shelves at steady speed. Voiced consonant loanwords with unvoiced distractor traps.",
+        "kana_preview": ["ガ", "ギ", "ザ", "ダ", "バ", "ビ"]
+    },
+    5: {
+        "title": "LOOKALIKE TRAPS & REVERSAL PATROL",
+        "japanese": "類似文字（シ/ツ・ソ/ン）・反転巡回（ピアノ・ピザ）",
+        "difficulty": 5,
+        "words": ["ピアノ (Piano)", "ピザ (Pizza)", "パソコン (PC)", "ポスト (Postbox)", "プリン (Pudding)"],
+        "summary": "Moving targets with directional reversals. Identify Handakuten (パ行) while distinguishing tricky lookalikes (シ/ツ, ソ/ン).",
+        "kana_preview": ["ピ", "パ", "ポ", "プ", "シ", "ツ"]
+    },
+    6: {
+        "title": "CHOONPU & SOKUON WAVE MOTION",
+        "japanese": "長音「ー」・促音「ッ」・波動巡回（ラーメン・コップ）",
+        "difficulty": 6,
+        "words": ["ラーメン (Ramen)", "スケート (Skate)", "スプーン (Spoon)", "コップ (Cup)", "ロッカー (Locker)"],
+        "summary": "Targets move in undulating sine waves across shelves. Master the long vowel dash (ー) and small 'ッ' stops.",
+        "kana_preview": ["ー", "ッ", "ラ", "ス", "コ", "ロ"]
+    },
+    7: {
+        "title": "TECH & TRAVEL & RAPID PATROL",
+        "japanese": "最新技術・高速標的（アニメ・スマホ・ホテル）",
+        "difficulty": 7,
+        "words": ["アニメ (Anime)", "スマホ (Smartphone)", "ホテル (Hotel)", "ロケット (Rocket)", "スキー (Skiing)"],
+        "summary": "High-velocity shelf patrol targets with fast pace. Modern digital and leisure vocabulary with 6 decoys.",
+        "kana_preview": ["ア", "ス", "ホ", "ロ", "マ", "キ"]
+    },
+    8: {
+        "title": "GRAND MASTER KATAKANA GAUNTLET",
+        "japanese": "免許皆伝・最終狙撃試練（エレベーター・レストラン）",
+        "difficulty": 8,
+        "words": ["エレベーター (Elevator)", "エスカレーター (Escalator)", "レストラン (Restaurant)", "スパゲッティ (Spaghetti)", "コンピュータ (Computer)"],
+        "summary": "The ultimate test of Katakana reading reflex! Rapid wave patrol targets with complex multi-syllable terms.",
+        "kana_preview": ["エ", "レ", "ス", "カ", "パ", "コ"]
+    }
+}
 
 # ==============================================================================
 # HIRAGANA SYLLABARY DEFINITIONS (46 Core + 20 Dakuten + 5 Handakuten = 71 Total)
