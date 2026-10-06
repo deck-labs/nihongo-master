@@ -900,7 +900,7 @@ class HudRenderer:
             pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
 
             # Section Header
-            txt_sec = self.font_caption.render(f"★ STAGE {selected_stage:02d} TARGETS & GALLERY CHALLENGE ★", True, theme_col)
+            txt_sec = self.font_caption.render(f"★ STAGE {selected_stage:02d} VOCABULARY & SPELLING CHALLENGE ★", True, sniper_theme_col)
             surface.blit(txt_sec, txt_sec.get_rect(center=(cx, card_y + 138)))
 
             # Summary

@@ -23,14 +23,13 @@ var hiragana_stages: Dictionary = {
 		"ie": {"kana": ["い", "え"], "meaning": "house"},
 		"ue": {"kana": ["う", "え"], "meaning": "above"},
 		"ai": {"kana": ["あ", "い"], "meaning": "love"},
-		"aki": {"kana": ["あ", "き"], "meaning": "autumn"},
+		"asa": {"kana": ["あ", "さ"], "meaning": "morning"},
 		"umi": {"kana": ["う", "み"], "meaning": "sea"}
 	},
 	2: {
 		"neko": {"kana": ["ね", "こ"], "meaning": "cat"},
 		"inu": {"kana": ["い", "ぬ"], "meaning": "dog"},
 		"tori": {"kana": ["と", "り"], "meaning": "bird"},
-		"kame": {"kana": ["か", "め"], "meaning": "turtle"},
 		"hana": {"kana": ["は", "な"], "meaning": "flower"},
 		"yama": {"kana": ["や", "ま"], "meaning": "mountain"},
 		"kawa": {"kana": ["か", "わ"], "meaning": "river"},
@@ -39,108 +38,124 @@ var hiragana_stages: Dictionary = {
 	3: {
 		"sakura": {"kana": ["さ", "く", "ら"], "meaning": "cherry blossom"},
 		"kuruma": {"kana": ["く", "る", "ま"], "meaning": "car"},
-		"sushi": {"kana": ["す", "し"], "meaning": "sushi"},
-		"tsuki": {"kana": ["つ", "き"], "meaning": "moon"},
-		"hoshi": {"kana": ["ほ", "し"], "meaning": "star"},
-		"mizu": {"kana": ["み", "ず"], "meaning": "water"},
-		"take": {"kana": ["た", "け"], "meaning": "bamboo"}
+		"tamago": {"kana": ["た", "ま", "ご"], "meaning": "egg"},
+		"kokoro": {"kana": ["こ", "こ", "ろ"], "meaning": "heart"},
+		"hikari": {"kana": ["ひ", "か", "り"], "meaning": "light"},
+		"sakana": {"kana": ["さ", "か", "な"], "meaning": "fish"}
 	},
 	4: {
 		"ringo": {"kana": ["り", "ん", "ご"], "meaning": "apple"},
-		"kaze": {"kana": ["か", "ぜ"], "meaning": "wind"},
-		"eiga": {"kana": ["え", "い", "が"], "meaning": "movie"},
-		"chizu": {"kana": ["ち", "ず"], "meaning": "map"},
-		"kagi": {"kana": ["か", "ぎ"], "meaning": "key"},
-		"mado": {"kana": ["ま", "ど"], "meaning": "window"}
+		"mikan": {"kana": ["み", "か", "ん"], "meaning": "mandarin orange"},
+		"denwa": {"kana": ["で", "ん", "わ"], "meaning": "telephone"},
+		"tegami": {"kana": ["て", "が", "み"], "meaning": "letter"},
+		"kazoku": {"kana": ["か", "ぞ", "く"], "meaning": "family"},
+		"tomodachi": {"kana": ["と", "も", "だ", "ち"], "meaning": "friend"}
 	},
 	5: {
-		"sanpo": {"kana": ["さ", "ん", "ぽ"], "meaning": "walk"},
-		"shimbun": {"kana": ["し", "ん", "ぶ", "ん"], "meaning": "newspaper"},
-		"tempura": {"kana": ["て", "ん", "ぷ", "ら"], "meaning": "tempura"},
-		"empitsu": {"kana": ["え", "ん", "ぴ", "つ"], "meaning": "pencil"},
-		"kingyo": {"kana": ["き", "ん", "ぎ", "ょ"], "meaning": "goldfish"}
-	},
-	6: {
 		"kitte": {"kana": ["き", "っ", "て"], "meaning": "postage stamp"},
 		"kippu": {"kana": ["き", "っ", "ぷ"], "meaning": "ticket"},
-		"gakkou": {"kana": ["が", "っ", "こ", "う"], "meaning": "school"},
 		"zasshi": {"kana": ["ざ", "っ", "し"], "meaning": "magazine"},
-		"shippo": {"kana": ["し", "っ", "ぽ"], "meaning": "tail"}
+		"shippo": {"kana": ["し", "っ", "ぽ"], "meaning": "tail"},
+		"sanpo": {"kana": ["さ", "ん", "ぽ"], "meaning": "walk"},
+		"tempura": {"kana": ["て", "ん", "ぷ", "ら"], "meaning": "tempura"},
+		"empitsu": {"kana": ["え", "ん", "ぴ", "つ"], "meaning": "pencil"}
 	},
-	7: {
+	6: {
+		"gakkou": {"kana": ["が", "っ", "こ", "う"], "meaning": "school"},
 		"hikouki": {"kana": ["ひ", "こ", "う", "き"], "meaning": "airplane"},
 		"chikatetsu": {"kana": ["ち", "か", "て", "つ"], "meaning": "subway"},
 		"ongaku": {"kana": ["お", "ん", "が", "く"], "meaning": "music"},
+		"sensei": {"kana": ["せ", "ん", "せ", "い"], "meaning": "teacher"},
+		"kouen": {"kana": ["こ", "う", "え", "ん"], "meaning": "park"},
+		"otouto": {"kana": ["お", "と", "う", "と"], "meaning": "younger brother"}
+	},
+	7: {
+		"kingyo": {"kana": ["き", "ん", "ぎ", "ょ"], "meaning": "goldfish"},
+		"ryokou": {"kana": ["り", "ょ", "こ", "う"], "meaning": "travel"},
 		"byouin": {"kana": ["び", "ょ", "う", "い", "ん"], "meaning": "hospital"},
-		"ryokou": {"kana": ["り", "ょ", "こ", "う"], "meaning": "travel"}
+		"shoubou": {"kana": ["し", "ょ", "う", "ぼ", "う"], "meaning": "firefighting"},
+		"juudou": {"kana": ["じ", "ゅ", "う", "ど", "う"], "meaning": "judo"},
+		"kyoushitsu": {"kana": ["き", "ょ", "う", "し", "つ"], "meaning": "classroom"}
 	},
 	8: {
-		"nihongo": {"kana": ["に", "ほ", "ん", "ご"], "meaning": "japanese"},
-		"toukyou": {"kana": ["と", "う", "き", "ょ", "う"], "meaning": "tokyo"},
-		"sensei": {"kana": ["せ", "ん", "せ", "い"], "meaning": "teacher"},
 		"arigatou": {"kana": ["あ", "り", "が", "と", "う"], "meaning": "thank you"},
-		"shoubousha": {"kana": ["し", "ょ", "う", "ぼ", "う", "し", "ゃ"], "meaning": "fire engine"}
+		"nihongo": {"kana": ["に", "ほ", "ん", "ご"], "meaning": "japanese language"},
+		"toukyou": {"kana": ["と", "う", "き", "ょ", "う"], "meaning": "tokyo"},
+		"toshokan": {"kana": ["と", "し", "ょ", "か", "ん"], "meaning": "library"},
+		"shoubousha": {"kana": ["し", "ょ", "う", "ぼ", "う", "し", "ゃ"], "meaning": "fire engine"},
+		"kyuukyuusha": {"kana": ["き", "ゅ", "う", "き", "ゅ", "う", "し", "ゃ"], "meaning": "ambulance"},
+		"shinkansen": {"kana": ["し", "ん", "か", "ん", "せ", "ん"], "meaning": "bullet train"}
 	}
 }
 
-## 2. 8-Stage Katakana Vocabulary Dictionaries
+## 2. 8-Stage Katakana Vocabulary Dictionaries (Progressive Length & Difficulty)
 var katakana_stages: Dictionary = {
 	1: {
 		"doa": {"kana": ["ド", "ア"], "meaning": "door"},
 		"ea": {"kana": ["エ", "ア"], "meaning": "air"},
-		"aisu": {"kana": ["ア", "イ", "ス"], "meaning": "ice cream"},
 		"memo": {"kana": ["メ", "モ"], "meaning": "memo"},
-		"basu": {"kana": ["バ", "ス"], "meaning": "bus"}
+		"basu": {"kana": ["バ", "ス"], "meaning": "bus"},
+		"pen": {"kana": ["ペ", "ン"], "meaning": "pen"},
+		"gasu": {"kana": ["ガ", "ス"], "meaning": "gas"}
 	},
 	2: {
 		"pan": {"kana": ["パ", "ン"], "meaning": "bread"},
-		"keeki": {"kana": ["ケ", "ー", "キ"], "meaning": "cake"},
-		"kohii": {"kana": ["コ", "ー", "ヒ", "ー"], "meaning": "coffee"},
+		"aisu": {"kana": ["ア", "イ", "ス"], "meaning": "ice cream"},
 		"tomato": {"kana": ["ト", "マ", "ト"], "meaning": "tomato"},
-		"banana": {"kana": ["バ", "ナ", "ナ"], "meaning": "banana"}
+		"banana": {"kana": ["バ", "ナ", "ナ"], "meaning": "banana"},
+		"kamera": {"kana": ["カ", "メ", "ラ"], "meaning": "camera"},
+		"miruku": {"kana": ["ミ", "ル", "ク"], "meaning": "milk"}
 	},
 	3: {
-		"terebi": {"kana": ["テ", "レ", "ビ"], "meaning": "television"},
-		"rajio": {"kana": ["ラ", "ジ", "オ"], "meaning": "radio"},
-		"kamera": {"kana": ["カ", "メ", "ラ"], "meaning": "camera"},
-		"taoru": {"kana": ["タ", "オ", "ル"], "meaning": "towel"},
+		"keeki": {"kana": ["ケ", "ー", "キ"], "meaning": "cake"},
+		"kohii": {"kana": ["コ", "ー", "ヒ", "ー"], "meaning": "coffee"},
 		"nooto": {"kana": ["ノ", "ー", "ト"], "meaning": "notebook"},
-		"sofaa": {"kana": ["ソ", "フ", "ァ", "ー"], "meaning": "sofa"}
+		"taoru": {"kana": ["タ", "オ", "ル"], "meaning": "towel"},
+		"sofaa": {"kana": ["ソ", "フ", "ァ", "ー"], "meaning": "sofa"},
+		"chiizu": {"kana": ["チ", "ー", "ズ"], "meaning": "cheese"}
 	},
 	4: {
-		"takushii": {"kana": ["タ", "ク", "シ", "ー"], "meaning": "taxi"},
-		"beru": {"kana": ["ベ", "ル"], "meaning": "bell"},
 		"beddo": {"kana": ["ベ", "ッ", "ド"], "meaning": "bed"},
-		"gorufu": {"kana": ["ゴ", "ル", "フ"], "meaning": "golf"},
-		"bideo": {"kana": ["ビ", "デ", "オ"], "meaning": "video"}
+		"koppu": {"kana": ["コ", "ッ", "プ"], "meaning": "cup"},
+		"kappu": {"kana": ["カ", "ッ", "プ"], "meaning": "mug"},
+		"rokkaa": {"kana": ["ロ", "ッ", "カ", "ー"], "meaning": "locker"},
+		"macchi": {"kana": ["マ", "ッ", "チ"], "meaning": "match"},
+		"beru": {"kana": ["ベ", "ル"], "meaning": "bell"}
 	},
 	5: {
 		"piano": {"kana": ["ピ", "ア", "ノ"], "meaning": "piano"},
 		"piza": {"kana": ["ピ", "ザ"], "meaning": "pizza"},
 		"pasokon": {"kana": ["パ", "ソ", "コ", "ン"], "meaning": "pc"},
-		"posuto": {"kana": ["ポ", "ス", "ト"], "meaning": "postbox"},
-		"purin": {"kana": ["プ", "リ", "ン"], "meaning": "pudding"}
+		"posuto": {"kana": ["ポ", "ス", "ト"], "meaning": "mailbox"},
+		"purin": {"kana": ["プ", "リ", "ン"], "meaning": "pudding"},
+		"terebi": {"kana": ["テ", "レ", "ビ"], "meaning": "television"},
+		"bideo": {"kana": ["ビ", "デ", "オ"], "meaning": "video"}
 	},
 	6: {
 		"ramen": {"kana": ["ラ", "ー", "メ", "ン"], "meaning": "ramen"},
 		"sukeeto": {"kana": ["ス", "ケ", "ー", "ト"], "meaning": "skating"},
 		"supuun": {"kana": ["ス", "プ", "ー", "ン"], "meaning": "spoon"},
-		"koppu": {"kana": ["コ", "ッ", "プ"], "meaning": "cup"},
-		"rokkaa": {"kana": ["ロ", "ッ", "カ", "ー"], "meaning": "locker"}
+		"roketto": {"kana": ["ロ", "ケ", "ッ", "ト"], "meaning": "rocket"},
+		"teeburu": {"kana": ["テ", "ー", "ブ", "ル"], "meaning": "table"},
+		"takushii": {"kana": ["タ", "ク", "シ", "ー"], "meaning": "taxi"},
+		"sakkaa": {"kana": ["サ", "ッ", "カ", "ー"], "meaning": "soccer"}
 	},
 	7: {
-		"anime": {"kana": ["ア", "ニ", "メ"], "meaning": "anime"},
 		"sumaho": {"kana": ["ス", "マ", "ホ"], "meaning": "smartphone"},
+		"anime": {"kana": ["ア", "ニ", "メ"], "meaning": "anime"},
 		"hoteru": {"kana": ["ホ", "テ", "ル"], "meaning": "hotel"},
-		"roketto": {"kana": ["ロ", "ケ", "ッ", "ト"], "meaning": "rocket"},
-		"sukii": {"kana": ["ス", "キ", "ー"], "meaning": "skiing"}
+		"juusu": {"kana": ["ジ", "ュ", "ー", "ス"], "meaning": "juice"},
+		"shatsu": {"kana": ["シ", "ャ", "ツ"], "meaning": "shirt"},
+		"supaagettii": {"kana": ["ス", "パ", "ゲ", "ッ", "テ", "ィ"], "meaning": "spaghetti"},
+		"chokoreeto": {"kana": ["チ", "ョ", "コ", "レ", "ー", "ト"], "meaning": "chocolate"}
 	},
 	8: {
+		"resutoran": {"kana": ["レ", "ス", "ト", "ラ", "ン"], "meaning": "restaurant"},
 		"erebeetaa": {"kana": ["エ", "レ", "ベ", "ー", "タ", "ー"], "meaning": "elevator"},
 		"esukareetaa": {"kana": ["エ", "ス", "カ", "レ", "ー", "タ", "ー"], "meaning": "escalator"},
-		"resutoran": {"kana": ["レ", "ス", "ト", "ラ", "ン"], "meaning": "restaurant"},
-		"supaagettii": {"kana": ["ス", "パ", "ゲ", "ッ", "テ", "ィ"], "meaning": "spaghetti"},
-		"konpyuuta": {"kana": ["コ", "ン", "ピ", "ュ", "ー", "タ"], "meaning": "computer"}
+		"konpyuuta": {"kana": ["コ", "ン", "ピ", "ュ", "ー", "タ"], "meaning": "computer"},
+		"sandowicchi": {"kana": ["サ", "ン", "ド", "イ", "ッ", "チ"], "meaning": "sandwich"},
+		"aisukuriimu": {"kana": ["ア", "イ", "ス", "ク", "リ", "ー", "ム"], "meaning": "ice cream"}
 	}
 }
 
@@ -298,27 +313,21 @@ func _parse_cmd_line_arguments() -> void:
 			if val.is_valid_int():
 				current_stage = clampi(val.to_int(), 1, MAX_STAGES)
 
-## Returns the active stage difficulty parameters (motion type, movement speed, decoy count)
+## Returns the active stage difficulty parameters (decoy distractors on shelves)
 func get_stage_difficulty_settings(stage: int) -> Dictionary:
 	match stage:
 		1:
-			return {"motion": 0, "speed": 0.0, "decoys": 3} # Stationary Novice
-		2:
-			return {"motion": 1, "speed": 0.0, "decoys": 4} # Gentle Vertical Bobbing
-		3:
-			return {"motion": 2, "speed": 0.0, "decoys": 4} # Horizontal Sway
-		4:
-			return {"motion": 3, "speed": 55.0, "decoys": 5} # Shelf Patrol Movement
-		5:
-			return {"motion": 3, "speed": 80.0, "decoys": 5} # Fast Patrol with Reversals
-		6:
-			return {"motion": 4, "speed": 95.0, "decoys": 6} # Sinusoidal Wave Patrol
-		7:
-			return {"motion": 3, "speed": 120.0, "decoys": 6} # High-Speed Patrol
+			return {"decoys": 3}
+		2, 3:
+			return {"decoys": 4}
+		4, 5:
+			return {"decoys": 5}
+		6, 7:
+			return {"decoys": 6}
 		8:
-			return {"motion": 4, "speed": 140.0, "decoys": 7} # Master Wave Gauntlet
+			return {"decoys": 7}
 		_:
-			return {"motion": 0, "speed": 0.0, "decoys": 4}
+			return {"decoys": 4}
 
 ## Returns the active vocabulary dictionary based on current mode and stage
 func get_active_dictionary() -> Dictionary:
@@ -623,7 +632,7 @@ func start_new_word() -> void:
 	update_ui()
 	spawn_targets()
 
-## Clears existing targets, generates decoys from mode syllabary pool, and spawns targets with stage motion
+## Clears existing targets, generates decoys from mode syllabary pool, and spawns stationary targets on shelves
 func spawn_targets() -> void:
 	for child in targets_container.get_children():
 		child.queue_free()
@@ -652,7 +661,7 @@ func spawn_targets() -> void:
 	
 	chosen_chars.shuffle()
 	
-	# 3. Place at random Marker2D spawn points with stage motion
+	# 3. Place stationary targets at random Marker2D spawn points
 	var available_points: Array[Marker2D] = spawn_points.duplicate()
 	available_points.shuffle()
 	
@@ -664,8 +673,6 @@ func spawn_targets() -> void:
 		target_instance.position = marker.position
 		targets_container.add_child(target_instance)
 		target_instance.set_character(chosen_chars[i])
-		if target_instance.has_method("setup_motion"):
-			target_instance.setup_motion(diff.get("motion", 0), diff.get("speed", 0.0))
 		target_instance.target_clicked.connect(_on_target_clicked)
 
 ## Evaluates clicked target character

@@ -273,68 +273,68 @@ SNIPER_TOTAL_STAGES = 8
 
 SNIPER_STAGE_INFO = {
     1: {
-        "title": "BASIC VOWELS & NOVICE GALLERY",
-        "japanese": "基本母音・静止標的（あ・い・う・え・お）",
+        "title": "2-KANA FOUNDATIONAL BASICS",
+        "japanese": "基本2文字語彙（あお・いえ・うえ・あい・あさ・うみ）",
         "difficulty": 1,
-        "words": ["あお (Blue)", "いえ (House)", "うえ (Above)", "あい (Love)", "あき (Autumn)", "うみ (Sea)"],
-        "summary": "Stationary targets on shooting gallery shelves. Master foundational vowels and simple 2-kana terms with 3 decoys.",
-        "kana_preview": ["あ", "い", "う", "え", "お"]
+        "words": ["あお (Blue)", "いえ (House)", "うえ (Above)", "あい (Love)", "あさ (Morning)", "うみ (Sea)"],
+        "summary": "Short 2-character words with simple vowels and basic consonants. Stationary gallery targets with 3 decoys.",
+        "kana_preview": ["あ", "い", "う", "え", "お", "さ"]
     },
     2: {
-        "title": "NATURE & GENTLE BOBBING",
-        "japanese": "自然と動物・揺れる標的（ねこ・いぬ・とり）",
+        "title": "2-KANA FAMILIAR NOUNS",
+        "japanese": "基本名詞・動物（ねこ・いぬ・とり・はな・やま・かわ）",
         "difficulty": 2,
-        "words": ["ねこ (Cat)", "いぬ (Dog)", "とり (Bird)", "かめ (Turtle)", "はな (Flower)", "やま (Mountain)"],
-        "summary": "Targets gently bob vertically on shelves. Identify familiar nature and animal words with 4 decoys.",
-        "kana_preview": ["ね", "い", "と", "か", "は", "や"]
+        "words": ["ねこ (Cat)", "いぬ (Dog)", "とり (Bird)", "はな (Flower)", "やま (Mountain)", "かわ (River)"],
+        "summary": "2-character everyday nouns across core consonant rows (k, s, t, n, h, y, r, w) with 4 decoys.",
+        "kana_preview": ["ね", "い", "と", "は", "や", "か"]
     },
     3: {
-        "title": "DAILY LIFE & HORIZONTAL SWAY",
-        "japanese": "日常生活・左右揺動（さくら・くるま・すし）",
+        "title": "3-KANA SEQUENTIAL SPELLING",
+        "japanese": "3文字語彙（さくら・くるま・たまご・こども・ひかり）",
         "difficulty": 3,
-        "words": ["さくら (Cherry Blossom)", "くるま (Car)", "すし (Sushi)", "つき (Moon)", "ほし (Star)", "みず (Water)"],
-        "summary": "Targets sway smoothly from side to side. Form everyday 3-kana terms while tracking floating targets with 5 decoys.",
-        "kana_preview": ["さ", "く", "す", "つ", "ほ", "み"]
+        "words": ["さくら (Cherry Blossom)", "くるま (Car)", "たまご (Egg)", "こども (Child)", "ひかり (Light)", "さかな (Fish)"],
+        "summary": "Multi-syllable 3-character nouns requiring sequential spelling across three shelf targets with 4 decoys.",
+        "kana_preview": ["さ", "く", "た", "こ", "ひ", "ま"]
     },
     4: {
-        "title": "VOICED DAKUTEN & SHELF PATROL",
-        "japanese": "濁音巡回（りんご・かぜ・えいが・まど）",
+        "title": "VOICED DAKUTEN & NASAL 'ん'",
+        "japanese": "濁音・撥音（りんご・みかん・でんわ・てがみ・かぞく）",
         "difficulty": 4,
-        "words": ["りんご (Apple)", "かぜ (Wind)", "えいが (Movie)", "ちず (Map)", "かぎ (Key)", "まど (Window)"],
-        "summary": "Targets patrol along the shelves at moderate speed. Spot voiced Dakuten characters (が・ざ・だ・ば) among unvoiced traps.",
-        "kana_preview": ["が", "ぎ", "ざ", "だ", "ば", "ご"]
+        "words": ["りんご (Apple)", "みかん (Mandarin)", "でんわ (Phone)", "てがみ (Letter)", "かぞく (Family)", "ともだち (Friend)"],
+        "summary": "3 to 4 character words introducing voiced Dakuten (が・ざ・だ・ば) and nasal 'ん' spelling with 5 decoys.",
+        "kana_preview": ["が", "ざ", "だ", "ば", "ん", "で"]
     },
     5: {
-        "title": "HANDAKUTEN & REVERSAL PATROL",
-        "japanese": "半濁音・撥音・反転巡回（さんぽ・しんぶん）",
+        "title": "SOKUON SMALL 'っ' & HANDAKUTEN",
+        "japanese": "促音「っ」・半濁音（きって・きっぷ・ざっし・てんぷら）",
         "difficulty": 5,
-        "words": ["さんぽ (Walk)", "しんぶん (Newspaper)", "てんぷら (Tempura)", "えんぴつ (Pencil)", "きんぎょ (Goldfish)"],
-        "summary": "Faster moving targets with direction reversals. Practice P-sounds (ぱ行) and nasal 'ん' across gallery shelves.",
-        "kana_preview": ["ぱ", "ぴ", "ぷ", "ぺ", "ぽ", "ん"]
+        "words": ["きって (Stamp)", "きっぷ (Ticket)", "ざっし (Magazine)", "しっぽ (Tail)", "てんぷら (Tempura)", "えんぴつ (Pencil)"],
+        "summary": "Tricky spelling featuring geminate double consonants (small 'っ') and Handakuten 'P' stops with 5 decoys.",
+        "kana_preview": ["っ", "き", "て", "ぷ", "ざ", "え"]
     },
     6: {
-        "title": "SOKUON & SINUSOIDAL WAVES",
-        "japanese": "促音「っ」・波動巡回（きって・きっぷ・がっこう）",
+        "title": "LONG VOWELS & 4-KANA COMPOUNDS",
+        "japanese": "長音・複合語（がっこう・ひこうき・ちかてつ・せんせい）",
         "difficulty": 6,
-        "words": ["きって (Stamp)", "きっぷ (Ticket)", "がっこう (School)", "ざっし (Magazine)", "しっぽ (Tail)"],
-        "summary": "Targets patrol horizontally while undulating vertically in wave formations. Master small 'っ' geminate double stops.",
-        "kana_preview": ["っ", "つ", "き", "て", "が", "こ"]
+        "words": ["がっこう (School)", "ひこうき (Airplane)", "ちかてつ (Subway)", "おんがく (Music)", "せんせい (Teacher)", "こうえん (Park)"],
+        "summary": "Longer 4-character compound words featuring phonetic vowel elongations (お・う, え・い) with 6 decoys.",
+        "kana_preview": ["が", "ひ", "ち", "お", "せ", "こ"]
     },
     7: {
-        "title": "ADVANCED COMPOUNDS & RAPID PATROL",
-        "japanese": "上級語彙・高速標的（ひこうき・ちかてつ・おんがく）",
+        "title": "CONTRACTED DIGRAPHS (YO-ON)",
+        "japanese": "拗音「ゃ・ゅ・ょ」（きんぎょ・りょこう・びょういん）",
         "difficulty": 7,
-        "words": ["ひこうき (Airplane)", "ちかてつ (Subway)", "おんがく (Music)", "びょういん (Hospital)", "りょこう (Travel)"],
-        "summary": "High-speed moving targets with variable shelf velocities. Multi-syllable compound vocabulary with 6 decoys.",
-        "kana_preview": ["ひ", "こ", "ち", "お", "び", "り"]
+        "words": ["きんぎょ (Goldfish)", "りょこう (Travel)", "びょういん (Hospital)", "しょうぼう (Firefighting)", "きょうしつ (Classroom)"],
+        "summary": "Challenging contracted digraphs combining standard syllables with small ゃ・ゅ・ょ across 4 to 5 kana with 6 decoys.",
+        "kana_preview": ["ぎ", "ょ", "り", "び", "し", "ゅ"]
     },
     8: {
-        "title": "GRAND MASTER SNIPER GAUNTLET",
-        "japanese": "神業狙撃手・最終試練（にほんご・とうきょう）",
+        "title": "MASTER SPELLING GAUNTLET (5-7 KANA)",
+        "japanese": "達人試練・超長文語彙（ありがとう・とうきょう・しょうぼうしゃ）",
         "difficulty": 8,
-        "words": ["にほんご (Japanese)", "とうきょう (Tokyo)", "せんせい (Teacher)", "ありがとう (Thank You)", "しょうぼうしゃ (Fire Engine)"],
-        "summary": "The ultimate test of precision and speed! Fast wave patrol targets with erratic maneuvers and 7 decoy traps.",
-        "kana_preview": ["に", "ほ", "と", "う", "せ", "あ"]
+        "words": ["ありがとう (Thank You)", "とうきょう (Tokyo)", "としょかん (Library)", "しょうぼうしゃ (Fire Engine)", "きゅうきゅうしゃ (Ambulance)", "しんかんせん (Bullet Train)"],
+        "summary": "Maximum length and spelling complexity! Multi-rule 5 to 7-character compound words tested across 7 shelf decoys.",
+        "kana_preview": ["あ", "と", "し", "ょ", "き", "ゅ"]
     }
 }
 
@@ -345,68 +345,68 @@ KATAKANA_SNIPER_TOTAL_STAGES = 8
 
 KATAKANA_SNIPER_STAGE_INFO = {
     1: {
-        "title": "BASIC LOANWORDS & NOVICE GALLERY",
-        "japanese": "基本外来語・静止標的（ドア・エア・アイス）",
+        "title": "2-KANA NOVICE LOANWORDS",
+        "japanese": "基本2文字外来語（ドア・エア・メモ・バス・ペン・ガス）",
         "difficulty": 1,
-        "words": ["ドア (Door)", "エア (Air)", "アイス (Ice Cream)", "メモ (Memo)", "バス (Bus)"],
-        "summary": "Stationary targets on gallery shelves. Master fundamental Katakana loanwords with 3 decoys.",
-        "kana_preview": ["ア", "イ", "ウ", "エ", "オ"]
+        "words": ["ドア (Door)", "エア (Air)", "メモ (Memo)", "バス (Bus)", "ペン (Pen)", "ガス (Gas)"],
+        "summary": "Shortest 2-character foundational loanwords with simple phonetics. Stationary targets with 3 decoys.",
+        "kana_preview": ["ド", "ア", "エ", "メ", "バ", "ペ"]
     },
     2: {
-        "title": "CAFE & FOOD & GENTLE BOBBING",
-        "japanese": "カフェと食べ物・揺れる標的（パン・ケーキ・トマト）",
+        "title": "2-3 KANA ELEMENTARY FOOD & OBJECTS",
+        "japanese": "初級外来語（パン・アイス・トマト・バナナ・カメラ）",
         "difficulty": 2,
-        "words": ["パン (Bread)", "ケーキ (Cake)", "コーヒー (Coffee)", "トマト (Tomato)", "バナナ (Banana)"],
-        "summary": "Targets bob gently up and down on shelves. Common cafe and dining loanwords with 4 decoys.",
-        "kana_preview": ["パ", "ケ", "コ", "ト", "バ", "ー"]
+        "words": ["パン (Bread)", "アイス (Ice Cream)", "トマト (Tomato)", "バナナ (Banana)", "カメラ (Camera)", "ミルク (Milk)"],
+        "summary": "Everyday 2 to 3-character international loanwords covering standard syllables with 4 decoys.",
+        "kana_preview": ["パ", "ア", "ト", "バ", "カ", "ミ"]
     },
     3: {
-        "title": "HOUSEHOLD & HORIZONTAL SWAY",
-        "japanese": "家庭用品・左右揺動（テレビ・ラジオ・カメラ）",
+        "title": "CHOONPU LONG VOWEL DASH 'ー'",
+        "japanese": "長音記号「ー」（ケーキ・コーヒー・ノート・タオル・ソファー）",
         "difficulty": 3,
-        "words": ["テレビ (Television)", "ラジオ (Radio)", "カメラ (Camera)", "タオル (Towel)", "ノート (Notebook)", "ソファー (Sofa)"],
-        "summary": "Targets sway horizontally. Read everyday technology and household loanwords with 5 decoys.",
-        "kana_preview": ["テ", "レ", "ラ", "カ", "タ", "ノ"]
+        "words": ["ケーキ (Cake)", "コーヒー (Coffee)", "ノート (Notebook)", "タオル (Towel)", "ソファー (Sofa)", "チーズ (Cheese)"],
+        "summary": "3 to 4 character loanwords requiring correct placement of the long vowel mark (ー) with 4 decoys.",
+        "kana_preview": ["ー", "ケ", "コ", "ノ", "タ", "ソ"]
     },
     4: {
-        "title": "DAKUTEN LOANWORDS & SHELF PATROL",
-        "japanese": "濁音外来語・巡回標的（タクシー・ベル・ベッド）",
+        "title": "SOKUON SMALL 'ッ' DOUBLE STOPS",
+        "japanese": "促音「ッ」（ベッド・コップ・カップ・ロッカー・マッチ）",
         "difficulty": 4,
-        "words": ["タクシー (Taxi)", "ベル (Bell)", "ベッド (Bed)", "ゴルフ (Golf)", "ビデオ (Video)"],
-        "summary": "Targets cruise along the shelves at steady speed. Voiced consonant loanwords with unvoiced distractor traps.",
-        "kana_preview": ["ガ", "ギ", "ザ", "ダ", "バ", "ビ"]
+        "words": ["ベッド (Bed)", "コップ (Cup)", "カップ (Mug)", "ロッカー (Locker)", "マッチ (Match)", "ベル (Bell)"],
+        "summary": "Tricky spelling with geminate small 'ッ' consonant stops in common foreign words with 5 decoys.",
+        "kana_preview": ["ッ", "ベ", "コ", "カ", "ロ", "マ"]
     },
     5: {
-        "title": "LOOKALIKE TRAPS & REVERSAL PATROL",
-        "japanese": "類似文字（シ/ツ・ソ/ン）・反転巡回（ピアノ・ピザ）",
+        "title": "VOICED LOANWORDS & TECH VOCABULARY",
+        "japanese": "濁音・家電技術（ピアノ・ピザ・パソコン・ポスト・プリン）",
         "difficulty": 5,
-        "words": ["ピアノ (Piano)", "ピザ (Pizza)", "パソコン (PC)", "ポスト (Postbox)", "プリン (Pudding)"],
-        "summary": "Moving targets with directional reversals. Identify Handakuten (パ行) while distinguishing tricky lookalikes (シ/ツ, ソ/ン).",
-        "kana_preview": ["ピ", "パ", "ポ", "プ", "シ", "ツ"]
+        "words": ["ピアノ (Piano)", "ピザ (Pizza)", "パソコン (PC)", "ポスト (Mailbox)", "プリン (Pudding)", "テレビ (TV)"],
+        "summary": "3 to 4 character technology and lifestyle terms featuring Handakuten (パ行) and Dakuten marks with 5 decoys.",
+        "kana_preview": ["ピ", "パ", "ポ", "プ", "テ", "ビ"]
     },
     6: {
-        "title": "CHOONPU & SOKUON WAVE MOTION",
-        "japanese": "長音「ー」・促音「ッ」・波動巡回（ラーメン・コップ）",
+        "title": "DUAL RULE: LONG VOWELS + SOKUON",
+        "japanese": "長音＋促音複合語（ラーメン・スケート・スプーン・ロケット）",
         "difficulty": 6,
-        "words": ["ラーメン (Ramen)", "スケート (Skate)", "スプーン (Spoon)", "コップ (Cup)", "ロッカー (Locker)"],
-        "summary": "Targets move in undulating sine waves across shelves. Master the long vowel dash (ー) and small 'ッ' stops.",
-        "kana_preview": ["ー", "ッ", "ラ", "ス", "コ", "ロ"]
+        "words": ["ラーメン (Ramen)", "スケート (Skate)", "スプーン (Spoon)", "ロケット (Rocket)", "テーブル (Table)", "タクシー (Taxi)"],
+        "summary": "4-character compound loanwords combining long vowel lines (ー) with small 'ッ' stops across 6 decoys.",
+        "kana_preview": ["ー", "ッ", "ラ", "ス", "ロ", "テ"]
     },
     7: {
-        "title": "TECH & TRAVEL & RAPID PATROL",
-        "japanese": "最新技術・高速標的（アニメ・スマホ・ホテル）",
+        "title": "EXTENDED DIGRAPHS & MODERN LOANWORDS",
+        "japanese": "外来音・長音（ジュース・シャツ・スパゲッティ・チョコレート）",
         "difficulty": 7,
-        "words": ["アニメ (Anime)", "スマホ (Smartphone)", "ホテル (Hotel)", "ロケット (Rocket)", "スキー (Skiing)"],
-        "summary": "High-velocity shelf patrol targets with fast pace. Modern digital and leisure vocabulary with 6 decoys.",
-        "kana_preview": ["ア", "ス", "ホ", "ロ", "マ", "キ"]
+        "words": ["スマホ (Smartphone)", "アニメ (Anime)", "ジュース (Juice)", "シャツ (Shirt)", "スパゲッティ (Spaghetti)", "チョコレート (Chocolate)"],
+        "summary": "Complex foreign phonetics combining contracted digraphs (ジュ, シャ, チョ, ティ) across 4 to 6 characters with 6 decoys.",
+        "kana_preview": ["ジ", "シ", "チ", "ュ", "ャ", "ョ"]
     },
     8: {
-        "title": "GRAND MASTER KATAKANA GAUNTLET",
-        "japanese": "免許皆伝・最終狙撃試練（エレベーター・レストラン）",
+        "title": "MASTER KATAKANA GAUNTLET (5-7 KANA)",
+        "japanese": "免許皆伝・超長文外来語（レストラン・エレベーター・エスカレーター）",
         "difficulty": 8,
-        "words": ["エレベーター (Elevator)", "エスカレーター (Escalator)", "レストラン (Restaurant)", "スパゲッティ (Spaghetti)", "コンピュータ (Computer)"],
-        "summary": "The ultimate test of Katakana reading reflex! Rapid wave patrol targets with complex multi-syllable terms.",
-        "kana_preview": ["エ", "レ", "ス", "カ", "パ", "コ"]
+        "words": ["レストラン (Restaurant)", "エレベーター (Elevator)", "エスカレーター (Escalator)", "コンピュータ (Computer)", "サンドイッチ (Sandwich)", "アイスクリーム (Ice Cream)"],
+        "summary": "The ultimate Katakana spelling test! 5 to 7-character complex loanwords challenging memory and quick targeting with 7 decoys.",
+        "kana_preview": ["レ", "エ", "ス", "コ", "サ", "ア"]
     }
 }
 
