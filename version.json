@@ -1,11 +1,11 @@
 {
-  "version": "1.5.1",
-  "tag_name": "v1.5.1",
-  "name": "Nihongo Master v1.5.1 - Stationary Gallery Targets & Word-Length Progression",
+  "version": "1.5.2",
+  "tag_name": "v1.5.2",
+  "name": "Nihongo Master v1.5.2 - Subgame Return Fix & 5 Words Target Progression",
   "release_date": "2026-10-06",
   "appimage_filename": "Nihongo_Master.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.1/Nihongo_Master.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.1/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.5.1: Removed floating target mechanics in The Gallery Sniper; stationary shelf targets with progressive word length and spelling difficulty curriculum across 8 stages. Reverted AppImage naming to Nihongo_Master without version numbers."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.2/Nihongo_Master.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.2/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.5.2: Resolved spurious exit issue when returning to title from The Gallery Sniper. Expanded stage target goal to 5 unique words cleared with progressive difficulty."
 }
 

@@ -432,7 +432,9 @@ class GameEngine:
         pygame.event.clear()
 
         # Set debounce cooldown to ignore any lingering button presses
-        self.subgame_return_cooldown = time.time() + 0.6
+        self.subgame_return_cooldown = time.time() + 1.0
+        self.subgame_just_returned = True
+        self.running = True
         if hasattr(self, 'gamepad_buttons_down'):
             self.gamepad_buttons_down.clear()
 
@@ -498,7 +500,9 @@ class GameEngine:
         pygame.event.clear()
 
         # Set debounce cooldown to ignore any lingering button presses
-        self.subgame_return_cooldown = time.time() + 0.6
+        self.subgame_return_cooldown = time.time() + 1.0
+        self.subgame_just_returned = True
+        self.running = True
         if hasattr(self, 'gamepad_buttons_down'):
             self.gamepad_buttons_down.clear()
 
@@ -1057,20 +1061,31 @@ class GameEngine:
                 if self.title_menu_index != 8:
                     self.title_menu_index = 8
                     self.audio.play_pause()
-                else:
-                    self.quit_game()
         elif self.is_stage_clear or self.is_game_over:
             self.return_to_title()
 
     def handle_events(self):
+        if getattr(self, "subgame_just_returned", False):
+            self.subgame_just_returned = False
+            pygame.event.pump()
+            pygame.event.clear()
+            return
+
         if time.time() < getattr(self, 'subgame_return_cooldown', 0.0):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                    return
+            # Unconditionally clear and discard ALL events during cooldown.
+            # Do NOT inspect pygame.QUIT, mouse, or keyboard events here,
+            # as child window closure produces spurious unmap/quit events.
+            pygame.event.pump()
+            pygame.event.clear()
             return
 
         for event in pygame.event.get():
+            if getattr(self, "subgame_just_returned", False):
+                self.subgame_just_returned = False
+                pygame.event.pump()
+                pygame.event.clear()
+                return
+
             if event.type == pygame.QUIT:
                 self.running = False
                 return
@@ -1218,6 +1233,8 @@ class GameEngine:
                         # Start button
                         if pygame.Rect(cx - 280, 758, 560, 56).collidepoint(mx, my):
                             self.menu_confirm()
+                            if getattr(self, "subgame_just_returned", False):
+                                return
                         # Back button
                         elif pygame.Rect(cx - 200, 838, 400, 48).collidepoint(mx, my):
                             self.menu_back()
@@ -1272,6 +1289,8 @@ class GameEngine:
                             if (y_pos - 20) <= my <= (y_pos + 20) and (cx - 360) <= mx <= (cx + 360):
                                 self.title_menu_index = idx
                                 self.menu_confirm()
+                                if getattr(self, "subgame_just_returned", False):
+                                    return
                 elif self.is_volume_menu_open:
                     cx = self.virtual_width // 2 if self.is_title_screen else 760
                     cy = self.virtual_height // 2
@@ -1320,8 +1339,8 @@ class GameEngine:
 
             # Keyboard Input
             if event.type == pygame.KEYDOWN:
-                # Quit shortcuts (Ctrl+Q or Ctrl+C, or Q when paused/gameover)
-                if (event.key == pygame.K_q and (event.mod & pygame.KMOD_CTRL or self.is_paused or self.is_game_over)) or \
+                # Quit shortcuts (Ctrl+Q or Ctrl+C only)
+                if (event.key == pygame.K_q and (event.mod & pygame.KMOD_CTRL)) or \
                    (event.key == pygame.K_c and (event.mod & pygame.KMOD_CTRL)):
                     self.running = False
                     return
@@ -1348,6 +1367,8 @@ class GameEngine:
                         self.menu_right()
                     elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
                         self.menu_confirm()
+                        if getattr(self, "subgame_just_returned", False):
+                            return
                     elif event.key == pygame.K_ESCAPE:
                         self.menu_back()
                     continue
@@ -1456,6 +1477,8 @@ class GameEngine:
                 if self.is_title_screen or self.is_volume_menu_open or self.is_update_dialog_open:
                     if btn in (0, 7, 9, 11): # A or Start to Confirm
                         self.menu_confirm()
+                        if getattr(self, "subgame_just_returned", False):
+                            return
                     elif btn == 1: # Only B button is Back
                         self.menu_back()
                 else:
@@ -1487,10 +1510,11 @@ class GameEngine:
                             self.return_to_title()
 
     def update(self, delta: float):
-        # Continuous check for simultaneous SELECT + START quit combination
-        if self.check_quit_combo():
-            self.running = False
-            return
+        # Continuous check for simultaneous SELECT + START quit combination (ignored during subgame return cooldown)
+        if time.time() >= getattr(self, 'subgame_return_cooldown', 0.0):
+            if self.check_quit_combo():
+                self.running = False
+                return
 
         self.audio.update(delta)
         

@@ -929,7 +929,7 @@ class HudRenderer:
             pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
 
             # Specs
-            txt_specs = self.font_caption.render(f"STAGE GOAL: 3 WORDS CLEARED    |    SHELVES: 3 TIERS    |    ENGINE: GODOT 2D SNIPER", True, (160, 200, 235))
+            txt_specs = self.font_caption.render(f"STAGE GOAL: 5 WORDS CLEARED    |    SHELVES: 3 TIERS    |    ENGINE: GODOT 2D SNIPER", True, (160, 200, 235))
             surface.blit(txt_specs, txt_specs.get_rect(center=(cx, card_y + 400)))
 
             # Action Buttons

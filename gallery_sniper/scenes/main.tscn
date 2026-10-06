@@ -218,7 +218,7 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 16
-text = "TARGET: 1/3 WORDS"
+text = "TARGET: 1/5 WORDS"
 
 [node name="PauseButton" type="Button" parent="UI"]
 offset_left = 1090.0

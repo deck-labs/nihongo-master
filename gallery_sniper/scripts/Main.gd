@@ -10,9 +10,10 @@ enum KanaMode { HIRAGANA, KATAKANA }
 var current_mode: KanaMode = KanaMode.HIRAGANA
 
 const MAX_STAGES: int = 8
-const WORDS_PER_STAGE: int = 3
+const WORDS_PER_STAGE: int = 5
 var current_stage: int = 1
 var stage_words_cleared: int = 0
+var stage_used_words: Array[String] = []
 var total_shots_fired: int = 0
 var total_hits_accurate: int = 0
 
@@ -443,6 +444,7 @@ func _on_restart_pressed() -> void:
 		toggle_pause()
 	current_character_index = 0
 	stage_words_cleared = 0
+	stage_used_words.clear()
 	if current_mode == KanaMode.HIRAGANA:
 		hiragana_score = 0
 		hiragana_cleared = 0
@@ -512,6 +514,7 @@ func _on_next_stage_pressed() -> void:
 		current_stage += 1
 	
 	stage_words_cleared = 0
+	stage_used_words.clear()
 	start_new_word()
 
 ## Handles quick desktop / Steam Deck / Gamepad shortcuts
@@ -621,10 +624,17 @@ func start_new_word() -> void:
 	if keys.is_empty():
 		return
 	
-	var next_word = keys.pick_random()
-	if keys.size() > 1 and next_word == current_word:
-		while next_word == current_word:
-			next_word = keys.pick_random()
+	var available_keys: Array = []
+	for k in keys:
+		if not stage_used_words.has(k):
+			available_keys.append(k)
+	
+	if available_keys.is_empty():
+		stage_used_words.clear()
+		available_keys = keys.duplicate()
+	
+	var next_word = available_keys.pick_random()
+	stage_used_words.append(next_word)
 	
 	current_word = next_word
 	current_character_index = 0
