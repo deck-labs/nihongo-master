@@ -6,19 +6,14 @@
 # ==============================================================================
 set -e
 
-VERSION="1.5.0"
-APPIMAGE="Nihongo_Master-v${VERSION}-x86_64.AppImage"
-URL="https://github.com/deck-labs/nihongo-master/releases/download/v${VERSION}/${APPIMAGE}"
-FALLBACK_URL="https://github.com/deck-labs/nihongo-master/releases/latest/download/${APPIMAGE}"
-LEGACY_URL="https://github.com/deck-labs/nihongo-master/releases/latest/download/Nihongo_Master-x86_64.AppImage"
+APPIMAGE="Nihongo_Master.AppImage"
+URL="https://github.com/deck-labs/nihongo-master/releases/latest/download/${APPIMAGE}"
+FALLBACK_URL="https://github.com/deck-labs/nihongo-master/releases/latest/download/Nihongo_Master-x86_64.AppImage"
 
-echo "=== Downloading Nihongo Master (v${VERSION}) ==="
+echo "=== Downloading Nihongo Master ==="
 if ! curl -L --progress-bar -f -o "${APPIMAGE}" "${URL}"; then
-    echo "Falling back to latest release asset..."
-    if ! curl -L --progress-bar -f -o "${APPIMAGE}" "${FALLBACK_URL}"; then
-        echo "Falling back to legacy asset..."
-        curl -L --progress-bar -f -o "${APPIMAGE}" "${LEGACY_URL}"
-    fi
+    echo "Falling back to x86_64 release asset..."
+    curl -L --progress-bar -f -o "${APPIMAGE}" "${FALLBACK_URL}"
 fi
 chmod +x "${APPIMAGE}"
 

@@ -109,33 +109,33 @@ class UpdateManager:
         # 3. Standard Steam Deck / Linux downloads location
         downloads_dir = os.path.expanduser("~/Downloads")
         if os.path.isdir(downloads_dir):
-            # Prioritize versioned or unversioned AppImages currently in Downloads
             preferred_names = [
-                f"Nihongo_Master-v{GAME_VERSION}-x86_64.AppImage",
-                "Nihongo_Master-x86_64.AppImage"
+                "Nihongo_Master.AppImage",
+                "Nihongo_Master-x86_64.AppImage",
+                "Nihongo_Master"
             ]
             for cand_name in preferred_names:
                 p = os.path.join(downloads_dir, cand_name)
                 if os.path.isfile(p):
                     return os.path.abspath(p)
             for fname in os.listdir(downloads_dir):
-                if fname.startswith("Nihongo_Master") and fname.endswith(".AppImage"):
+                if fname.startswith("Nihongo_Master") and (fname.endswith(".AppImage") or fname == "Nihongo_Master"):
                     p = os.path.join(downloads_dir, fname)
                     if os.path.isfile(p):
                         return os.path.abspath(p)
 
         # 4. Local workspace copy fallback
         app_candidates = [
-            f"/home/deck/Applications/nihongo-master/Nihongo_Master-v{GAME_VERSION}-x86_64.AppImage",
+            "/home/deck/Applications/nihongo-master/Nihongo_Master.AppImage",
             "/home/deck/Applications/nihongo-master/Nihongo_Master-x86_64.AppImage",
-            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", f"Nihongo_Master-v{GAME_VERSION}-x86_64.AppImage")),
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Nihongo_Master.AppImage")),
             os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Nihongo_Master-x86_64.AppImage"))
         ]
         for p in app_candidates:
             if os.path.isfile(p):
                 return p
 
-        return os.path.join(downloads_dir, f"Nihongo_Master-v{GAME_VERSION}-x86_64.AppImage")
+        return os.path.join(downloads_dir, "Nihongo_Master.AppImage")
 
     def check_for_updates(self, force: bool = False):
         """Start asynchronous update check."""
@@ -199,19 +199,25 @@ class UpdateManager:
                     tag = rel.get("tag_name", "").lstrip("vV")
                     assets = rel.get("assets", [])
                     d_url = None
-                    expected_versioned = f"Nihongo_Master-v{tag}-x86_64.AppImage"
-                    # Priority 1: Match versioned AppImage name
+                    target_name = os.path.basename(self.target_path) if self.target_path else "Nihongo_Master.AppImage"
+                    # Priority 1: Match exact current target name
                     for a in assets:
-                        if a.get("name") == expected_versioned:
+                        if a.get("name") == target_name:
                             d_url = a.get("browser_download_url")
                             break
-                    # Priority 2: Match unversioned AppImage name
+                    # Priority 2: Match Nihongo_Master.AppImage
+                    if not d_url:
+                        for a in assets:
+                            if a.get("name") == "Nihongo_Master.AppImage":
+                                d_url = a.get("browser_download_url")
+                                break
+                    # Priority 3: Match Nihongo_Master-x86_64.AppImage
                     if not d_url:
                         for a in assets:
                             if a.get("name") == "Nihongo_Master-x86_64.AppImage":
                                 d_url = a.get("browser_download_url")
                                 break
-                    # Priority 3: Any AppImage asset
+                    # Priority 4: Any AppImage asset
                     if not d_url:
                         for a in assets:
                             if a.get("name", "").endswith(".AppImage"):
@@ -222,7 +228,7 @@ class UpdateManager:
                         "name": rel.get("name", f"Release {tag}"),
                         "changelog": rel.get("body", "Updated release on GitHub."),
                         "download_url": d_url,
-                        "fallback_raw_url": f"https://github.com/{GITHUB_REPO}/releases/download/v{tag}/{expected_versioned}"
+                        "fallback_raw_url": f"https://github.com/{GITHUB_REPO}/releases/download/v{tag}/Nihongo_Master.AppImage"
                     })
         except Exception:
             pass
@@ -276,7 +282,21 @@ class UpdateManager:
 
     def _run_download(self):
         urls_to_try = [self.download_url, self.fallback_url]
-        urls_to_try = [u for u in urls_to_try if u]
+        if self.remote_version:
+            r_tag = self.remote_version if str(self.remote_version).startswith("v") else f"v{self.remote_version}"
+            urls_to_try.append(f"https://github.com/{GITHUB_REPO}/releases/download/{r_tag}/Nihongo_Master.AppImage")
+            urls_to_try.append(f"https://github.com/{GITHUB_REPO}/releases/download/{r_tag}/Nihongo_Master-x86_64.AppImage")
+            urls_to_try.append(f"https://github.com/{GITHUB_REPO}/releases/latest/download/Nihongo_Master.AppImage")
+            urls_to_try.append(f"https://github.com/{GITHUB_REPO}/releases/latest/download/Nihongo_Master-x86_64.AppImage")
+        
+        # Deduplicate while preserving order
+        seen = set()
+        clean_urls = []
+        for u in urls_to_try:
+            if u and u not in seen:
+                seen.add(u)
+                clean_urls.append(u)
+        urls_to_try = clean_urls
         
         target = self.get_target_appimage_path()
         target_dir = os.path.dirname(target)

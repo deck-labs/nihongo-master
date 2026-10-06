@@ -148,27 +148,23 @@ if [ ! -x "$TOOL" ]; then
     fi
 fi
 
-VERSION=$(grep 'GAME_VERSION = ' "$DIR/python/game_config.py" | cut -d'"' -f2)
-if [ -z "$VERSION" ]; then
-    VERSION="1.5.0"
-fi
-APPIMAGE_NAME="Nihongo_Master-v${VERSION}-x86_64.AppImage"
-OUT_FILE="$DIR/${APPIMAGE_NAME}"
+OUT_FILE="$DIR/Nihongo_Master.AppImage"
 rm -f "$OUT_FILE" "$DIR/Nihongo_Master-x86_64.AppImage"
 
 echo "Running $TOOL on $APPDIR -> $OUT_FILE..."
 ARCH=x86_64 "$TOOL" "$APPDIR" "$OUT_FILE"
 chmod +x "$OUT_FILE"
 
-# Maintain unversioned copy in build dir as well
+# Maintain Nihongo_Master-x86_64.AppImage as well
 cp -f "$OUT_FILE" "$DIR/Nihongo_Master-x86_64.AppImage"
+chmod +x "$DIR/Nihongo_Master-x86_64.AppImage"
 
 # Optional Mirror to ~/Downloads (Disabled by default to preserve local testing AppImage)
 if [ "${MIRROR_TO_DOWNLOADS:-0}" = "1" ]; then
     echo "Mirroring to ~/Downloads..."
-    cp -f "$OUT_FILE" "/home/deck/Downloads/${APPIMAGE_NAME}"
+    cp -f "$OUT_FILE" /home/deck/Downloads/Nihongo_Master.AppImage
     cp -f "$OUT_FILE" /home/deck/Downloads/Nihongo_Master-x86_64.AppImage
-    chmod +x "/home/deck/Downloads/${APPIMAGE_NAME}" /home/deck/Downloads/Nihongo_Master-x86_64.AppImage
+    chmod +x /home/deck/Downloads/Nihongo_Master.AppImage /home/deck/Downloads/Nihongo_Master-x86_64.AppImage
 fi
 
 echo "========================================================="
