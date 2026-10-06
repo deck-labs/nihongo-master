@@ -298,7 +298,7 @@ class UpdateManager:
                 clean_urls.append(u)
         urls_to_try = clean_urls
         
-        target = self.get_target_appimage_path()
+        target = self.target_path if self.target_path else self.get_target_appimage_path()
         target_dir = os.path.dirname(target)
         if not os.path.isdir(target_dir):
             os.makedirs(target_dir, exist_ok=True)
@@ -401,7 +401,7 @@ class UpdateManager:
 
     def restart_game(self):
         """Relaunch the updated executable and exit cleanly."""
-        target = self.get_target_appimage_path()
+        target = self.target_path if self.target_path else self.get_target_appimage_path()
         if os.path.isfile(target) and os.access(target, os.X_OK):
             try:
                 clean_env = os.environ.copy()
