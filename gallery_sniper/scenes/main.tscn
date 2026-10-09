@@ -394,28 +394,28 @@ custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 18
-text = "▶  RESUME GAME   [(A) / START / ESC]"
+text = "▶  RESUME GAME   [(A) / START]"
 
 [node name="BtnRestart" type="Button" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 18
-text = "↺  RESTART ROUND   [(B) / R]"
+text = "↺  RESTART ROUND   [(Y) / R]"
 
 [node name="BtnSwitchKana" type="Button" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 18
-text = "⇄  SWITCH KANA   [(Y) / TAB]"
+text = "⇄  SWITCH KANA   [TAB]"
 
 [node name="BtnReturnTitle" type="Button" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 18
-text = "✖  RETURN TO TITLE   [(X) / Q]"
+text = "✖  RETURN TO TITLE   [(B) / (X) / ESC / Q]"
 
 [node name="HSeparator2" type="HSeparator" parent="UI/PauseModal/ModalPanel/Margin/VBox"]
 layout_mode = 2
@@ -425,7 +425,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 0.85)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 14
-text = "D-PAD: Navigate  •  (A): Select  •  (B) / [START]: Resume"
+text = "D-PAD: Navigate  •  (A): Select  •  (B) / [ESC] / [Q]: Return to Title"
 horizontal_alignment = 1
 
 [node name="StageClearModal" type="Control" parent="UI"]

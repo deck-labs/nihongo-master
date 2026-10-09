@@ -1,11 +1,11 @@
 {
-  "version": "1.5.2",
-  "tag_name": "v1.5.2",
-  "name": "Nihongo Master v1.5.2 - Subgame Return Fix & 5 Words Target Progression",
-  "release_date": "2026-10-06",
+  "version": "1.5.3",
+  "tag_name": "v1.5.3",
+  "name": "Nihongo Master v1.5.3 - Universal Exit-to-Title & Navigation Safeguard",
+  "release_date": "2026-10-09",
   "appimage_filename": "Nihongo_Master.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.2/Nihongo_Master.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.2/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.5.2: Resolved spurious exit issue when returning to title from The Gallery Sniper. Expanded stage target goal to 5 unique words cleared with progressive difficulty."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.3/Nihongo_Master.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.3/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.5.3: Ensure exiting any minigame (Highway Racer, 3D Cards, The Gallery Sniper) returns strictly to the Main Title screen without closing the application. Added full controller and keyboard exit mapping in pause and stage clear menus."
 }
 

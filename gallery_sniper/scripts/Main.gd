@@ -526,7 +526,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				KEY_ENTER, KEY_SPACE:
 					_on_next_stage_pressed()
 					get_viewport().set_input_as_handled()
-				KEY_ESCAPE, KEY_Q, KEY_B:
+				KEY_ESCAPE, KEY_Q, KEY_B, KEY_BACKSPACE:
 					_on_return_title_pressed()
 					get_viewport().set_input_as_handled()
 		elif event is InputEventJoypadButton and event.pressed:
@@ -543,8 +543,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
 		if event is InputEventKey and event.pressed:
 			match event.keycode:
-				KEY_ESCAPE, KEY_P:
+				KEY_ENTER, KEY_SPACE, KEY_P:
 					toggle_pause()
+					get_viewport().set_input_as_handled()
+				KEY_ESCAPE, KEY_Q, KEY_B, KEY_BACKSPACE:
+					_on_return_title_pressed()
 					get_viewport().set_input_as_handled()
 				KEY_R:
 					_on_restart_pressed()
@@ -552,19 +555,16 @@ func _unhandled_input(event: InputEvent) -> void:
 				KEY_TAB:
 					_on_switch_kana_pressed()
 					get_viewport().set_input_as_handled()
-				KEY_Q:
-					_on_return_title_pressed()
-					get_viewport().set_input_as_handled()
 		elif event is InputEventJoypadButton and event.pressed:
 			match event.button_index:
-				JOY_BUTTON_START, JOY_BUTTON_BACK, JOY_BUTTON_B:
+				JOY_BUTTON_START, JOY_BUTTON_A, 0:
 					toggle_pause()
 					get_viewport().set_input_as_handled()
-				JOY_BUTTON_X, 2, 3:
+				JOY_BUTTON_B, JOY_BUTTON_BACK, JOY_BUTTON_X, 1, 2, 3:
 					_on_return_title_pressed()
 					get_viewport().set_input_as_handled()
 				JOY_BUTTON_Y:
-					_on_switch_kana_pressed()
+					_on_restart_pressed()
 					get_viewport().set_input_as_handled()
 		return
 

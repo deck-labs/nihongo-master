@@ -351,7 +351,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 0.85, 1, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 22
-text = "Press (A) to Play Again  •  [Start] to Exit"
+text = "Press (A) to Play Again  •  (B) / [ESC] / [Q] to Return to Main Menu"
 horizontal_alignment = 1
 
 [node name="ModalPaused" type="PanelContainer" parent="HUD"]
@@ -393,7 +393,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 16
-text = "Press (B) to Restart Set  •  (X) to Exit"
+text = "Press (B) / [ESC] / [Q] to Return to Main Menu  •  (Y) / [R] to Restart"
 horizontal_alignment = 1
 
 [node name="Audio" type="Node" parent="."]

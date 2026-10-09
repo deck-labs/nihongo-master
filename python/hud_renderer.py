@@ -1120,7 +1120,7 @@ class HudRenderer:
         txt_p = self.font_title.render("PAUSE", True, col_p)
         surface.blit(txt_p, txt_p.get_rect(center=(cx, cy - 24)))
         
-        txt_sub = self.font_caption.render("SELECT / START: RESUME   |   SELECT + START: QUIT", True, COLOR_WHITE)
+        txt_sub = self.font_caption.render("(A) / START: RESUME   •   (B) / [ESC] / SELECT+START: MAIN MENU", True, COLOR_WHITE)
         surface.blit(txt_sub, txt_sub.get_rect(center=(cx, cy + 34)))
 
     def render_stage_clear_overlay(self, surface: pygame.Surface, stage: int, is_flawless_unlock: bool = False, game_mode: str = "hiragana"):

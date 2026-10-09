@@ -292,16 +292,23 @@ func _input(event: InputEvent):
 				reset_selection()
 
 	if current_state == State.PAUSED:
-		if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and event.keycode in [KEY_ESCAPE, KEY_P]):
-			toggle_pause()
+		if event is InputEventKey and event.pressed:
+			match event.keycode:
+				KEY_ENTER, KEY_SPACE, KEY_P:
+					toggle_pause()
+				KEY_ESCAPE, KEY_Q, KEY_B, KEY_BACKSPACE:
+					get_tree().quit()
+				KEY_R:
+					toggle_pause()
+					start_set(current_set_index)
 		elif event is InputEventJoypadButton and event.pressed:
-			if event.button_index in [JOY_BUTTON_START, JOY_BUTTON_BACK, JOY_BUTTON_A]:
+			if event.button_index in [JOY_BUTTON_START, JOY_BUTTON_A]:
 				toggle_pause()
-			elif event.button_index == JOY_BUTTON_B:
+			elif event.button_index in [JOY_BUTTON_B, JOY_BUTTON_BACK, JOY_BUTTON_X, 1, 2, 3]:
+				get_tree().quit()
+			elif event.button_index == JOY_BUTTON_Y:
 				toggle_pause()
 				start_set(current_set_index)
-			elif event.button_index in [JOY_BUTTON_X, 2, 3]:
-				get_tree().quit()
 		return
 
 	if current_state == State.SET_CLEAR:
@@ -309,18 +316,20 @@ func _input(event: InputEvent):
 		   (event is InputEventKey and event.pressed and event.keycode in [KEY_ENTER, KEY_SPACE]):
 			modal_set_clear.visible = false
 			start_set(current_set_index + 1)
-		elif (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_B, JOY_BUTTON_BACK]) or \
-		     (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE):
+		elif (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_B, JOY_BUTTON_BACK, JOY_BUTTON_X, 1, 2, 3]) or \
+		     (event is InputEventKey and event.pressed and event.keycode in [KEY_ESCAPE, KEY_Q, KEY_B, KEY_BACKSPACE]):
 			get_tree().quit()
 		return
 
 	if current_state == State.STAGE_CLEAR:
-		if (event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_A) or (event is InputEventKey and event.pressed and event.keycode == KEY_ENTER):
+		if (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_A, JOY_BUTTON_START]) or \
+		   (event is InputEventKey and event.pressed and event.keycode in [KEY_ENTER, KEY_SPACE]):
 			if current_stage_index >= MAX_STAGES:
 				start_stage(1)
 			else:
 				start_stage(current_stage_index + 1)
-		elif (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_B, JOY_BUTTON_START, JOY_BUTTON_BACK]) or (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE):
+		elif (event is InputEventJoypadButton and event.pressed and event.button_index in [JOY_BUTTON_B, JOY_BUTTON_BACK, JOY_BUTTON_X, 1, 2, 3]) or \
+		     (event is InputEventKey and event.pressed and event.keycode in [KEY_ESCAPE, KEY_Q, KEY_B, KEY_BACKSPACE]):
 			get_tree().quit()
 		return
 

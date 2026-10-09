@@ -431,16 +431,17 @@ class GameEngine:
         pygame.event.pump()
         pygame.event.clear()
 
-        # Set debounce cooldown to ignore any lingering button presses
-        self.subgame_return_cooldown = time.time() + 1.0
+        # Set debounce cooldown to ignore any lingering button presses or window events
+        self.subgame_return_cooldown = time.time() + 2.0
         self.subgame_just_returned = True
         self.running = True
         if hasattr(self, 'gamepad_buttons_down'):
             self.gamepad_buttons_down.clear()
 
-        # Enforce hidden mouse cursor and return to title screen
+        # Enforce hidden mouse cursor, return to title screen, render, and flip
         self.hide_cursor()
         self.return_to_title()
+        self.render()
         self._present_to_screen()
         pygame.display.flip()
 
@@ -499,15 +500,17 @@ class GameEngine:
         pygame.event.pump()
         pygame.event.clear()
 
-        # Set debounce cooldown to ignore any lingering button presses
-        self.subgame_return_cooldown = time.time() + 1.0
+        # Set debounce cooldown to ignore any lingering button presses or window events
+        self.subgame_return_cooldown = time.time() + 2.0
         self.subgame_just_returned = True
         self.running = True
         if hasattr(self, 'gamepad_buttons_down'):
             self.gamepad_buttons_down.clear()
 
+        # Enforce hidden mouse cursor, return to title screen, render, and flip
         self.hide_cursor()
         self.return_to_title()
+        self.render()
         self._present_to_screen()
         pygame.display.flip()
 
@@ -1087,8 +1090,16 @@ class GameEngine:
                 return
 
             if event.type == pygame.QUIT:
-                self.running = False
-                return
+                # Exiting any game must return to the main screen, never quit the app!
+                if not self.is_title_screen:
+                    self.return_to_title()
+                    return
+                elif time.time() < getattr(self, 'subgame_return_cooldown', 0.0) + 4.0:
+                    print("[NihongoMaster] Absorbed window quit event after subgame exit.")
+                    return
+                else:
+                    self.running = False
+                    return
 
             # Controller Hotplugging
             if event.type == pygame.JOYDEVICEADDED:
@@ -1339,11 +1350,15 @@ class GameEngine:
 
             # Keyboard Input
             if event.type == pygame.KEYDOWN:
-                # Quit shortcuts (Ctrl+Q or Ctrl+C only)
+                # Quit shortcuts (Ctrl+Q or Ctrl+C)
                 if (event.key == pygame.K_q and (event.mod & pygame.KMOD_CTRL)) or \
                    (event.key == pygame.K_c and (event.mod & pygame.KMOD_CTRL)):
-                    self.running = False
-                    return
+                    if not self.is_title_screen:
+                        self.return_to_title()
+                        return
+                    else:
+                        self.running = False
+                        return
 
                 # Pause toggle on keyboard
                 if event.key in (pygame.K_p, pygame.K_PAUSE):
@@ -1352,9 +1367,12 @@ class GameEngine:
                     continue
 
                 if self.is_paused:
-                    if event.key in (pygame.K_SPACE, pygame.K_RETURN, pygame.K_ESCAPE):
+                    if event.key in (pygame.K_SPACE, pygame.K_RETURN):
                         self.toggle_pause()
-                    continue
+                        continue
+                    elif event.key in (pygame.K_ESCAPE, pygame.K_q, pygame.K_b, pygame.K_BACKSPACE):
+                        self.return_to_title()
+                        continue
 
                 if self.is_title_screen or self.is_volume_menu_open or self.is_update_dialog_open:
                     if event.key in (pygame.K_UP, pygame.K_w):
@@ -1445,10 +1463,14 @@ class GameEngine:
                 inst = getattr(event, 'instance_id', getattr(event, 'joy', 0))
                 self.gamepad_buttons_down.add((inst, event.button))
 
-                # Immediate check for simultaneous SELECT + START quit combination
+                # Check for simultaneous SELECT + START quit combination
                 if self.check_quit_combo():
-                    self.running = False
-                    return
+                    if not self.is_title_screen:
+                        self.return_to_title()
+                        return
+                    else:
+                        self.running = False
+                        return
 
                 btn = event.button
                 # SELECT buttons: 4, 6, 8, 10
@@ -1467,10 +1489,12 @@ class GameEngine:
                         self.toggle_pause() # Pause
                     continue
 
-                # When paused, pressing START or any action button unpauses
+                # When paused:
                 if self.is_paused:
-                    if btn in (0, 1, 2, 3, 7, 9, 11):
+                    if btn in (0, 7, 9, 11): # A or Start unpauses
                         self.toggle_pause()
+                    elif btn in (1, 2, 3): # B, X, Y returns to title
+                        self.return_to_title()
                     continue
 
                 # Menus (Title screen, Volume settings modal, Update modal)
@@ -1513,8 +1537,12 @@ class GameEngine:
         # Continuous check for simultaneous SELECT + START quit combination (ignored during subgame return cooldown)
         if time.time() >= getattr(self, 'subgame_return_cooldown', 0.0):
             if self.check_quit_combo():
-                self.running = False
-                return
+                if not self.is_title_screen:
+                    self.return_to_title()
+                    return
+                else:
+                    self.running = False
+                    return
 
         self.audio.update(delta)
         
