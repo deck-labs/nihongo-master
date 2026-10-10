@@ -54,6 +54,12 @@ var last_moving_pos: Vector2 = Vector2.ZERO
 @onready var stage_clear_stats: Label = $HUD/ModalStageClear/Margin/VBox/Stats
 @onready var stage_clear_prompt: Label = $HUD/ModalStageClear/Margin/VBox/Prompt
 @onready var modal_paused: PanelContainer = $HUD/ModalPaused
+@onready var action_bar: PanelContainer = $HUD/ActionBar
+@onready var btn_submit: Button = $HUD/ActionBar/Margin/HBox/BtnSubmit
+@onready var btn_reset: Button = $HUD/ActionBar/Margin/HBox/BtnReset
+@onready var controls_footer_label: Label = $HUD/ControlsFooter/HBox/Lbl
+
+var last_input_device: String = "mouse_keyboard"
 
 # Audio Players
 @onready var sfx_deal: AudioStreamPlayer = $Audio/SfxDeal
@@ -75,6 +81,14 @@ func _ready():
 	_parse_cmdline_args()
 	if top_title_label:
 		top_title_label.text = "KATAKANA CARDS" if current_mode == "katakana" else "HIRAGANA CARDS"
+	if btn_submit:
+		btn_submit.pressed.connect(_on_submit_pressed)
+		btn_submit.mouse_entered.connect(_on_btn_hover)
+	if btn_reset:
+		btn_reset.pressed.connect(_on_reset_pressed)
+		btn_reset.mouse_entered.connect(_on_btn_hover)
+	_update_action_bar()
+	_update_controls_footer()
 	start_stage(current_stage_index)
 
 func _hide_mouse():
@@ -85,7 +99,7 @@ func _hide_mouse():
 
 func _show_mouse(pos: Vector2):
 	mouse_visible = true
-	mouse_idle_timer = 2.0
+	mouse_idle_timer = 5.0
 	last_moving_pos = pos
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
@@ -153,9 +167,12 @@ func next_round():
 	current_state = State.PLAYING
 	state_timer = 0.0
 	_hide_overlays()
+	_update_action_bar()
+	if action_bar: action_bar.visible = true
 
 func _deal_8_card_hand():
 	selected_cards.clear()
+	_update_action_bar()
 	var target_chars: Array = current_word["kana"].duplicate()
 	var needed = target_chars.size()
 	var decoy_count = max(0, 8 - needed)
@@ -239,27 +256,34 @@ func _update_card_tray_positions():
 		c.glide_to(t_pos, Vector3(24.0, 0, 0), 0.22)
 
 func _input(event: InputEvent):
-	# Auto-hide mouse when gamepad or keyboard is used
-	if event is InputEventJoypadButton or event is InputEventKey:
+	# Auto-hide mouse only when gamepad is used
+	if event is InputEventJoypadButton:
+		_set_input_device("gamepad")
 		if mouse_visible:
 			_hide_mouse()
 	elif event is InputEventJoypadMotion:
-		if abs(event.axis_value) > 0.4 and mouse_visible:
-			_hide_mouse()
+		if abs(event.axis_value) > 0.4:
+			_set_input_device("gamepad")
+			if mouse_visible:
+				_hide_mouse()
+
+	elif event is InputEventKey:
+		_set_input_device("mouse_keyboard")
 
 	# Mouse movement tracking
-	if event is InputEventMouseMotion:
+	elif event is InputEventMouseMotion:
+		_set_input_device("mouse_keyboard")
 		var mpos = event.position
 		if mouse_startup_grace_timer > 0.0:
 			idle_anchor_pos = mpos
 		elif not mouse_visible:
 			var dist = mpos.distance_to(idle_anchor_pos)
-			if dist >= 15.0:
+			if dist >= 10.0:
 				_show_mouse(mpos)
 		else:
 			var dist = mpos.distance_to(last_moving_pos)
 			if dist >= 2.0:
-				mouse_idle_timer = 2.0
+				mouse_idle_timer = 5.0
 				last_moving_pos = mpos
 
 		if mouse_visible and current_state == State.PLAYING:
@@ -270,10 +294,20 @@ func _input(event: InputEvent):
 
 	# Mouse clicks
 	elif event is InputEventMouseButton and event.pressed:
-		if mouse_startup_grace_timer <= 0.0:
+		_set_input_device("mouse_keyboard")
+		if not mouse_visible:
 			_show_mouse(event.position)
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if current_state == State.PLAYING:
+				# If clicking inside the Action Bar buttons, trigger actions directly
+				if btn_submit and btn_submit.visible and btn_submit.get_global_rect().has_point(event.position):
+					_on_submit_pressed()
+					return
+				if btn_reset and btn_reset.visible and btn_reset.get_global_rect().has_point(event.position):
+					_on_reset_pressed()
+					return
+				if action_bar and action_bar.visible and action_bar.get_global_rect().has_point(event.position):
+					return
 				var clicked = _get_card_at_screen_pos(event.position)
 				if clicked != -1:
 					cursor_index = clicked
@@ -393,6 +427,7 @@ func toggle_selected_card():
 		_update_card_tray_positions()
 		if sfx_deselect: sfx_deselect.play()
 		_update_cursor_hover()
+	_update_action_bar()
 
 func reset_selection():
 	if selected_cards.is_empty():
@@ -404,6 +439,7 @@ func reset_selection():
 	selected_cards.clear()
 	if sfx_reset: sfx_reset.play()
 	_update_cursor_hover()
+	_update_action_bar()
 
 func submit_word():
 	if selected_cards.is_empty():
@@ -427,6 +463,7 @@ func submit_word():
 		if banner_correct: banner_correct.visible = true
 		if sfx_correct: sfx_correct.play()
 		if confetti_particles: confetti_particles.restart()
+		if action_bar: action_bar.visible = false
 		_update_hud()
 	else:
 		# INCORRECT SEQUENCE
@@ -436,15 +473,18 @@ func submit_word():
 		if sfx_incorrect: sfx_incorrect.play()
 		for c in selected_cards:
 			c.shake()
+		_update_action_bar()
 
 func toggle_pause():
 	if current_state == State.PAUSED:
 		current_state = previous_state
 		if modal_paused: modal_paused.visible = false
+		if action_bar: action_bar.visible = (current_state == State.PLAYING)
 	else:
 		previous_state = current_state
 		current_state = State.PAUSED
 		if modal_paused: modal_paused.visible = true
+		if action_bar: action_bar.visible = false
 
 func _show_toast(msg: String):
 	toast_label.text = msg
@@ -458,6 +498,7 @@ func _hide_overlays():
 	if modal_stage_clear: modal_stage_clear.visible = false
 	if modal_paused: modal_paused.visible = false
 	if toast_panel: toast_panel.visible = false
+	if action_bar: action_bar.visible = (current_state == State.PLAYING)
 
 func _process(delta: float):
 	state_timer += delta
@@ -466,12 +507,12 @@ func _process(delta: float):
 		if toast_timer <= 0.0 and toast_panel:
 			toast_panel.visible = false
 
-	# Mouse auto-hide countdown (2 seconds idle, with 1.0s startup grace)
+	# Mouse auto-hide countdown: only when in gamepad mode
 	if mouse_startup_grace_timer > 0.0:
 		mouse_startup_grace_timer = max(0.0, mouse_startup_grace_timer - delta)
-		if mouse_visible:
+		if mouse_visible and last_input_device == "gamepad":
 			_hide_mouse()
-	elif mouse_visible:
+	elif mouse_visible and last_input_device == "gamepad":
 		mouse_idle_timer -= delta
 		if mouse_idle_timer <= 0.0:
 			_hide_mouse()
@@ -541,5 +582,61 @@ func _update_hud():
 		pip.custom_minimum_size = Vector2(16, 16)
 		pip.color = Color(0.18, 0.84, 0.45, 1) if i < words_completed else Color(0.25, 0.35, 0.3, 0.8)
 		pips_container.add_child(pip)
+
+func _update_action_bar():
+	if not btn_submit or not btn_reset:
+		return
+	var count = selected_cards.size()
+	var shortcut = "[CLICK / TAB / X]" if last_input_device == "mouse_keyboard" else "[(X) / RB]"
+	var reset_shortcut = "[B / R-CLICK]" if last_input_device == "mouse_keyboard" else "[(B)]"
+	
+	if count > 0:
+		btn_submit.text = "✔ SUBMIT CARDS (%d)\n%s" % [count, shortcut]
+		btn_reset.text = "↺ RESET\n%s" % [reset_shortcut]
+		btn_submit.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		btn_reset.modulate = Color(1.0, 1.0, 1.0, 1.0)
+	else:
+		btn_submit.text = "✔ SUBMIT CARDS\n%s" % [shortcut]
+		btn_reset.text = "↺ RESET\n%s" % [reset_shortcut]
+		btn_submit.modulate = Color(0.85, 0.95, 0.9, 0.75)
+		btn_reset.modulate = Color(0.85, 0.85, 0.85, 0.7)
+
+func _update_controls_footer():
+	if not controls_footer_label:
+		return
+	if last_input_device == "mouse_keyboard":
+		controls_footer_label.text = "[Mouse / Arrows] Move  •  [Click / Space] Select  •  [R-Click / B] Reset  •  [Click / Tab / X] Submit  •  [ESC] Pause"
+	else:
+		controls_footer_label.text = "[D-Pad / Stick] Move   •   (A) Select/Deselect   •   (B) Reset All   •   (X) Submit Word   •   [Start] Pause"
+
+func _set_input_device(dev: String):
+	if last_input_device != dev:
+		last_input_device = dev
+		_update_action_bar()
+		_update_controls_footer()
+
+var last_submit_time: float = 0.0
+var last_reset_time: float = 0.0
+
+func _on_submit_pressed():
+	var now = Time.get_ticks_msec() / 1000.0
+	if now - last_submit_time < 0.2:
+		return
+	last_submit_time = now
+	if current_state == State.PLAYING:
+		submit_word()
+
+func _on_reset_pressed():
+	var now = Time.get_ticks_msec() / 1000.0
+	if now - last_reset_time < 0.2:
+		return
+	last_reset_time = now
+	if current_state == State.PLAYING:
+		reset_selection()
+
+func _on_btn_hover():
+	if sfx_cursor:
+		sfx_cursor.play()
+
 
 
