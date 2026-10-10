@@ -20,6 +20,9 @@ import pygame
 from game_config import (
     GAME_VERSION, GITHUB_REPO, VERSION_CHECK_URL, RELEASES_API_URL
 )
+from logger import get_logger
+
+logger = get_logger()
 
 def get_ssl_context():
     """Create a resilient SSL context with CA bundle detection and fallback."""
@@ -421,5 +424,5 @@ class UpdateManager:
                 pygame.quit()
                 sys.exit(0)
             except Exception as e:
-                print(f"Restart failed: {e}")
+                logger.error(f"Restart failed: {e}", exc_info=True)
 

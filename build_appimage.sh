@@ -132,7 +132,20 @@ HERE="$(dirname "$(readlink -f "${0}")")"
 export PATH="${HERE}/usr/bin:${PATH}"
 export LD_LIBRARY_PATH="${HERE}/usr/bin/_internal:${HERE}/usr/lib:${LD_LIBRARY_PATH}"
 cd "${HERE}"
-exec "${HERE}/usr/bin/nihongo_master" "$@"
+
+# Ensure user log directory exists
+LOG_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/nihongo-master/logs"
+mkdir -p "$LOG_DIR" 2>/dev/null || LOG_DIR="/tmp/nihongo-master-logs"
+mkdir -p "$LOG_DIR" 2>/dev/null
+
+"${HERE}/usr/bin/nihongo_master" "$@"
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 130 ]; then
+    echo "[AppRun] Nihongo Master exited with non-zero code $EXIT_CODE at $(date)" >> "$LOG_DIR/nihongo_master_apprun.log"
+fi
+
+exit $EXIT_CODE
 EOA
 
 chmod +x "$APPDIR/AppRun" "$APPDIR/usr/bin/nihongo_master"

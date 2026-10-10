@@ -1,10 +1,10 @@
 {
-  "version": "1.5.5",
-  "tag_name": "v1.5.5",
-  "name": "Nihongo Master v1.5.5 - Eye-Friendly Palette & Audio Update Polish",
+  "version": "1.5.6",
+  "tag_name": "v1.5.6",
+  "name": "Nihongo Master v1.5.6 - Crash Diagnostics & Robust System Logging",
   "release_date": "2026-10-10",
   "appimage_filename": "Nihongo_Master.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.5/Nihongo_Master.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.5/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.5.5: Upgraded the entire UI color scheme from harsh pure-black to an eye-friendly dark slate and charcoal palette with softened typography across menus, stage selects, HUDs, and Godot subgames. Added automatic music pausing during in-app updates."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.6/Nihongo_Master.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.6/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.5.6: Added a comprehensive logging and crash diagnostic system. Captures runtime logs in ~/.local/share/nihongo-master/logs/nihongo_master.log and dumps complete system telemetry, stack traces, and subgame errors into nihongo_master_crash.log on any unexpected failure. Added --logs CLI inspector and protected arcade game loop from freeze."
 }

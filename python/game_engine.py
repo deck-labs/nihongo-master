@@ -27,6 +27,9 @@ from entities import PlayerCar, TrafficCar
 from hud_renderer import HudRenderer
 from update_manager import UpdateManager
 from hiragana_extras import HiraganaExtras
+from logger import get_logger, get_log_dir, write_crash_report, log_subgame_execution
+
+logger = get_logger()
 
 class GameEngine:
     def __init__(self, start_stage: int = 1, skip_title: bool = False, custom_dist: float = 0.0,
@@ -77,9 +80,9 @@ class GameEngine:
                 joy = pygame.joystick.Joystick(i)
                 joy.init()
                 self.joysticks.append(joy)
-                print(f"Controller {i} initialized: {joy.get_name()}")
+                logger.info(f"Controller {i} initialized: {joy.get_name()}")
             except Exception as e:
-                print(f"Failed to init joystick {i}: {e}")
+                logger.warning(f"Failed to init joystick {i}: {e}")
                 
         self.stick_x_released = True
         self.stick_y_released = True
@@ -214,7 +217,7 @@ class GameEngine:
                     self.katakana_secret_stage_unlocked = True
                 self._save_unlocks()
         except Exception as e:
-            print(f"Note: Could not load unlocks: {e}")
+            logger.debug(f"Could not load unlocks: {e}")
 
     def _save_unlocks(self):
         try:
@@ -226,7 +229,7 @@ class GameEngine:
                     "last_mode": self.game_mode
                 }, f, indent=2)
         except Exception as e:
-            print(f"Note: Could not save unlocks: {e}")
+            logger.debug(f"Could not save unlocks: {e}")
 
     def toggle_game_mode(self):
         modes = ["hiragana", "katakana", "cards", "katakana_cards"]
@@ -373,6 +376,88 @@ class GameEngine:
         self.start_stage(self.selected_stage, keep_fuel=False)
         self.audio.start_engine()
 
+    def _run_subgame_process(self, cmd: list[str], env: dict) -> int:
+        """Execute Godot subgame process, logging stdout/stderr and safely restoring display."""
+        subgame_name = os.path.basename(cmd[0])
+        log_dir = get_log_dir()
+        subgame_log_path = os.path.join(log_dir, f"subgame_{subgame_name}.log")
+
+        logger.info(f"Executing subgame process: {' '.join(cmd)}")
+        logger.info(f"Subgame runtime log: {subgame_log_path}")
+
+        returncode = -1
+        stdout_text = ""
+        stderr_text = ""
+
+        try:
+            import subprocess
+            with open(subgame_log_path, "w", encoding="utf-8", errors="replace") as log_f:
+                proc = subprocess.Popen(
+                    cmd,
+                    env=env,
+                    stdout=log_f,
+                    stderr=subprocess.STDOUT
+                )
+                returncode = proc.wait()
+        except Exception as e:
+            logger.error(f"Failed to execute subgame process: {e}", exc_info=True)
+            returncode = -999
+            stderr_text = str(e)
+
+        if os.path.isfile(subgame_log_path):
+            try:
+                with open(subgame_log_path, "r", encoding="utf-8", errors="replace") as log_f:
+                    lines = log_f.readlines()
+                    stdout_text = "".join(lines[-60:])
+                    if returncode != 0:
+                        stderr_text = stdout_text
+            except Exception:
+                pass
+
+        log_subgame_execution(cmd, env, returncode, stdout_text, stderr_text)
+
+        # Ensure Pygame window is un-minimized, restored to foreground, and focused
+        try:
+            from pygame._sdl2.video import Window
+            win = Window.from_display_module()
+            win.restore()
+            win.show()
+            win.focus()
+            if hasattr(self, 'screen') and self.screen and (self.screen.get_flags() & pygame.FULLSCREEN):
+                win.set_fullscreen(True)
+        except Exception as e:
+            logger.warning(f"Window restore notice: {e}")
+
+        # Verify display surface is still alive
+        try:
+            curr_surf = pygame.display.get_surface()
+            if curr_surf is None:
+                logger.warning("Display surface lost after subgame exit, restoring video mode...")
+                if self.screen:
+                    self.screen = pygame.display.set_mode(self.screen.get_size(), self.screen.get_flags())
+        except Exception as e:
+            logger.error(f"Error checking display surface: {e}")
+
+        # Drain stale window/mouse events accumulated while child was running
+        pygame.event.pump()
+        pygame.event.clear()
+
+        # Set debounce cooldown to ignore any lingering button presses or window events
+        self.subgame_return_cooldown = time.time() + 2.0
+        self.subgame_just_returned = True
+        self.running = True
+        if hasattr(self, 'gamepad_buttons_down'):
+            self.gamepad_buttons_down.clear()
+
+        # Enforce hidden mouse cursor, return to title screen, render, and flip
+        self.hide_cursor()
+        self.return_to_title()
+        self.render()
+        self._present_to_screen()
+        pygame.display.flip()
+
+        return returncode
+
     def launch_card_game(self, start_stage: int = 1):
         """Seamlessly launch Godot 3D Card Game (Hiragana or Katakana)."""
         self.audio.stop_title_music(fade_ms=300)
@@ -399,51 +484,17 @@ class GameEngine:
                 break
 
         if not cmd:
-            print("[NihongoMaster] Error: Godot Cards binary not found.")
+            logger.error("Godot Cards binary not found.")
             self.return_to_title()
             self.audio.play_title_music()
             return
 
-        print(f"[NihongoMaster] Launching Godot 3D Cards ({mode_arg}): {cmd} (Stage {start_stage})")
-        try:
-            import subprocess
-            env = os.environ.copy()
-            env["NIHONGO_CARD_STAGE"] = str(start_stage)
-            env["NIHONGO_CARD_MODE"] = mode_arg
-            env["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
-            subprocess.run(cmd, env=env)
-        except Exception as e:
-            print(f"[NihongoMaster] Error launching card game: {e}")
-
-        # Ensure Pygame window is un-minimized, restored to foreground, and focused
-        try:
-            from pygame._sdl2.video import Window
-            win = Window.from_display_module()
-            win.restore()
-            win.show()
-            win.focus()
-            if hasattr(self, 'screen') and (self.screen.get_flags() & pygame.FULLSCREEN):
-                win.set_fullscreen(True)
-        except Exception as e:
-            print(f"[NihongoMaster] Window restore notice: {e}")
-
-        # Drain stale window/mouse events accumulated while child was running
-        pygame.event.pump()
-        pygame.event.clear()
-
-        # Set debounce cooldown to ignore any lingering button presses or window events
-        self.subgame_return_cooldown = time.time() + 2.0
-        self.subgame_just_returned = True
-        self.running = True
-        if hasattr(self, 'gamepad_buttons_down'):
-            self.gamepad_buttons_down.clear()
-
-        # Enforce hidden mouse cursor, return to title screen, render, and flip
-        self.hide_cursor()
-        self.return_to_title()
-        self.render()
-        self._present_to_screen()
-        pygame.display.flip()
+        logger.info(f"Preparing to launch Godot 3D Cards ({mode_arg}, Stage {start_stage})")
+        env = os.environ.copy()
+        env["NIHONGO_CARD_STAGE"] = str(start_stage)
+        env["NIHONGO_CARD_MODE"] = mode_arg
+        env["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
+        self._run_subgame_process(cmd, env)
 
     def launch_sniper_game(self, mode: str = "hiragana", start_stage: int = 1):
         """Seamlessly launch Godot The Gallery Sniper (Hiragana or Katakana)."""
@@ -469,50 +520,17 @@ class GameEngine:
                 break
 
         if not cmd:
-            print("[NihongoMaster] Error: Godot Gallery Sniper binary not found.")
+            logger.error("Godot Gallery Sniper binary not found.")
             self.return_to_title()
             self.audio.play_title_music()
             return
 
-        print(f"[NihongoMaster] Launching Godot Gallery Sniper ({mode}): {cmd} (Stage {start_stage})")
-        try:
-            import subprocess
-            env = os.environ.copy()
-            env["NIHONGO_SNIPER_STAGE"] = str(start_stage)
-            env["NIHONGO_SNIPER_MODE"] = mode
-            env["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
-            subprocess.run(cmd, env=env)
-        except Exception as e:
-            print(f"[NihongoMaster] Error launching gallery sniper: {e}")
-
-        # Ensure Pygame window is un-minimized, restored to foreground, and focused
-        try:
-            from pygame._sdl2.video import Window
-            win = Window.from_display_module()
-            win.restore()
-            win.show()
-            win.focus()
-            if hasattr(self, 'screen') and (self.screen.get_flags() & pygame.FULLSCREEN):
-                win.set_fullscreen(True)
-        except Exception as e:
-            print(f"[NihongoMaster] Window restore notice: {e}")
-
-        pygame.event.pump()
-        pygame.event.clear()
-
-        # Set debounce cooldown to ignore any lingering button presses or window events
-        self.subgame_return_cooldown = time.time() + 2.0
-        self.subgame_just_returned = True
-        self.running = True
-        if hasattr(self, 'gamepad_buttons_down'):
-            self.gamepad_buttons_down.clear()
-
-        # Enforce hidden mouse cursor, return to title screen, render, and flip
-        self.hide_cursor()
-        self.return_to_title()
-        self.render()
-        self._present_to_screen()
-        pygame.display.flip()
+        logger.info(f"Preparing to launch Godot Gallery Sniper ({mode}, Stage {start_stage})")
+        env = os.environ.copy()
+        env["NIHONGO_SNIPER_STAGE"] = str(start_stage)
+        env["NIHONGO_SNIPER_MODE"] = mode
+        env["SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS"] = "0"
+        self._run_subgame_process(cmd, env)
 
 
     def return_to_title(self):
@@ -1098,7 +1116,7 @@ class GameEngine:
                     self.return_to_title()
                     return
                 elif time.time() < getattr(self, 'subgame_return_cooldown', 0.0) + 4.0:
-                    print("[NihongoMaster] Absorbed window quit event after subgame exit.")
+                    logger.info("Absorbed window quit event after subgame exit.")
                     return
                 else:
                     self.running = False
@@ -1111,13 +1129,13 @@ class GameEngine:
                     joy.init()
                     if not any(j.get_instance_id() == joy.get_instance_id() for j in self.joysticks):
                         self.joysticks.append(joy)
-                        print(f"Gamepad attached: {joy.get_name()}")
+                        logger.info(f"Gamepad attached: {joy.get_name()}")
                 except Exception as e:
-                    print(f"Error initializing attached gamepad: {e}")
+                    logger.warning(f"Error initializing attached gamepad: {e}")
             elif event.type == pygame.JOYDEVICEREMOVED:
                 self.joysticks = [j for j in self.joysticks if j.get_instance_id() != event.instance_id]
                 self.gamepad_buttons_down = {b for b in self.gamepad_buttons_down if b[0] != event.instance_id}
-                print("Gamepad detached")
+                logger.info("Gamepad detached")
 
             # If user operates gamepad buttons, hats, or keyboard, immediately hide mouse cursor
             elif event.type in (pygame.JOYBUTTONDOWN, pygame.JOYHATMOTION, pygame.KEYDOWN):
@@ -1967,11 +1985,40 @@ class GameEngine:
         self.render()
 
     def run(self):
+        consecutive_frame_errors = 0
+        max_consecutive_errors = 5
+
+        logger.info("Entering main arcade game loop.")
         while self.running:
             delta = self.clock.tick(TARGET_FPS) / 1000.0
             # Cap delta to avoid physics explosions on lag spikes
             delta = min(0.05, max(0.001, delta))
-            self.run_frame(delta)
+            
+            try:
+                self.run_frame(delta)
+                consecutive_frame_errors = 0
+            except Exception as e:
+                consecutive_frame_errors += 1
+                logger.error(
+                    f"Recoverable frame exception ({consecutive_frame_errors}/{max_consecutive_errors}): {e}",
+                    exc_info=True
+                )
+                if consecutive_frame_errors >= max_consecutive_errors:
+                    logger.critical(
+                        f"Encountered {consecutive_frame_errors} consecutive frame errors. Aborting to prevent freeze.",
+                        exc_info=True
+                    )
+                    write_crash_report(*sys.exc_info(), reason=f"Persistent Frame Loop Exception: {e}")
+                    self.running = False
+                    break
+                time.sleep(0.05)
         
-        self.audio.stop_all()
-        pygame.quit()
+        logger.info("Exiting game loop, performing clean shutdown.")
+        try:
+            self.audio.stop_all()
+        except Exception:
+            pass
+        try:
+            pygame.quit()
+        except Exception:
+            pass

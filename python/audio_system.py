@@ -7,6 +7,9 @@ import os
 import math
 import pygame
 from game_config import get_asset_path
+from logger import get_logger
+
+logger = get_logger()
 
 class AudioSystem:
     def __init__(self):
@@ -69,7 +72,7 @@ class AudioSystem:
             self.is_initialized = True
             self.apply_volumes()
         except Exception as e:
-            print(f"Warning: Audio initialization failed: {e}")
+            logger.warning(f"Audio initialization failed: {e}")
             self.is_initialized = False
 
     def set_master_volume(self, val: float):
@@ -104,7 +107,7 @@ class AudioSystem:
                 pygame.mixer.music.play(loops=-1)
                 self.is_title_music_playing = True
             except Exception as e:
-                print(f"Warning: Failed to play title music: {e}")
+                logger.warning(f"Failed to play title music: {e}")
 
     def stop_title_music(self, fade_ms: int = 400):
         """Fade out and stop title screen music."""
