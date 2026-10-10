@@ -3,17 +3,17 @@
 [![Language](https://img.shields.io/badge/Language-Python%203.13-blue.svg)](https://www.python.org/)
 [![Engine](https://img.shields.io/badge/Engine-Pygame%202.6%20%2F%20Godot%204.7-yellow.svg)](https://godotengine.org/)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%2F%20SteamOS%20(Steam%20Deck)-orange.svg)](https://store.steampowered.com/steamdeck)
-[![Version](https://img.shields.io/badge/Release-v1.5.6-blueviolet.svg)](https://github.com/deck-labs/nihongo-master/releases/tag/v1.5.6)
+[![Version](https://img.shields.io/badge/Release-v1.5.7-blueviolet.svg)](https://github.com/deck-labs/nihongo-master/releases/tag/v1.5.7)
 [![Characters](https://img.shields.io/badge/Characters-142%20Total%20Kana%20(71%20Hiragana%20%2B%2071%20Katakana)-brightgreen.svg)](#-syllabus--stage-overview)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
-[![Download AppImage](https://img.shields.io/badge/Download-Nihongo__Master.AppImage-00C853?style=flat&logo=appimage&logoColor=white)](https://github.com/deck-labs/nihongo-master/releases/download/v1.5.6/Nihongo_Master.AppImage)
+[![Download AppImage](https://img.shields.io/badge/Download-Nihongo__Master.AppImage-00C853?style=flat&logo=appimage&logoColor=white)](https://github.com/deck-labs/nihongo-master/releases/download/v1.5.7/Nihongo_Master.AppImage)
 
 The definitive retro Japanese arcade learning suite bundling three distinct game modes for both **Hiragana** and **Katakana** into a single cohesive experience for Steam Deck and Linux.
 
 <div align="center">
 
-<a href="https://github.com/deck-labs/nihongo-master/releases/download/v1.5.6/Nihongo_Master.AppImage">
-  <img src="https://img.shields.io/badge/⬇%20DOWNLOAD%20APPIMAGE-Nihongo__Master.AppImage%20(v1.5.6)-00C853?style=for-the-badge&logo=appimage&logoColor=white" height="46" alt="Download AppImage">
+<a href="https://github.com/deck-labs/nihongo-master/releases/download/v1.5.7/Nihongo_Master.AppImage">
+  <img src="https://img.shields.io/badge/⬇%20DOWNLOAD%20APPIMAGE-Nihongo__Master.AppImage%20(v1.5.7)-00C853?style=for-the-badge&logo=appimage&logoColor=white" height="46" alt="Download AppImage">
 </a>
 
 <br>
@@ -60,7 +60,7 @@ curl -sSL https://raw.githubusercontent.com/deck-labs/nihongo-master/main/downlo
 
 ### 📥 Manual Download
 ```bash
-curl -L -o Nihongo_Master.AppImage https://github.com/deck-labs/nihongo-master/releases/download/v1.5.6/Nihongo_Master.AppImage
+curl -L -o Nihongo_Master.AppImage https://github.com/deck-labs/nihongo-master/releases/download/v1.5.7/Nihongo_Master.AppImage
 chmod +x Nihongo_Master.AppImage
 ./Nihongo_Master.AppImage
 ```

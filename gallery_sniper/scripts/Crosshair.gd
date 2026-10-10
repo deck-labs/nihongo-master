@@ -1,7 +1,7 @@
 extends Node2D
 ## Crosshair.gd
 ## Custom sniper scope reticle supporting Mouse, Steam Deck Trackpads, and Gamepad analog sticks.
-## Automatically hides hardware cursor, provides smooth analog steering, and recoil punch.
+## Provides pixel-precise 1-to-1 mouse aiming, recoil animations, and unified shot firing.
 
 signal shot_requested(at_position: Vector2)
 
@@ -18,9 +18,16 @@ var trigger_was_pressed: bool = false
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	z_index = 100 # Keep reticle on top of all targets and background
-	target_pos = get_viewport_rect().size / 2.0
+	sync_to_mouse()
+
+## Immediately snaps crosshair to current mouse cursor position
+func sync_to_mouse() -> void:
+	var mp = get_global_mouse_position()
+	var vp = get_viewport_rect().size
+	target_pos.x = clampf(mp.x, 20.0, vp.x - 20.0)
+	target_pos.y = clampf(mp.y, 20.0, vp.y - 20.0)
 	global_position = target_pos
-	last_mouse_pos = get_global_mouse_position()
+	last_mouse_pos = target_pos
 
 func _process(delta: float) -> void:
 	if not visible or get_tree().paused:
@@ -32,13 +39,13 @@ func _process(delta: float) -> void:
 	# Left analog stick
 	var lx = Input.get_joy_axis(0, JOY_AXIS_LEFT_X)
 	var ly = Input.get_joy_axis(0, JOY_AXIS_LEFT_Y)
-	if Vector2(lx, ly).length() > 0.15:
+	if Vector2(lx, ly).length() > 0.20:
 		stick_vec += Vector2(lx, ly)
 	
 	# Right analog stick
 	var rx = Input.get_joy_axis(0, JOY_AXIS_RIGHT_X)
 	var ry = Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y)
-	if Vector2(rx, ry).length() > 0.15:
+	if Vector2(rx, ry).length() > 0.20:
 		stick_vec += Vector2(rx, ry)
 	
 	# Gamepad D-Pad
@@ -51,51 +58,81 @@ func _process(delta: float) -> void:
 	if Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_DOWN):
 		stick_vec.y += 1.0
 
-	var mouse_pos = get_global_mouse_position()
-	var mouse_delta = mouse_pos.distance_to(last_mouse_pos)
-
-	if mouse_delta > 1.5:
-		# Player is using Mouse or Steam Deck Touchscreen/Trackpad
-		is_gamepad_mode = false
-		target_pos = mouse_pos
-		last_mouse_pos = mouse_pos
-	elif stick_vec.length() > 0.1:
+	if stick_vec.length() > 0.20:
 		# Player is using Gamepad analog stick
 		is_gamepad_mode = true
 		var stick_magnitude = minf(stick_vec.length(), 1.0)
-		# Quadratic response curve for precision aiming
 		var speed_factor = stick_magnitude * stick_magnitude
 		target_pos += stick_vec.normalized() * (gamepad_speed * speed_factor) * delta
 		
 		# Clamp to screen boundaries
 		var vp = get_viewport_rect().size
-		target_pos.x = clampf(target_pos.x, 30.0, vp.x - 30.0)
-		target_pos.y = clampf(target_pos.y, 30.0, vp.y - 30.0)
+		target_pos.x = clampf(target_pos.x, 20.0, vp.x - 20.0)
+		target_pos.y = clampf(target_pos.y, 20.0, vp.y - 20.0)
 		
 		get_viewport().warp_mouse(target_pos)
 		last_mouse_pos = target_pos
-
-	global_position = target_pos
+		global_position = target_pos
+	elif not is_gamepad_mode:
+		# Pixel-perfect sync with current mouse position
+		var cur_m = get_global_mouse_position()
+		var vp = get_viewport_rect().size
+		target_pos.x = clampf(cur_m.x, 20.0, vp.x - 20.0)
+		target_pos.y = clampf(cur_m.y, 20.0, vp.y - 20.0)
+		global_position = target_pos
 
 func _input(event: InputEvent) -> void:
 	if not visible or get_tree().paused:
 		return
 	
-	# Mouse click recoil
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+	# 1. 1-to-1 Mouse Movement Tracking
+	if event is InputEventMouseMotion:
+		is_gamepad_mode = false
+		var mp = get_global_mouse_position()
+		var vp = get_viewport_rect().size
+		target_pos.x = clampf(mp.x, 20.0, vp.x - 20.0)
+		target_pos.y = clampf(mp.y, 20.0, vp.y - 20.0)
+		global_position = target_pos
+		last_mouse_pos = target_pos
+
+	# 2. Mouse Click Shooting (Left Mouse Button)
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		is_gamepad_mode = false
+		var mp = get_global_mouse_position()
+		var vp = get_viewport_rect().size
+		target_pos.x = clampf(mp.x, 20.0, vp.x - 20.0)
+		target_pos.y = clampf(mp.y, 20.0, vp.y - 20.0)
+		global_position = target_pos
+		last_mouse_pos = target_pos
+		
+		# If clicking top header buttons (Tabs, Pause), let UI buttons handle it without shooting
+		if mp.y < 52.0 and ((mp.x > 350.0 and mp.x < 910.0) or mp.x > 1080.0):
+			return
+		
 		play_shot_recoil()
-	
-	# Gamepad button triggers (A, X)
-	elif event is InputEventJoypadButton and event.pressed:
-		if event.button_index in [JOY_BUTTON_A, JOY_BUTTON_X]:
+		shot_requested.emit(global_position)
+		get_viewport().set_input_as_handled()
+
+	# 3. Keyboard Shooting Triggers (Space, Enter)
+	elif event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode in [KEY_SPACE, KEY_ENTER]:
 			play_shot_recoil()
 			shot_requested.emit(global_position)
+			get_viewport().set_input_as_handled()
 
-	
-	# Gamepad analog trigger triggers (RT, LT)
+	# 4. Gamepad Button Triggers (A, X)
+	elif event is InputEventJoypadButton and event.pressed:
+		if event.button_index in [JOY_BUTTON_A, JOY_BUTTON_X]:
+			is_gamepad_mode = true
+			play_shot_recoil()
+			shot_requested.emit(global_position)
+			get_viewport().set_input_as_handled()
+
+	# 5. Gamepad Analog Trigger Triggers (RT, LT)
 	elif event is InputEventJoypadMotion:
-		if (event.axis == JOY_AXIS_TRIGGER_RIGHT or event.axis == JOY_AXIS_TRIGGER_LEFT):
+		if event.axis == JOY_AXIS_TRIGGER_RIGHT or event.axis == JOY_AXIS_TRIGGER_LEFT:
 			if event.axis_value > 0.5 and not trigger_was_pressed:
+				is_gamepad_mode = true
 				trigger_was_pressed = true
 				play_shot_recoil()
 				shot_requested.emit(global_position)

@@ -1,10 +1,10 @@
 {
-  "version": "1.5.6",
-  "tag_name": "v1.5.6",
-  "name": "Nihongo Master v1.5.6 - Crash Diagnostics & Robust System Logging",
+  "version": "1.5.7",
+  "tag_name": "v1.5.7",
+  "name": "Nihongo Master v1.5.7 - Precision Mouse Aiming & Shooting Fix",
   "release_date": "2026-10-10",
   "appimage_filename": "Nihongo_Master.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.6/Nihongo_Master.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.6/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.5.6: Added a comprehensive logging and crash diagnostic system. Captures runtime logs in ~/.local/share/nihongo-master/logs/nihongo_master.log and dumps complete system telemetry, stack traces, and subgame errors into nihongo_master_crash.log on any unexpected failure. Added --logs CLI inspector and protected arcade game loop from freeze."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.7/Nihongo_Master.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.7/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.5.7: Fully restored pixel-perfect 1-to-1 mouse aiming and click shooting in The Gallery Sniper. Fixed missing mouse shot trigger, eliminated the 1.5px movement deadzone for smooth micro-aiming, unified shots across mouse, keyboard (Space/Enter), and gamepad triggers, and added automatic crosshair mouse synchronization when resuming from pause or stage clear menus."
 }

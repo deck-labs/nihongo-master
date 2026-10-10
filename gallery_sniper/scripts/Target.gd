@@ -38,13 +38,9 @@ func set_character(new_char: String) -> void:
 	if label:
 		label.text = character
 
-## Handles player clicks on this target's Area2D collision zone
-func _input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
-	if not is_active:
-		return
-	
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		target_clicked.emit(character)
+## Target hits are evaluated centrally by Crosshair and Main.gd
+func _input_event(_viewport: Node, _event: InputEvent, _shape_idx: int) -> void:
+	pass
 
 ## Play successful hit animation (pop & shrink) then free
 func play_hit_effect() -> void:

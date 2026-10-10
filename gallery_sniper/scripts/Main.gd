@@ -252,9 +252,9 @@ func _ready() -> void:
 	# Always launch in exclusive fullscreen mode at the display's maximum native resolution
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 	
-	# Connect gamepad shot trigger from Crosshair
+	# Connect unified shot trigger from Crosshair (Mouse, Keyboard, Gamepad)
 	if crosshair and crosshair.has_signal("shot_requested"):
-		crosshair.shot_requested.connect(_on_gamepad_shot)
+		crosshair.shot_requested.connect(_on_shot_fired)
 	
 	# Connect UI Mode tabs and Pause button
 	if hiragana_tab:
@@ -438,6 +438,7 @@ func toggle_pause() -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 		if crosshair:
 			crosshair.visible = true
+			crosshair.sync_to_mouse()
 
 func _on_restart_pressed() -> void:
 	if get_tree().paused:
@@ -507,6 +508,7 @@ func _on_next_stage_pressed() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 	if crosshair:
 		crosshair.visible = true
+		crosshair.sync_to_mouse()
 	
 	if current_stage >= MAX_STAGES:
 		current_stage = 1
@@ -597,8 +599,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			JOY_BUTTON_Y:
 				toggle_mode()
 
-## Handles gamepad shot trigger hitting a target at crosshair location
-func _on_gamepad_shot(shot_pos: Vector2) -> void:
+## Handles unified shot trigger hitting a target at crosshair location (Mouse, Space/Enter, Gamepad)
+func _on_shot_fired(shot_pos: Vector2) -> void:
 	if get_tree().paused or (stage_clear_modal and stage_clear_modal.visible):
 		return
 	var hit_target: Node = null
@@ -683,7 +685,6 @@ func spawn_targets() -> void:
 		target_instance.position = marker.position
 		targets_container.add_child(target_instance)
 		target_instance.set_character(chosen_chars[i])
-		target_instance.target_clicked.connect(_on_target_clicked)
 
 ## Evaluates clicked target character
 func _on_target_clicked(clicked_character: String) -> void:
