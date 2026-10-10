@@ -77,7 +77,7 @@ class HudRenderer:
         
         # Stage Header Box (Balanced spacing, zero collisions, clean centering)
         st_rect = pygame.Rect(14, 14, 252, 130)
-        pygame.draw.rect(surface, (10, 20, 36), st_rect, border_radius=6)
+        pygame.draw.rect(surface, (24, 34, 48), st_rect, border_radius=6)
         pygame.draw.rect(surface, COLOR_GOLD, st_rect, 2, border_radius=6)
         
         if stage == 11:
@@ -101,7 +101,7 @@ class HudRenderer:
         card_h = 185
         card_y = scr_h - card_h - 20
         card_rect = pygame.Rect(card_x, card_y, card_w, card_h)
-        pygame.draw.rect(surface, (8, 16, 28), card_rect, border_radius=8)
+        pygame.draw.rect(surface, (24, 34, 48), card_rect, border_radius=8)
         pygame.draw.rect(surface, COLOR_PANEL_BORDER, card_rect, 2, border_radius=8)
 
         # Vertical Mini-Map Track
@@ -112,7 +112,7 @@ class HudRenderer:
         
         # Goal Badge
         goal_rect = pygame.Rect(90, track_top - 30, 130, 26)
-        pygame.draw.rect(surface, (10, 20, 36), goal_rect, border_radius=4)
+        pygame.draw.rect(surface, (24, 34, 48), goal_rect, border_radius=4)
         pygame.draw.rect(surface, COLOR_GOLD, goal_rect, 2, border_radius=4)
         txt_goal = self.font_caption.render("★ GOAL ★", True, COLOR_GOLD)
         surface.blit(txt_goal, txt_goal.get_rect(center=goal_rect.center))
@@ -132,7 +132,7 @@ class HudRenderer:
             
         # Start Badge
         start_rect = pygame.Rect(105, track_bot + 8, 100, 28)
-        pygame.draw.rect(surface, (10, 20, 36), start_rect, border_radius=4)
+        pygame.draw.rect(surface, (24, 34, 48), start_rect, border_radius=4)
         pygame.draw.rect(surface, COLOR_CYAN, start_rect, 2, border_radius=4)
         txt_start = self.font_caption.render("START", True, COLOR_CYAN)
         surface.blit(txt_start, txt_start.get_rect(center=start_rect.center))
@@ -189,7 +189,7 @@ class HudRenderer:
         box_y = 20
         box_h = 245
         chamber_rect = pygame.Rect(rx, box_y, rw, box_h)
-        pygame.draw.rect(surface, (8, 16, 28), chamber_rect)
+        pygame.draw.rect(surface, (24, 34, 48), chamber_rect)
         border_col = COLOR_GOLD if match_timer > 0.0 else COLOR_CYAN
         pygame.draw.rect(surface, border_col, chamber_rect, 2)
         
@@ -208,7 +208,7 @@ class HudRenderer:
             
         # Romaji pronunciation guide (high-contrast pill plate)
         ro_box = pygame.Rect(rx + rw // 2 - 110, box_y + 162, 220, 42)
-        pygame.draw.rect(surface, (12, 22, 38), ro_box, border_radius=6)
+        pygame.draw.rect(surface, (20, 28, 40), ro_box, border_radius=6)
         pygame.draw.rect(surface, COLOR_CYAN, ro_box, 2, border_radius=6)
         txt_ro = self.font_menu.render(f"[ {target_romaji.upper()} ]", True, COLOR_GOLD)
         surface.blit(txt_ro, txt_ro.get_rect(center=ro_box.center))
@@ -224,7 +224,7 @@ class HudRenderer:
         # 2. Speedometer
         spd_y = 285
         spd_rect = pygame.Rect(rx, spd_y, rw, 150)
-        pygame.draw.rect(surface, (8, 16, 28), spd_rect)
+        pygame.draw.rect(surface, (24, 34, 48), spd_rect)
         pygame.draw.rect(surface, COLOR_PANEL_BORDER, spd_rect, 2)
         
         txt_spd_h = self.font_sub.render("VELOCITY TELEMETRY", True, (200, 225, 250))
@@ -256,7 +256,7 @@ class HudRenderer:
         bar_y = spd_y + 105
         bar_w = rw - 48
         bar_h = 24
-        pygame.draw.rect(surface, (16, 26, 42), (bar_x, bar_y, bar_w, bar_h))
+        pygame.draw.rect(surface, (20, 28, 40), (bar_x, bar_y, bar_w, bar_h))
         
         fill_ratio = min(1.0, speed_kmh / 264.0)
         fill_w = int(bar_w * fill_ratio)
@@ -268,7 +268,7 @@ class HudRenderer:
         # 3. Battery / Fuel Level
         fuel_y = 455
         fuel_rect = pygame.Rect(rx, fuel_y, rw, 150)
-        pygame.draw.rect(surface, (8, 16, 28), fuel_rect)
+        pygame.draw.rect(surface, (24, 34, 48), fuel_rect)
         pygame.draw.rect(surface, COLOR_PANEL_BORDER, fuel_rect, 2)
         
         txt_f_h = self.font_sub.render("FUEL ENERGY CELL (WRONG CAR: -15%)", True, (200, 225, 250))
@@ -304,7 +304,7 @@ class HudRenderer:
         # 4. Mission Telemetry / Score
         score_y = 625
         sc_rect = pygame.Rect(rx, score_y, rw, 140)
-        pygame.draw.rect(surface, (8, 16, 28), sc_rect)
+        pygame.draw.rect(surface, (24, 34, 48), sc_rect)
         pygame.draw.rect(surface, COLOR_PANEL_BORDER, sc_rect, 2)
         
         txt_sc_h = self.font_sub.render("TACTICAL SCORE TELEMETRY", True, (200, 225, 250))
@@ -334,7 +334,7 @@ class HudRenderer:
         ctrl_y = 800
         ctrl_h = max(285, scr_h - ctrl_y - 20)
         c_rect = pygame.Rect(rx, ctrl_y, rw, ctrl_h)
-        pygame.draw.rect(surface, (8, 16, 28), c_rect)
+        pygame.draw.rect(surface, (24, 34, 48), c_rect)
         pygame.draw.rect(surface, COLOR_PANEL_BORDER, c_rect, 2)
         
         txt_c_h = self.font_sub.render("FLIGHT CONTROLS & COMMANDS", True, COLOR_CYAN)
@@ -360,8 +360,8 @@ class HudRenderer:
 
     def render_title_screen(self, surface: pygame.Surface, menu_index: int, selected_stage: int,
                             game_mode: str = "hiragana", display_info: str = ""):
-        # Solid dark arcade canvas
-        surface.fill((8, 12, 22))
+        # Eye-friendly soft dark slate arcade canvas
+        surface.fill((24, 31, 42))
         surface_w = surface.get_width()
         surface_h = surface.get_height()
         cx = surface_w // 2
@@ -372,7 +372,7 @@ class HudRenderer:
         badge_w = txt_ver.get_width() + 28
         badge_h = txt_ver.get_height() + 14
         badge_rect = pygame.Rect(40, 32, badge_w, badge_h)
-        pygame.draw.rect(surface, (12, 22, 38), badge_rect, border_radius=6)
+        pygame.draw.rect(surface, (20, 28, 40), badge_rect, border_radius=6)
         pygame.draw.rect(surface, (0, 160, 240), badge_rect, 2, border_radius=6)
         surface.blit(txt_ver, txt_ver.get_rect(center=badge_rect.center))
         
@@ -459,7 +459,7 @@ class HudRenderer:
             is_focused = (menu_index == g["menu_idx"])
 
             # Card background
-            bg_col = (20, 32, 54) if (is_focused or is_active_game) else (12, 16, 26)
+            bg_col = (32, 44, 62) if (is_focused or is_active_game) else (20, 27, 38)
             pygame.draw.rect(surface, bg_col, c_rect, border_radius=14)
 
             # Border
@@ -469,7 +469,7 @@ class HudRenderer:
             elif is_active_game:
                 pygame.draw.rect(surface, g["col"], c_rect, 3, border_radius=14)
             else:
-                pygame.draw.rect(surface, (70, 95, 130), c_rect, 2, border_radius=14)
+                pygame.draw.rect(surface, (45, 65, 92), c_rect, 2, border_radius=14)
 
             # Status Pill at top
             if is_active_game or is_focused:
@@ -477,7 +477,7 @@ class HudRenderer:
                 status_col = COLOR_GOLD if is_focused else g["col"]
             else:
                 status_txt = "AVAILABLE"
-                status_col = (110, 130, 155)
+                status_col = (130, 150, 175)
 
             txt_st = self.font_caption.render(status_txt, True, status_col)
             surface.blit(txt_st, txt_st.get_rect(center=(c_center_x, cards_y + 22)))
@@ -488,13 +488,13 @@ class HudRenderer:
             surface.blit(txt_title, txt_title.get_rect(center=(c_center_x, cards_y + 54)))
 
             # Game Subtitle / Kana
-            sub_col = g["col"] if (is_active_game or is_focused) else (100, 125, 150)
+            sub_col = g["col"] if (is_active_game or is_focused) else (120, 145, 170)
             txt_desc = self.font_kana_sub.render(f"{g['tag']} • {g['kana']}", True, sub_col)
             surface.blit(txt_desc, txt_desc.get_rect(center=(c_center_x, cards_y + 86)))
 
         # Divider line
         div_y = cards_y + card_h + 24
-        pygame.draw.line(surface, (0, 140, 220), (cx - 750, div_y), (cx + 750, div_y), 2)
+        pygame.draw.line(surface, (45, 95, 155), (cx - 750, div_y), (cx + 750, div_y), 2)
         
         # 3. Direct Menu Items (9 visible options)
         menu_y_start = div_y + 38
@@ -517,7 +517,7 @@ class HudRenderer:
             y_pos = menu_y_start + idx * spacing
             item_text = label
 
-            col = COLOR_WHITE if (is_sel and is_blink) else (COLOR_GOLD if is_sel else (210, 230, 250))
+            col = COLOR_WHITE if (is_sel and is_blink) else (COLOR_GOLD if is_sel else (200, 218, 238))
             txt_surf = self.font_menu.render(item_text, True, col)
             r = txt_surf.get_rect(center=(cx, y_pos))
 
@@ -532,13 +532,13 @@ class HudRenderer:
             surface.blit(txt_disp, (40, surface_h - 48))
 
         # Footer
-        txt_foot = self.font_caption.render("▲/▼ / ◀/▶: CHOOSE GAME   [ENTER] / [A] / [START]: SELECT GAME   [SELECT + START]: QUIT", True, (210, 235, 255))
+        txt_foot = self.font_caption.render("▲/▼ / ◀/▶: CHOOSE GAME   [ENTER] / [A] / [START]: SELECT GAME   [SELECT + START]: QUIT", True, (180, 205, 230))
         surface.blit(txt_foot, txt_foot.get_rect(center=(cx, surface_h - 52)))
 
     def render_stage_select_screen(self, surface: pygame.Surface, selected_stage: int,
                                    game_mode: str = "hiragana", secret_unlocked: bool = False):
-        # Solid dark arcade canvas
-        surface.fill((8, 12, 22))
+        # Eye-friendly soft dark slate arcade canvas
+        surface.fill((24, 31, 42))
         surface_w = surface.get_width()
         surface_h = surface.get_height()
         cx = surface_w // 2
@@ -578,14 +578,14 @@ class HudRenderer:
         badge_w = txt_ver.get_width() + 28
         badge_h = txt_ver.get_height() + 14
         badge_rect = pygame.Rect(40, 32, badge_w, badge_h)
-        pygame.draw.rect(surface, (12, 22, 38), badge_rect, border_radius=6)
+        pygame.draw.rect(surface, (20, 28, 40), badge_rect, border_radius=6)
         pygame.draw.rect(surface, (0, 160, 240), badge_rect, 2, border_radius=6)
         surface.blit(txt_ver, txt_ver.get_rect(center=badge_rect.center))
 
         # 1. Mode Pill Badge at Top
         txt_badge = self.font_caption.render(f"★  {mode_badge}  ★", True, theme_col)
         b_rect = pygame.Rect(cx - 240, 52, 480, 38)
-        pygame.draw.rect(surface, (15, 26, 44), b_rect, border_radius=19)
+        pygame.draw.rect(surface, (28, 38, 54), b_rect, border_radius=19)
         pygame.draw.rect(surface, theme_col, b_rect, 2, border_radius=19)
         surface.blit(txt_badge, txt_badge.get_rect(center=b_rect.center))
 
@@ -619,14 +619,14 @@ class HudRenderer:
                 is_cur = (st == selected_stage)
 
                 if is_cur:
-                    pygame.draw.rect(surface, (28, 48, 76), p_rect, border_radius=8)
+                    pygame.draw.rect(surface, (36, 54, 82), p_rect, border_radius=8)
                     b_col = COLOR_WHITE if is_blink else COLOR_GOLD
                     pygame.draw.rect(surface, b_col, p_rect, 3, border_radius=8)
                     lbl = "★" if st == 11 else f"{st:02d}"
                     txt_p = self.font_sub.render(lbl, True, COLOR_GOLD)
                 else:
-                    pygame.draw.rect(surface, (14, 20, 32), p_rect, border_radius=8)
-                    pygame.draw.rect(surface, (70, 95, 130), p_rect, 2, border_radius=8)
+                    pygame.draw.rect(surface, (20, 27, 38), p_rect, border_radius=8)
+                    pygame.draw.rect(surface, (45, 65, 92), p_rect, 2, border_radius=8)
                     lbl = "★" if st == 11 else f"{st:02d}"
                     txt_p = self.font_sub.render(lbl, True, (130, 155, 180))
 
@@ -639,7 +639,7 @@ class HudRenderer:
             card_y = 286
             c_rect = pygame.Rect(card_x, card_y, card_w, card_h)
 
-            pygame.draw.rect(surface, (12, 18, 30), c_rect, border_radius=14)
+            pygame.draw.rect(surface, (28, 37, 52), c_rect, border_radius=14)
             pygame.draw.rect(surface, theme_col, c_rect, 3, border_radius=14)
 
             # Stage Name & Environment
@@ -658,7 +658,7 @@ class HudRenderer:
             surface.blit(txt_env, txt_env.get_rect(center=(cx, card_y + 82)))
 
             # Divider line 1
-            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
+            pygame.draw.line(surface, (45, 65, 92), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
 
             # Target Kana Syllabary Section
             txt_sec = self.font_caption.render("★ TARGET KANA SYLLABARY PRACTICED IN THIS STAGE ★", True, theme_col)
@@ -696,7 +696,7 @@ class HudRenderer:
                     surface.blit(txt_r1, txt_r1.get_rect(center=(cx, card_y + 270)))
 
             # Divider line 2
-            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
+            pygame.draw.line(surface, (45, 65, 92), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
 
             # Mission specs
             txt_specs = self.font_caption.render("COURSE DISTANCE: 36,000m    |    TARGET: 100% FUEL CLEAR    |    SPEED GOAL: 280+ KM/H", True, (160, 200, 235))
@@ -706,14 +706,14 @@ class HudRenderer:
             btn_y = 758
             # Prev Button
             btn_prev = pygame.Rect(cx - 530, btn_y, 220, 56)
-            pygame.draw.rect(surface, (16, 25, 40), btn_prev, border_radius=10)
+            pygame.draw.rect(surface, (24, 32, 46), btn_prev, border_radius=10)
             pygame.draw.rect(surface, (0, 160, 240), btn_prev, 2, border_radius=10)
             txt_pv = self.font_sub_btn.render("◄ PREV STAGE", True, (180, 220, 255))
             surface.blit(txt_pv, txt_pv.get_rect(center=btn_prev.center))
 
             # Start Mission Button (Highlighted)
             btn_start = pygame.Rect(cx - 280, btn_y, 560, 56)
-            pygame.draw.rect(surface, (22, 38, 62), btn_start, border_radius=10)
+            pygame.draw.rect(surface, (32, 48, 72), btn_start, border_radius=10)
             st_bcol = COLOR_WHITE if is_blink else COLOR_GOLD
             pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
             txt_st = self.font_btn.render("► START STAGE (A / ENTER) ◄", True, st_bcol)
@@ -721,7 +721,7 @@ class HudRenderer:
 
             # Next Button
             btn_next = pygame.Rect(cx + 310, btn_y, 220, 56)
-            pygame.draw.rect(surface, (16, 25, 40), btn_next, border_radius=10)
+            pygame.draw.rect(surface, (24, 32, 46), btn_next, border_radius=10)
             pygame.draw.rect(surface, (0, 160, 240), btn_next, 2, border_radius=10)
             txt_nx = self.font_sub_btn.render("NEXT STAGE ►", True, (180, 220, 255))
             surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
@@ -752,8 +752,8 @@ class HudRenderer:
                     lbl = f"{st:02d}"
                     txt_p = self.font_sub.render(lbl, True, card_theme_col)
                 else:
-                    pygame.draw.rect(surface, (14, 20, 32), p_rect, border_radius=8)
-                    pygame.draw.rect(surface, (70, 95, 130), p_rect, 2, border_radius=8)
+                    pygame.draw.rect(surface, (20, 27, 38), p_rect, border_radius=8)
+                    pygame.draw.rect(surface, (45, 65, 92), p_rect, 2, border_radius=8)
                     lbl = f"{st:02d}"
                     txt_p = self.font_sub.render(lbl, True, (130, 155, 180))
 
@@ -766,7 +766,7 @@ class HudRenderer:
             card_y = 286
             c_rect = pygame.Rect(card_x, card_y, card_w, card_h)
 
-            pygame.draw.rect(surface, (12, 18, 30), c_rect, border_radius=14)
+            pygame.draw.rect(surface, (28, 37, 52), c_rect, border_radius=14)
             pygame.draw.rect(surface, card_theme_col, c_rect, 3, border_radius=14)
 
             # Retrieve stage configuration
@@ -782,7 +782,7 @@ class HudRenderer:
             surface.blit(txt_sub_jp, txt_sub_jp.get_rect(center=(cx, card_y + 82)))
 
             # Divider line 1
-            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
+            pygame.draw.line(surface, (45, 65, 92), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
 
             # Section Header
             txt_sec = self.font_caption.render(f"★ STAGE {selected_stage:02d} OBJECTIVES & SYLLABARY FOCUS ★", True, theme_col)
@@ -811,7 +811,7 @@ class HudRenderer:
             surface.blit(txt_tips, txt_tips.get_rect(center=(cx, card_y + 325)))
 
             # Divider line 2
-            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
+            pygame.draw.line(surface, (45, 65, 92), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
 
             # Specs
             txt_specs = self.font_caption.render(f"CURRICULUM: 3 SETS ({info.get('total_words', 9)} WORDS TOTAL)    |    HAND: 8 CARDS    |    ENGINE: GODOT 4 + BLENDER 3D", True, (160, 200, 235))
@@ -821,14 +821,14 @@ class HudRenderer:
             btn_y = 758
             # Prev Button
             btn_prev = pygame.Rect(cx - 530, btn_y, 220, 56)
-            pygame.draw.rect(surface, (16, 25, 40), btn_prev, border_radius=10)
+            pygame.draw.rect(surface, (24, 32, 46), btn_prev, border_radius=10)
             pygame.draw.rect(surface, (0, 160, 240), btn_prev, 2, border_radius=10)
             txt_pv = self.font_sub_btn.render("◄ PREV STAGE", True, (180, 220, 255))
             surface.blit(txt_pv, txt_pv.get_rect(center=btn_prev.center))
 
             # Start Battle Button (Highlighted)
             btn_start = pygame.Rect(cx - 280, btn_y, 560, 56)
-            pygame.draw.rect(surface, (22, 38, 62), btn_start, border_radius=10)
+            pygame.draw.rect(surface, (32, 48, 72), btn_start, border_radius=10)
             st_bcol = COLOR_WHITE if is_blink else card_theme_col
             pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
             txt_st = self.font_btn.render("► START BATTLE (A / ENTER) ◄", True, st_bcol)
@@ -836,7 +836,7 @@ class HudRenderer:
 
             # Next Button
             btn_next = pygame.Rect(cx + 310, btn_y, 220, 56)
-            pygame.draw.rect(surface, (16, 25, 40), btn_next, border_radius=10)
+            pygame.draw.rect(surface, (24, 32, 46), btn_next, border_radius=10)
             pygame.draw.rect(surface, (0, 160, 240), btn_next, 2, border_radius=10)
             txt_nx = self.font_sub_btn.render("NEXT STAGE ►", True, (180, 220, 255))
             surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
@@ -867,8 +867,8 @@ class HudRenderer:
                     lbl = f"{st:02d}"
                     txt_p = self.font_sub.render(lbl, True, sniper_theme_col)
                 else:
-                    pygame.draw.rect(surface, (14, 20, 32), p_rect, border_radius=8)
-                    pygame.draw.rect(surface, (70, 95, 130), p_rect, 2, border_radius=8)
+                    pygame.draw.rect(surface, (20, 27, 38), p_rect, border_radius=8)
+                    pygame.draw.rect(surface, (45, 65, 92), p_rect, 2, border_radius=8)
                     lbl = f"{st:02d}"
                     txt_p = self.font_sub.render(lbl, True, (130, 155, 180))
 
@@ -881,7 +881,7 @@ class HudRenderer:
             card_y = 286
             c_rect = pygame.Rect(card_x, card_y, card_w, card_h)
 
-            pygame.draw.rect(surface, (12, 18, 30), c_rect, border_radius=14)
+            pygame.draw.rect(surface, (28, 37, 52), c_rect, border_radius=14)
             pygame.draw.rect(surface, sniper_theme_col, c_rect, 3, border_radius=14)
 
             # Retrieve stage configuration
@@ -897,7 +897,7 @@ class HudRenderer:
             surface.blit(txt_sub_jp, txt_sub_jp.get_rect(center=(cx, card_y + 82)))
 
             # Divider line 1
-            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
+            pygame.draw.line(surface, (45, 65, 92), (card_x + 40, card_y + 112), (card_x + card_w - 40, card_y + 112), 2)
 
             # Section Header
             txt_sec = self.font_caption.render(f"★ STAGE {selected_stage:02d} VOCABULARY & SPELLING CHALLENGE ★", True, sniper_theme_col)
@@ -926,7 +926,7 @@ class HudRenderer:
             surface.blit(txt_tips, txt_tips.get_rect(center=(cx, card_y + 325)))
 
             # Divider line 2
-            pygame.draw.line(surface, (25, 45, 75), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
+            pygame.draw.line(surface, (45, 65, 92), (card_x + 40, card_y + 365), (card_x + card_w - 40, card_y + 365), 2)
 
             # Specs
             txt_specs = self.font_caption.render(f"STAGE GOAL: 5 WORDS CLEARED    |    SHELVES: 3 TIERS    |    ENGINE: GODOT 2D SNIPER", True, (160, 200, 235))
@@ -936,14 +936,14 @@ class HudRenderer:
             btn_y = 758
             # Prev Button
             btn_prev = pygame.Rect(cx - 530, btn_y, 220, 56)
-            pygame.draw.rect(surface, (16, 25, 40), btn_prev, border_radius=10)
+            pygame.draw.rect(surface, (24, 32, 46), btn_prev, border_radius=10)
             pygame.draw.rect(surface, (0, 160, 240), btn_prev, 2, border_radius=10)
             txt_pv = self.font_sub_btn.render("◄ PREV STAGE", True, (180, 220, 255))
             surface.blit(txt_pv, txt_pv.get_rect(center=btn_prev.center))
 
             # Start Battle Button (Highlighted)
             btn_start = pygame.Rect(cx - 280, btn_y, 560, 56)
-            pygame.draw.rect(surface, (22, 38, 62), btn_start, border_radius=10)
+            pygame.draw.rect(surface, (32, 48, 72), btn_start, border_radius=10)
             st_bcol = COLOR_WHITE if is_blink else sniper_theme_col
             pygame.draw.rect(surface, st_bcol, btn_start, 3, border_radius=10)
             txt_st = self.font_btn.render("► START SHOOTING (A / ENTER) ◄", True, st_bcol)
@@ -951,7 +951,7 @@ class HudRenderer:
 
             # Next Button
             btn_next = pygame.Rect(cx + 310, btn_y, 220, 56)
-            pygame.draw.rect(surface, (16, 25, 40), btn_next, border_radius=10)
+            pygame.draw.rect(surface, (24, 32, 46), btn_next, border_radius=10)
             pygame.draw.rect(surface, (0, 160, 240), btn_next, 2, border_radius=10)
             txt_nx = self.font_sub_btn.render("NEXT STAGE ►", True, (180, 220, 255))
             surface.blit(txt_nx, txt_nx.get_rect(center=btn_next.center))
@@ -959,13 +959,13 @@ class HudRenderer:
         # Back to Title Button
         back_y = 838
         btn_back = pygame.Rect(cx - 200, back_y, 400, 48)
-        pygame.draw.rect(surface, (16, 22, 34), btn_back, border_radius=10)
+        pygame.draw.rect(surface, (24, 32, 46), btn_back, border_radius=10)
         pygame.draw.rect(surface, (0, 160, 240), btn_back, 2, border_radius=10)
         txt_bk = self.font_sub_btn.render("◄ BACK TO TITLE (B / ESC)", True, (180, 215, 245))
         surface.blit(txt_bk, txt_bk.get_rect(center=btn_back.center))
 
         # Footer
-        txt_foot = self.font_caption.render("◄/► / ▲/▼: CHANGE STAGE   [A] / [ENTER]: START MISSION   [B] / [ESC]: BACK TO GAME SELECT", True, (210, 235, 255))
+        txt_foot = self.font_caption.render("◄/► / ▲/▼: CHANGE STAGE   [A] / [ENTER]: START MISSION   [B] / [ESC]: BACK TO GAME SELECT", True, (180, 205, 230))
         surface.blit(txt_foot, txt_foot.get_rect(center=(cx, surface_h - 60)))
 
     def render_volume_menu(self, surface: pygame.Surface, is_title_screen: bool, selected_idx: int,
@@ -976,7 +976,7 @@ class HudRenderer:
         
         # 1. Full-screen dimmed backdrop for clarity & focus
         dim_surf = pygame.Surface((surface_w, surface_h), pygame.SRCALPHA)
-        dim_surf.fill((5, 10, 18, 200))
+        dim_surf.fill((16, 22, 32, 210))
         surface.blit(dim_surf, (0, 0))
         
         # 2. Centered cyber options dialog
@@ -989,12 +989,12 @@ class HudRenderer:
         
         # High-contrast dark backing
         modal_surf = pygame.Surface((w, h), pygame.SRCALPHA)
-        modal_surf.fill((10, 18, 32, 255))
+        modal_surf.fill((26, 35, 48, 255))
         surface.blit(modal_surf, (x, y))
         
         # Cyber gold/cyan border
         pygame.draw.rect(surface, (0, 180, 240), (x, y, w, h), 3, border_radius=12)
-        pygame.draw.rect(surface, (25, 45, 75), (x + 3, y + 3, w - 6, h - 6), 2, border_radius=10)
+        pygame.draw.rect(surface, (45, 65, 92), (x + 3, y + 3, w - 6, h - 6), 2, border_radius=10)
         
         # Header title
         title_str = "GAME OPTIONS & CONFIGURATION"
@@ -1032,7 +1032,7 @@ class HudRenderer:
             by = sy + 30
             bw = w - 90
             bh = 18
-            pygame.draw.rect(surface, (15, 25, 42), (bx, by, bw, bh), border_radius=4)
+            pygame.draw.rect(surface, (20, 28, 40), (bx, by, bw, bh), border_radius=4)
             fill_w = int(bw * max(0.0, min(1.0, vol)))
             if fill_w > 0:
                 bar_col = (0, 220, 255) if is_sel else (0, 150, 200)
@@ -1053,7 +1053,7 @@ class HudRenderer:
         surface.blit(txt_ar_lbl, (x + 45, ar_y))
 
         ar_box = pygame.Rect(x + 45, ar_y + 28, w - 90, 36)
-        pygame.draw.rect(surface, (15, 25, 42), ar_box, border_radius=6)
+        pygame.draw.rect(surface, (20, 28, 40), ar_box, border_radius=6)
         pygame.draw.rect(surface, COLOR_GOLD if is_sel_ar else (70, 110, 150), ar_box, 2, border_radius=6)
 
         mode_str = f"◄  {aspect_ratio_label}  ►" if is_sel_ar else aspect_ratio_label
@@ -1064,7 +1064,7 @@ class HudRenderer:
             # Item 4: Resume Game Button
             btn1_y = y + 404
             btn1_sel = (selected_idx == 4)
-            btn1_bg = (0, 110, 180) if btn1_sel else (18, 32, 50)
+            btn1_bg = (0, 110, 180) if btn1_sel else (24, 34, 48)
             btn1_rect = pygame.Rect(cx - 210, btn1_y, 420, 46)
             pygame.draw.rect(surface, btn1_bg, btn1_rect, border_radius=6)
             pygame.draw.rect(surface, COLOR_GOLD if btn1_sel else (40, 80, 120), btn1_rect, 2, border_radius=6)
@@ -1074,7 +1074,7 @@ class HudRenderer:
             # Item 5: Return to Title Button
             btn2_y = y + 462
             btn2_sel = (selected_idx == 5)
-            btn2_bg = (160, 30, 30) if btn2_sel else (28, 20, 30)
+            btn2_bg = (160, 30, 30) if btn2_sel else (32, 22, 34)
             btn2_rect = pygame.Rect(cx - 210, btn2_y, 420, 46)
             pygame.draw.rect(surface, btn2_bg, btn2_rect, border_radius=6)
             pygame.draw.rect(surface, COLOR_GOLD if btn2_sel else (90, 50, 60), btn2_rect, 2, border_radius=6)
@@ -1084,7 +1084,7 @@ class HudRenderer:
             # Item 4: Return to Title (Close)
             btn_y = y + 430
             btn_is_sel = (selected_idx == 4)
-            btn_bg = (0, 110, 180) if btn_is_sel else (18, 32, 50)
+            btn_bg = (0, 110, 180) if btn_is_sel else (24, 34, 48)
             btn_rect = pygame.Rect(cx - 210, btn_y, 420, 50)
             pygame.draw.rect(surface, btn_bg, btn_rect, border_radius=6)
             pygame.draw.rect(surface, COLOR_GOLD if btn_is_sel else (40, 80, 120), btn_rect, 2, border_radius=6)
@@ -1106,14 +1106,14 @@ class HudRenderer:
         
         # Semi-transparent dark curtain across the road viewport
         dim_surf = pygame.Surface((960, surface_h), pygame.SRCALPHA)
-        dim_surf.fill((0, 0, 0, 120))
+        dim_surf.fill((16, 22, 32, 140))
         surface.blit(dim_surf, (280, 0))
         
         # Pause badge box (Generous margins for Steam Deck handheld readability)
         box_w = 640
         box_h = 150
         bg_rect = pygame.Rect(cx - box_w // 2, cy - box_h // 2, box_w, box_h)
-        pygame.draw.rect(surface, (10, 15, 26), bg_rect, border_radius=10)
+        pygame.draw.rect(surface, (26, 35, 48), bg_rect, border_radius=10)
         pygame.draw.rect(surface, COLOR_GOLD, bg_rect, 3, border_radius=10)
         
         col_p = COLOR_GOLD if is_blink else (170, 150, 25)
@@ -1133,7 +1133,7 @@ class HudRenderer:
             box_w = 880
             box_h = 280
             r_box = pygame.Rect(cx - box_w // 2, cy - box_h // 2, box_w, box_h)
-            pygame.draw.rect(surface, (14, 10, 32), r_box, border_radius=14)
+            pygame.draw.rect(surface, (32, 28, 48), r_box, border_radius=14)
             pygame.draw.rect(surface, (255, 215, 0), r_box, 3, border_radius=14)
             pygame.draw.rect(surface, (0, 220, 255), r_box.inflate(-8, -8), 2, border_radius=10)
 
@@ -1155,7 +1155,7 @@ class HudRenderer:
             box_w = 880
             box_h = 280
             r_box = pygame.Rect(cx - box_w // 2, cy - box_h // 2, box_w, box_h)
-            pygame.draw.rect(surface, (10, 22, 38), r_box, border_radius=14)
+            pygame.draw.rect(surface, (26, 35, 48), r_box, border_radius=14)
             pygame.draw.rect(surface, (255, 215, 0), r_box, 3, border_radius=14)
             pygame.draw.rect(surface, (46, 224, 125), r_box.inflate(-8, -8), 2, border_radius=10)
 
@@ -1176,7 +1176,7 @@ class HudRenderer:
             box_w = 880
             box_h = 260
             r_box = pygame.Rect(cx - box_w // 2, cy - box_h // 2, box_w, box_h)
-            pygame.draw.rect(surface, (10, 20, 36), r_box, border_radius=12)
+            pygame.draw.rect(surface, (26, 35, 48), r_box, border_radius=12)
             pygame.draw.rect(surface, COLOR_GOLD, r_box, 3, border_radius=12)
             
             txt_h = self.font_title.render("ALL STAGES CLEARED!", True, COLOR_GOLD)
@@ -1192,7 +1192,7 @@ class HudRenderer:
             box_w = 860
             box_h = 220
             r_box = pygame.Rect(cx - box_w // 2, cy - box_h // 2, box_w, box_h)
-            pygame.draw.rect(surface, (10, 20, 36), r_box, border_radius=12)
+            pygame.draw.rect(surface, (26, 35, 48), r_box, border_radius=12)
             pygame.draw.rect(surface, COLOR_GOLD, r_box, 3, border_radius=12)
             
             txt_h = self.font_title.render(f"STAGE {stage:02d} CLEARED!", True, COLOR_GOLD)
@@ -1208,7 +1208,7 @@ class HudRenderer:
         box_w = 780
         box_h = 210
         r_box = pygame.Rect(cx - box_w // 2, cy - box_h // 2, box_w, box_h)
-        pygame.draw.rect(surface, (25, 10, 10), r_box, border_radius=10)
+        pygame.draw.rect(surface, (38, 20, 24), r_box, border_radius=10)
         pygame.draw.rect(surface, (240, 40, 40), r_box, 3, border_radius=10)
         
         txt_h = self.font_title.render("OUT OF FUEL", True, (255, 65, 65))
@@ -1225,7 +1225,7 @@ class HudRenderer:
         
         # 1. Full-screen dimmed backdrop
         dim_surf = pygame.Surface((surface_w, surface_h), pygame.SRCALPHA)
-        dim_surf.fill((5, 10, 18, 225))
+        dim_surf.fill((16, 22, 32, 215))
         surface.blit(dim_surf, (0, 0))
         
         # 2. Centered Cyber Modal Dialog (Expanded width for generous text padding)
@@ -1237,12 +1237,12 @@ class HudRenderer:
         y = cy - (h // 2)
         
         modal_bg = pygame.Surface((w, h), pygame.SRCALPHA)
-        modal_bg.fill((10, 18, 30, 252))
+        modal_bg.fill((26, 35, 48, 252))
         surface.blit(modal_bg, (x, y))
         
         # Double border
         pygame.draw.rect(surface, (0, 180, 240), (x, y, w, h), 3, border_radius=12)
-        pygame.draw.rect(surface, (25, 45, 75), (x + 3, y + 3, w - 6, h - 6), 2, border_radius=10)
+        pygame.draw.rect(surface, (45, 65, 92), (x + 3, y + 3, w - 6, h - 6), 2, border_radius=10)
         
         # Header
         t_header = self.font_menu.render("ONLINE SYSTEM UPDATER", True, COLOR_GOLD)
@@ -1283,7 +1283,7 @@ class HudRenderer:
             surface.blit(t_sub, t_sub.get_rect(center=(cx, cy + 25)))
             
             pulse_x = int((math.sin(time.time() * 5.0) * 0.5 + 0.5) * (w - 240))
-            pygame.draw.rect(surface, (15, 30, 50), (x + 120, cy + 70, w - 240, 10), border_radius=5)
+            pygame.draw.rect(surface, (20, 32, 48), (x + 120, cy + 70, w - 240, 10), border_radius=5)
             pygame.draw.rect(surface, (0, 220, 255), (x + 120 + pulse_x, cy + 70, 60, 10), border_radius=5)
             
         elif state == update_mgr.STATE_UP_TO_DATE:
@@ -1300,7 +1300,7 @@ class HudRenderer:
             surface.blit(t_sub, t_sub.get_rect(center=(cx, cy + 68)))
             
             btn_ok = pygame.Rect(cx - 240, y + h - 72, 480, 52)
-            pygame.draw.rect(surface, (18, 32, 52), btn_ok, border_radius=8)
+            pygame.draw.rect(surface, (24, 38, 56), btn_ok, border_radius=8)
             pygame.draw.rect(surface, (0, 180, 240), btn_ok, 2, border_radius=8)
             t_btn = self.font_sub_btn.render("OK  [ENTER / A / B]", True, COLOR_GOLD)
             surface.blit(t_btn, t_btn.get_rect(center=btn_ok.center))
@@ -1315,7 +1315,7 @@ class HudRenderer:
             
             # Changelog box (fits neatly within modal)
             c_box = pygame.Rect(x + 40, cy - 22, w - 80, 130)
-            pygame.draw.rect(surface, (15, 26, 44), c_box, border_radius=8)
+            pygame.draw.rect(surface, (22, 30, 42), c_box, border_radius=8)
             pygame.draw.rect(surface, (0, 160, 240), c_box, 2, border_radius=8)
             
             t_ch_h = self.font_caption.render("WHAT'S NEW IN THIS UPDATE:", True, (180, 215, 245))
@@ -1338,13 +1338,13 @@ class HudRenderer:
             
             # Dual interactive buttons: Install vs Cancel
             btn_inst = pygame.Rect(cx - 420, y + h - 72, 400, 52)
-            pygame.draw.rect(surface, (15, 55, 35), btn_inst, border_radius=8)
+            pygame.draw.rect(surface, (18, 58, 38), btn_inst, border_radius=8)
             pygame.draw.rect(surface, (60, 220, 120), btn_inst, 2, border_radius=8)
             t_inst = self.font_sub_btn.render("INSTALL NOW  [A / ENTER]", True, (90, 255, 160))
             surface.blit(t_inst, t_inst.get_rect(center=btn_inst.center))
 
             btn_canc = pygame.Rect(cx + 20, y + h - 72, 400, 52)
-            pygame.draw.rect(surface, (45, 22, 22), btn_canc, border_radius=8)
+            pygame.draw.rect(surface, (48, 24, 26), btn_canc, border_radius=8)
             pygame.draw.rect(surface, (220, 75, 75), btn_canc, 2, border_radius=8)
             t_canc = self.font_sub_btn.render("CANCEL  [B / ESC]", True, (255, 170, 170))
             surface.blit(t_canc, t_canc.get_rect(center=btn_canc.center))
@@ -1358,7 +1358,7 @@ class HudRenderer:
             bar_h = 26
             bar_x = x + 60
             bar_y = cy - 12
-            pygame.draw.rect(surface, (15, 25, 42), (bar_x, bar_y, bar_w, bar_h), border_radius=6)
+            pygame.draw.rect(surface, (20, 28, 40), (bar_x, bar_y, bar_w, bar_h), border_radius=6)
             fill_w = int(bar_w * (pct / 100.0))
             if fill_w > 0:
                 pygame.draw.rect(surface, (0, 220, 255), (bar_x, bar_y, fill_w, bar_h), border_radius=6)
@@ -1389,13 +1389,13 @@ class HudRenderer:
             surface.blit(t_steam, t_steam.get_rect(center=(cx, cy + 76)))
             
             btn_rst = pygame.Rect(cx - 420, y + h - 72, 400, 52)
-            pygame.draw.rect(surface, (18, 48, 75), btn_rst, border_radius=8)
+            pygame.draw.rect(surface, (22, 52, 80), btn_rst, border_radius=8)
             pygame.draw.rect(surface, (0, 220, 255), btn_rst, 2, border_radius=8)
             t_rst = self.font_sub_btn.render("RESTART GAME  [A / ENTER]", True, COLOR_GOLD)
             surface.blit(t_rst, t_rst.get_rect(center=btn_rst.center))
 
             btn_cls = pygame.Rect(cx + 20, y + h - 72, 400, 52)
-            pygame.draw.rect(surface, (30, 35, 48), btn_cls, border_radius=8)
+            pygame.draw.rect(surface, (34, 40, 54), btn_cls, border_radius=8)
             pygame.draw.rect(surface, (140, 170, 200), btn_cls, 2, border_radius=8)
             t_cls = self.font_sub_btn.render("CLOSE  [B / ESC]", True, (210, 230, 250))
             surface.blit(t_cls, t_cls.get_rect(center=btn_cls.center))

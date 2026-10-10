@@ -22,7 +22,7 @@ ROAD_WIDTH = GAME_W - (ROAD_MARGIN * 2.0)  # 640.0 px wide 4-lane highway
 PLAYER_SCREEN_Y = 960.0  # 1200 - 240.0
 
 # Version & Release Metadata
-GAME_VERSION = "1.5.4"
+GAME_VERSION = "1.5.5"
 GITHUB_REPO = "deck-labs/nihongo-master"
 VERSION_CHECK_URL = "https://raw.githubusercontent.com/deck-labs/nihongo-master/main/version.json"
 RELEASES_API_URL = "https://api.github.com/repos/deck-labs/nihongo-master/releases/latest"
@@ -837,9 +837,9 @@ def get_gauntlet_kana(game_mode: str) -> list[dict]:
 TRAFFIC_COLORS = ["blue", "green", "yellow", "purple", "cyan", "orange"]
 
 # Visual Colors & Palette (RGB tuples)
-COLOR_BG            = (15, 18, 24)
-COLOR_PANEL_BG      = (10, 20, 36)
-COLOR_PANEL_BORDER  = (0, 115, 191)
+COLOR_BG            = (24, 31, 42)    # Eye-friendly soft dark slate
+COLOR_PANEL_BG      = (28, 37, 52)    # Elevated slate container
+COLOR_PANEL_BORDER  = (45, 95, 155)   # Muted slate-cyan border
 COLOR_WATER_DEEP    = (14, 48, 95)
 COLOR_WATER_MID     = (24, 80, 145)
 COLOR_WATER_SWELL   = (40, 115, 185)
@@ -850,9 +850,9 @@ COLOR_RAILING       = (190, 198, 205)
 COLOR_BARRIER_RED   = (225, 45, 45)
 COLOR_GOLD          = (255, 215, 0)
 COLOR_CYAN          = (0, 217, 255)
-COLOR_WHITE         = (255, 255, 255)
+COLOR_WHITE         = (228, 234, 242) # Soft off-white to eliminate halation
 COLOR_BLACK         = (0, 0, 0)
-COLOR_BEZEL         = (5, 8, 14)
+COLOR_BEZEL         = (20, 26, 36)    # Soft charcoal letterbox
 COLOR_NEON_PURPLE   = (175, 45, 245)
 COLOR_NEON_AMBER    = (255, 165, 0)
 COLOR_NEON_CYAN     = (0, 235, 255)

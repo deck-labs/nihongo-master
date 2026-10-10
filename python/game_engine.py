@@ -960,12 +960,15 @@ class GameEngine:
         if self.update_mgr.state != UpdateManager.STATE_DOWNLOADING:
             self.is_update_dialog_open = False
             self.audio.play_pause()
+            if self.is_title_screen:
+                self.audio.resume_title_music()
 
     def menu_confirm(self):
         if self.is_update_dialog_open:
             state = self.update_mgr.state
             if state == UpdateManager.STATE_UPDATE_AVAILABLE:
                 self.audio.play_match()
+                self.audio.pause_title_music()
                 self.update_mgr.start_download()
             elif state == UpdateManager.STATE_SUCCESS:
                 self.update_mgr.restart_game()
@@ -1567,6 +1570,10 @@ class GameEngine:
                 self.audio.play_match()
             elif self.update_mgr.state in (UpdateManager.STATE_UP_TO_DATE, UpdateManager.STATE_ERROR):
                 self.startup_update_check_active = False
+
+        # Mute/pause music while downloading/applying app updates
+        if self.update_mgr.state == UpdateManager.STATE_DOWNLOADING:
+            self.audio.pause_title_music()
 
         if self.is_title_screen or self.is_volume_menu_open or self.is_paused or self.is_update_dialog_open:
             return

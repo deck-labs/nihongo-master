@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://b82j3q9v8k1m"]
+[gd_scene load_steps=22 format=3 uid="uid://b82j3q9v8k1m"]
 
 [ext_resource type="Script" path="res://scripts/card_table.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://assets/models/felt_table.glb" id="2_table_mesh"]
@@ -28,13 +28,61 @@ point_count = 2
 offsets = PackedFloat32Array(0, 0.25, 0.5, 0.75, 1)
 colors = PackedColorArray(1, 0.8, 0.2, 1, 0.1, 0.8, 1, 1, 1, 0.3, 0.3, 1, 0.2, 0.9, 0.4, 1, 1, 1, 1, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action_bar"]
-bg_color = Color(0.06, 0.09, 0.12, 0.88)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
+bg_color = Color(0.12, 0.16, 0.22, 0.92)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.2, 0.3, 0.4, 0.8)
+border_color = Color(0.24, 0.32, 0.44, 0.8)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plaque"]
+bg_color = Color(0.12, 0.16, 0.22, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.24, 0.32, 0.44, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_footer"]
+bg_color = Color(0.11, 0.15, 0.21, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.3, 0.42, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+bg_color = Color(0.13, 0.17, 0.24, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.28, 0.38, 0.52, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action_bar"]
+bg_color = Color(0.12, 0.16, 0.22, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.24, 0.32, 0.44, 0.8)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
@@ -167,6 +215,7 @@ offset_top = 16.0
 offset_right = -32.0
 offset_bottom = 68.0
 grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
 
 [node name="Margin" type="MarginContainer" parent="HUD/TopBar"]
 layout_mode = 2
@@ -223,6 +272,7 @@ offset_top = 80.0
 offset_right = 220.0
 offset_bottom = 188.0
 grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_plaque")
 
 [node name="VBox" type="VBoxContainer" parent="HUD/Plaque"]
 layout_mode = 2
@@ -238,7 +288,7 @@ horizontal_alignment = 1
 
 [node name="Romaji" type="Label" parent="HUD/Plaque/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.92, 0.94, 0.97, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 46
 text = "N  E  K  O"
@@ -311,6 +361,7 @@ offset_right = -32.0
 offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_footer")
 
 [node name="HBox" type="HBoxContainer" parent="HUD/ControlsFooter"]
 layout_mode = 2
@@ -409,6 +460,7 @@ offset_right = 280.0
 offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
 
 [node name="Margin" type="MarginContainer" parent="HUD/ModalSetClear"]
 layout_mode = 2
@@ -450,6 +502,7 @@ offset_right = 340.0
 offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
 
 [node name="Margin" type="MarginContainer" parent="HUD/ModalStageClear"]
 layout_mode = 2
@@ -499,6 +552,7 @@ offset_right = 220.0
 offset_bottom = 100.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
 
 [node name="VBox" type="VBoxContainer" parent="HUD/ModalPaused"]
 layout_mode = 2
@@ -506,7 +560,7 @@ alignment = 1
 
 [node name="Title" type="Label" parent="HUD/ModalPaused/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.92, 0.94, 0.97, 1)
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 32
 text = "PAUSED"

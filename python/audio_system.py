@@ -120,6 +120,27 @@ class AudioSystem:
             pass
         self.is_title_music_playing = False
 
+    def pause_title_music(self):
+        """Pause title screen music while the game is updating."""
+        if not self.is_initialized:
+            return
+        try:
+            if pygame.mixer.music.get_busy():
+                pygame.mixer.music.pause()
+        except Exception:
+            pass
+
+    def resume_title_music(self):
+        """Resume title screen music after update modal closes."""
+        if not self.is_initialized:
+            return
+        try:
+            pygame.mixer.music.unpause()
+            if not pygame.mixer.music.get_busy() and self.is_title_music_playing:
+                self.play_title_music()
+        except Exception:
+            pass
+
     def apply_volumes(self):
         if not self.is_initialized:
             return
