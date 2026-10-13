@@ -389,6 +389,14 @@ class GameEngine:
         stdout_text = ""
         stderr_text = ""
 
+        # Hide the launcher window so its fullscreen surface cannot sit above the
+        # subgame and swallow mouse clicks (keyboard focus alone would still work).
+        try:
+            from pygame._sdl2.video import Window as _SDLWindow
+            _SDLWindow.from_display_module().hide()
+        except Exception as e:
+            logger.warning(f"Could not hide launcher window: {e}")
+
         try:
             import subprocess
             with open(subgame_log_path, "w", encoding="utf-8", errors="replace") as log_f:
