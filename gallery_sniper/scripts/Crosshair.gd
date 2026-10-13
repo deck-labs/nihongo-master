@@ -29,7 +29,30 @@ func sync_to_mouse() -> void:
 	global_position = target_pos
 	last_mouse_pos = target_pos
 
+var mouse_was_down: bool = false
+var last_shot_frame: int = -10
+
+## Fires a mouse shot at the current cursor (shared by event and polling paths)
+func _fire_mouse_shot(mp: Vector2) -> void:
+	# Ignore clicks on the top header buttons (tabs / pause)
+	if mp.y < 52.0 and ((mp.x > 350.0 and mp.x < 910.0) or mp.x > 1080.0):
+		return
+	var f = Engine.get_process_frames()
+	if f - last_shot_frame < 3:
+		return # already fired for this click
+	last_shot_frame = f
+	play_shot_recoil()
+	shot_requested.emit(global_position)
+
 func _process(delta: float) -> void:
+	# Polling fallback for left click (works even if click events never reach _input)
+	var down = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	if down and not mouse_was_down and visible and not get_tree().paused:
+		is_gamepad_mode = false
+		sync_to_mouse()
+		_fire_mouse_shot(get_global_mouse_position())
+	mouse_was_down = down
+	
 	if not visible or get_tree().paused:
 		return
 	
@@ -104,14 +127,9 @@ func _input(event: InputEvent) -> void:
 		target_pos.y = clampf(mp.y, 20.0, vp.y - 20.0)
 		global_position = target_pos
 		last_mouse_pos = target_pos
-		
-		# If clicking top header buttons (Tabs, Pause), let UI buttons handle it without shooting
-		if mp.y < 52.0 and ((mp.x > 350.0 and mp.x < 910.0) or mp.x > 1080.0):
-			return
-		
-		play_shot_recoil()
-		shot_requested.emit(global_position)
-		get_viewport().set_input_as_handled()
+		_fire_mouse_shot(mp)
+		if not (mp.y < 52.0 and ((mp.x > 350.0 and mp.x < 910.0) or mp.x > 1080.0)):
+			get_viewport().set_input_as_handled()
 
 	# 3. Keyboard Shooting Triggers (Space, Enter)
 	elif event is InputEventKey and event.pressed and not event.echo:

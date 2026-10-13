@@ -1,10 +1,10 @@
 {
-  "version": "1.5.8",
-  "tag_name": "v1.5.8",
-  "name": "Nihongo Master v1.5.8 - Sniper Click Registration Fix",
+  "version": "1.5.9",
+  "tag_name": "v1.5.9",
+  "name": "Nihongo Master v1.5.9 - Sniper Click Polling Fix",
   "release_date": "2026-10-10",
   "appimage_filename": "Nihongo_Master.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.8/Nihongo_Master.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.8/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.5.8: Sniper clicks now use the click event own position so shots register reliably with mouse, trackpad and touch."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.9/Nihongo_Master.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.9/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.5.9: Sniper mouse clicks now also detected by polling the button state, so shots fire with sound and recoil on every click."
 }
