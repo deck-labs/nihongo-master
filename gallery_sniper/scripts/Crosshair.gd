@@ -88,17 +88,17 @@ func _input(event: InputEvent) -> void:
 	# 1. 1-to-1 Mouse Movement Tracking
 	if event is InputEventMouseMotion:
 		is_gamepad_mode = false
-		var mp = get_global_mouse_position()
+		var mp: Vector2 = _event_pos(event)
 		var vp = get_viewport_rect().size
 		target_pos.x = clampf(mp.x, 20.0, vp.x - 20.0)
 		target_pos.y = clampf(mp.y, 20.0, vp.y - 20.0)
 		global_position = target_pos
 		last_mouse_pos = target_pos
 
-	# 2. Mouse Click Shooting (Left Mouse Button)
+	# 2. Mouse Click Shooting (Left Mouse Button) - uses the click's own position
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		is_gamepad_mode = false
-		var mp = get_global_mouse_position()
+		var mp: Vector2 = _event_pos(event)
 		var vp = get_viewport_rect().size
 		target_pos.x = clampf(mp.x, 20.0, vp.x - 20.0)
 		target_pos.y = clampf(mp.y, 20.0, vp.y - 20.0)
@@ -161,6 +161,10 @@ func _draw() -> void:
 	
 	# 4. Center pin-point red dot
 	draw_circle(Vector2.ZERO, 2.5, Color(1.0, 0.95, 0.95, 1.0))
+
+## Converts a mouse event position into canvas coordinates
+func _event_pos(event: InputEvent) -> Vector2:
+	return get_canvas_transform().affine_inverse() * event.position
 
 ## Visual recoil feedback when clicking / shooting
 func play_shot_recoil() -> void:

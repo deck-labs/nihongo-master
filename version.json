@@ -1,10 +1,10 @@
 {
-  "version": "1.5.7",
-  "tag_name": "v1.5.7",
-  "name": "Nihongo Master v1.5.7 - Precision Mouse Aiming & Shooting Fix",
+  "version": "1.5.8",
+  "tag_name": "v1.5.8",
+  "name": "Nihongo Master v1.5.8 - Sniper Click Registration Fix",
   "release_date": "2026-10-10",
   "appimage_filename": "Nihongo_Master.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.7/Nihongo_Master.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.7/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.5.7: Fully restored pixel-perfect 1-to-1 mouse aiming and click shooting in The Gallery Sniper. Fixed missing mouse shot trigger, eliminated the 1.5px movement deadzone for smooth micro-aiming, unified shots across mouse, keyboard (Space/Enter), and gamepad triggers, and added automatic crosshair mouse synchronization when resuming from pause or stage clear menus."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.8/Nihongo_Master.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.8/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.5.8: Sniper clicks now use the click event own position so shots register reliably with mouse, trackpad and touch."
 }
