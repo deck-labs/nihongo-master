@@ -1,10 +1,10 @@
 {
-  "version": "1.5.11",
-  "tag_name": "v1.5.11",
-  "name": "Nihongo Master v1.5.11 - Launcher Overlay Click Fix",
-  "release_date": "2026-10-10",
+  "version": "1.5.12",
+  "tag_name": "v1.5.12",
+  "name": "Nihongo Master v1.5.12 - Stability & Exit Crash Resolution",
+  "release_date": "2026-10-13",
   "appimage_filename": "Nihongo_Master.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.11/Nihongo_Master.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.11/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.5.11: Launcher window is hidden while Sniper and Cards run so it can no longer swallow mouse clicks."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.12/Nihongo_Master.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.12/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.5.12: Upgraded engine to pygame-ce 2.5.8 (SDL 2.32) for full Python 3.13 runtime stability, completely resolving segmentation faults during event polling (PyLong_FromLong / SDL_MOUSEMOTION). Streamlined clean application shutdown from menus."
 }

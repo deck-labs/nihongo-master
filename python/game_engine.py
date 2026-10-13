@@ -428,11 +428,9 @@ class GameEngine:
         try:
             from pygame._sdl2.video import Window
             win = Window.from_display_module()
-            win.restore()
             win.show()
+            win.restore()
             win.focus()
-            if hasattr(self, 'screen') and self.screen and (self.screen.get_flags() & pygame.FULLSCREEN):
-                win.set_fullscreen(True)
         except Exception as e:
             logger.warning(f"Window restore notice: {e}")
 
@@ -575,10 +573,8 @@ class GameEngine:
 
     def quit_game(self):
         """Completely exit and close the application."""
+        logger.info("Player requested exit from main menu.")
         self.running = False
-        self.audio.stop_all()
-        pygame.quit()
-        sys.exit(0)
 
     def pick_new_target_kana(self):
         if self.current_stage == 11:
