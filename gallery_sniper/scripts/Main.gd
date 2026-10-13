@@ -250,7 +250,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	
 	# Always launch in exclusive fullscreen mode at the display's maximum native resolution
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	
 	# Connect unified shot trigger from Crosshair (Mouse, Keyboard, Gamepad)
 	if crosshair and crosshair.has_signal("shot_requested"):
@@ -577,10 +577,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				toggle_pause()
 			KEY_F11:
 				var mode = DisplayServer.window_get_mode()
-				if mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_FULLSCREEN:
+				if mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_FULLSCREEN:
 					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 				else:
-					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 			KEY_TAB:
 				toggle_mode()
 			KEY_1:
