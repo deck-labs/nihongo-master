@@ -1,10 +1,10 @@
 {
-  "version": "1.5.15",
-  "tag_name": "v1.5.15",
-  "name": "Nihongo Master v1.5.15 - Clean Kart Decal Plates",
+  "version": "1.5.16",
+  "tag_name": "v1.5.16",
+  "name": "Nihongo Master v1.5.16 - Unified Character Sizes Across Racers",
   "release_date": "2026-10-16",
   "appimage_filename": "Nihongo_Master.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.15/Nihongo_Master.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.15/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.5.15: Removed simulated dark visor above character decals on Mario Kart style vehicles in Katakana Racer, centering Kana and Romaji on clean white decal plates for crystal-clear legibility."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.16/Nihongo_Master.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.16/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.5.16: Unified character sizing on cars across both Hiragana Racer and Katakana Racer for absolute visual consistency. Player karts now render Kana at 33pt, and traffic rival karts render Romaji at 31pt (1-char), 26pt (2-char), and 21pt (3-char) on aerodynamic racing plates."
 }

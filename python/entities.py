@@ -84,11 +84,11 @@ class PlayerCar:
 
         cx = int(self.WIDTH * 0.5)
         if self.style == "kart":
-            # Mario Kart clean circular racing plate with gold border
-            font = get_cjk_font(31)
-            pygame.draw.circle(surf, (15, 20, 30), (cx, 66), 23)
-            pygame.draw.circle(surf, (255, 215, 0), (cx, 66), 22)
-            pygame.draw.circle(surf, (252, 252, 255), (cx, 66), 20)
+            # Mario Kart clean circular racing plate with gold border (consistent 33pt Kana glyph matching Hiragana Racer)
+            font = get_cjk_font(33)
+            pygame.draw.circle(surf, (15, 20, 30), (cx, 66), 25)
+            pygame.draw.circle(surf, (255, 215, 0), (cx, 66), 24)
+            pygame.draw.circle(surf, (252, 252, 255), (cx, 66), 22)
             txt = font.render(self.current_kana, True, (190, 15, 20))
             surf.blit(txt, txt.get_rect(center=(cx, 66)))
         else:
@@ -351,17 +351,26 @@ class TrafficCar:
         cx = int(cls.WIDTH * 0.5)
 
         if style == "kart":
-            # Mario Kart traffic clean steel-bordered white circular decal
-            pygame.draw.circle(surf, (15, 20, 30), (cx, 66), 23)
-            pygame.draw.circle(surf, (75, 95, 125), (cx, 66), 22)
-            pygame.draw.circle(surf, (255, 255, 255), (cx, 66), 20)
-            
-            if len(clean_ro) == 1:
-                fnt = get_latin_font(30)
+            # Mario Kart traffic clean steel-bordered white decal (consistent font sizes matching Hiragana Racer)
+            if len(clean_ro) >= 3:
+                # Capsule / stadium plate for 3-letter Romaji readings (e.g. KYO, TSU, SHI)
+                pw, ph = 54, 46
+                px = cx - pw // 2
+                py = 66 - ph // 2
+                pygame.draw.rect(surf, (15, 20, 30), (px, py, pw, ph), border_radius=23)
+                pygame.draw.rect(surf, (75, 95, 125), (px + 1, py + 1, pw - 2, ph - 2), 2, border_radius=22)
+                pygame.draw.rect(surf, (255, 255, 255), (px + 3, py + 3, pw - 6, ph - 6), border_radius=20)
+                fnt = get_latin_font(21)
             elif len(clean_ro) == 2:
-                fnt = get_latin_font(24)
+                pygame.draw.circle(surf, (15, 20, 30), (cx, 66), 25)
+                pygame.draw.circle(surf, (75, 95, 125), (cx, 66), 24)
+                pygame.draw.circle(surf, (255, 255, 255), (cx, 66), 22)
+                fnt = get_latin_font(26)
             else:
-                fnt = get_latin_font(19)
+                pygame.draw.circle(surf, (15, 20, 30), (cx, 66), 25)
+                pygame.draw.circle(surf, (75, 95, 125), (cx, 66), 24)
+                pygame.draw.circle(surf, (255, 255, 255), (cx, 66), 22)
+                fnt = get_latin_font(31)
 
             txt = fnt.render(clean_ro, True, (12, 18, 30))
             surf.blit(txt, txt.get_rect(center=(cx, 66)))
