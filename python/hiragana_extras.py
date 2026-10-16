@@ -6,7 +6,7 @@ Arcade Racer gameplay & graphics extras (Road Fighter style) for Hiragana & Kata
   * Slipstream drafting, near-miss bonus, match combo multiplier
   * Pooled particles, speed lines, screen shake, floating text, HUD chips
 
-Active for both Hiragana and Katakana Arcade racers.
+Active for both Hiragana and Katakana Racers.
 """
 
 import math

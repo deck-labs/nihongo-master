@@ -25,7 +25,7 @@ The definitive retro Japanese arcade learning suite bundling three distinct game
 
 ## ✨ 3 Games in 1 Bundle
 
-1. **🏎️ Retro Arcade Racers (Hiragana & Katakana Fighter)**:
+1. **🏎️ Retro Racers (Hiragana & Katakana Racer)**:
    - High-speed retro highway racer built with Pygame & SDL2.
    - 10 distinct campaign stages + secret **Rainbow Skyway** (Stage 11) 71-Kana Gauntlet.
    - Slipstream drafting (`DRAFT BOOST`), near-miss bonuses, oil slick hazards, rival traffic archetypes, and authentic tire smoke & turbo flame particles.

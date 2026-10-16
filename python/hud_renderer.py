@@ -395,7 +395,7 @@ class HudRenderer:
         games_data = [
             {
                 "id": "hiragana",
-                "title": "HIRAGANA ARCADE",
+                "title": "HIRAGANA RACER",
                 "tag": "ROAD RACER",
                 "kana": "ひらがな レーサー",
                 "menu_idx": 0,
@@ -403,7 +403,7 @@ class HudRenderer:
             },
             {
                 "id": "katakana",
-                "title": "KATAKANA ARCADE",
+                "title": "KATAKANA RACER",
                 "tag": "ROAD RACER",
                 "kana": "カタカナ レーサー",
                 "menu_idx": 1,
@@ -501,8 +501,8 @@ class HudRenderer:
         spacing = 46
 
         menu_items = [
-            ("HIRAGANA ARCADE", 0),
-            ("KATAKANA ARCADE", 1),
+            ("HIRAGANA RACER", 0),
+            ("KATAKANA RACER", 1),
             ("3D HIRAGANA CARDS", 2),
             ("3D KATAKANA CARDS", 3),
             ("HIRAGANA SNIPER", 4),
@@ -547,11 +547,11 @@ class HudRenderer:
 
         # Mode configuration
         if game_mode == "hiragana":
-            mode_badge = "HIRAGANA ARCADE"
+            mode_badge = "HIRAGANA RACER"
             mode_sub = "CLASSIC ROAD RACER // ひらがな レーサー"
             theme_col = (0, 225, 255)
         elif game_mode == "katakana":
-            mode_badge = "KATAKANA ARCADE"
+            mode_badge = "KATAKANA RACER"
             mode_sub = "CLASSIC ROAD RACER // カタカナ レーサー"
             theme_col = (255, 175, 45)
         elif game_mode == "katakana_cards":
