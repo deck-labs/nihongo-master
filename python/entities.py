@@ -33,33 +33,69 @@ class PlayerCar:
         self.hiragana_extras = False
         self.arcade_extras = False
         self.lean = 0.0
+        self.style = "beetle"
+        self._sprites = {}
         
-        # Load sprite
+        # Load beetle sprite
         spr_path = get_asset_path("sprites/player_car.png")
         try:
             raw = pygame.image.load(spr_path).convert_alpha()
             try:
-                self.sprite = pygame.transform.smoothscale(raw, (int(self.WIDTH), int(self.HEIGHT)))
+                self._sprites["beetle"] = pygame.transform.smoothscale(raw, (int(self.WIDTH), int(self.HEIGHT)))
             except Exception:
-                self.sprite = pygame.transform.scale(raw, (int(self.WIDTH), int(self.HEIGHT)))
+                self._sprites["beetle"] = pygame.transform.scale(raw, (int(self.WIDTH), int(self.HEIGHT)))
         except Exception as e:
-            print(f"Warning: Player sprite load failed: {e}")
-            self.sprite = pygame.Surface((int(self.WIDTH), int(self.HEIGHT)), pygame.SRCALPHA)
-            pygame.draw.rect(self.sprite, (220, 40, 40), (0, 0, int(self.WIDTH), int(self.HEIGHT)), border_radius=8)
+            print(f"Warning: Player beetle sprite load failed: {e}")
+            s = pygame.Surface((int(self.WIDTH), int(self.HEIGHT)), pygame.SRCALPHA)
+            pygame.draw.rect(s, (220, 40, 40), (0, 0, int(self.WIDTH), int(self.HEIGHT)), border_radius=8)
+            self._sprites["beetle"] = s
 
+        # Load kart sprite
+        kart_path = get_asset_path("sprites/kart_player.png")
+        try:
+            raw_k = pygame.image.load(kart_path).convert_alpha()
+            try:
+                self._sprites["kart"] = pygame.transform.smoothscale(raw_k, (int(self.WIDTH), int(self.HEIGHT)))
+            except Exception:
+                self._sprites["kart"] = pygame.transform.scale(raw_k, (int(self.WIDTH), int(self.HEIGHT)))
+        except Exception as e:
+            print(f"Warning: Player kart sprite load failed: {e}")
+            self._sprites["kart"] = self._sprites["beetle"]
+
+        self.sprite = self._sprites[self.style]
         self.composite_sprite = self._build_composite_sprite()
         # Precomputed vehicle chassis drop shadow (ground contact on asphalt)
         self.shadow_surf = pygame.Surface((int(self.WIDTH + 16), int(self.HEIGHT + 16)), pygame.SRCALPHA)
         pygame.draw.rect(self.shadow_surf, (0, 0, 0, 65), (0, 0, int(self.WIDTH + 9), int(self.HEIGHT + 9)), border_radius=22)
         pygame.draw.rect(self.shadow_surf, (0, 0, 0, 105), (3, 3, int(self.WIDTH + 2), int(self.HEIGHT + 2)), border_radius=20)
 
+    def set_style(self, style: str):
+        """Switch vehicle style between classic 'beetle' and 'kart'."""
+        if style in self._sprites and self.style != style:
+            self.style = style
+            self.sprite = self._sprites[self.style]
+            self.composite_sprite = self._build_composite_sprite()
+
     def _build_composite_sprite(self) -> pygame.Surface:
-        """High-contrast illuminated racing roof decal with pearl-white backing and crimson glyph."""
+        """High-contrast illuminated racing decal with pearl-white backing and crimson glyph."""
         surf = self.sprite.copy()
-        if self.current_kana:
+        if not self.current_kana:
+            return surf
+
+        cx = int(self.WIDTH * 0.5)
+        if self.style == "kart":
+            # Mario Kart driver helmet in cockpit with gold-bordered white decal
+            font = get_cjk_font(28)
+            pygame.draw.circle(surf, (15, 20, 30), (cx, 66), 23)
+            pygame.draw.circle(surf, (255, 215, 0), (cx, 66), 22)
+            pygame.draw.circle(surf, (252, 252, 255), (cx, 66), 20)
+            pygame.draw.ellipse(surf, (25, 30, 45), (cx - 13, 49, 26, 12))
+            txt = font.render(self.current_kana, True, (190, 15, 20))
+            surf.blit(txt, txt.get_rect(center=(cx, 68)))
+        else:
             font = get_cjk_font(33)
             pw, ph = 54, 48
-            px = int(self.WIDTH * 0.5) - pw // 2
+            px = cx - pw // 2
             py = 64 - ph // 2
             # Outer dark bezel
             pygame.draw.rect(surf, (20, 25, 35), (px, py, pw, ph), border_radius=5)
@@ -67,9 +103,9 @@ class PlayerCar:
             pygame.draw.rect(surf, (255, 215, 0), (px + 1, py + 1, pw - 2, ph - 2), 2, border_radius=4)
             # Brilliant pearl white plate
             pygame.draw.rect(surf, (252, 252, 255), (px + 3, py + 3, pw - 6, ph - 6), border_radius=3)
-            # Bold rich crimson Hiragana/Katakana glyph (10% larger: 33pt)
+            # Bold rich crimson Hiragana/Katakana glyph (33pt)
             txt = font.render(self.current_kana, True, (190, 15, 20))
-            surf.blit(txt, txt.get_rect(center=(int(self.WIDTH * 0.5), 64)))
+            surf.blit(txt, txt.get_rect(center=(cx, 64)))
         return surf
 
     def update_kana(self, kana: str):
@@ -143,13 +179,18 @@ class PlayerCar:
         return pygame.Rect(self.x - hw * 0.5, self.y - hh * 0.5, hw, hh)
 
     def render(self, surface: pygame.Surface):
-        # 1. Turbo Flames (aligned with Beetle dual chrome exhaust tips)
+        # 1. Turbo Flames (aligned with vehicle exhaust tips)
         if self.is_turbo and self.speed_kmh > 100.0:
             fl_h = random.uniform(16.0, 30.0)
             fl_w = 7.0
-            left_fl_x = self.x - 11.0
-            right_fl_x = self.x + 5.0
-            fl_y = self.y + (self.HEIGHT * 0.5) - 2.0
+            if self.style == "kart":
+                left_fl_x = self.x - 14.0
+                right_fl_x = self.x + 8.0
+                fl_y = self.y + (self.HEIGHT * 0.5) + 4.0
+            else:
+                left_fl_x = self.x - 11.0
+                right_fl_x = self.x + 5.0
+                fl_y = self.y + (self.HEIGHT * 0.5) - 2.0
             
             # Yellow/Orange/Cyan glow
             for fl_x in [left_fl_x, right_fl_x]:
@@ -179,12 +220,20 @@ class PlayerCar:
 
         # Arcade Fighter: glowing brake lights at the tail
         if (self.hiragana_extras or self.arcade_extras) and self.is_braking and self.speed_kmh > 5.0:
-            tail_y = int(round(self.y + self.HEIGHT * 0.5)) - 6
-            for sx in (-30, 30):
-                px = int(round(self.x)) + sx
-                pygame.draw.circle(surface, (150, 10, 10), (px, tail_y), 11)
-                pygame.draw.circle(surface, (255, 50, 40), (px, tail_y), 7)
-                pygame.draw.circle(surface, (255, 190, 170), (px, tail_y), 3)
+            if self.style == "kart":
+                tail_y = int(round(self.y + self.HEIGHT * 0.5)) + 4
+                for sx in (-28, 28):
+                    px = int(round(self.x)) + sx
+                    pygame.draw.circle(surface, (150, 10, 10), (px, tail_y), 9)
+                    pygame.draw.circle(surface, (255, 50, 40), (px, tail_y), 6)
+                    pygame.draw.circle(surface, (255, 190, 170), (px, tail_y), 3)
+            else:
+                tail_y = int(round(self.y + self.HEIGHT * 0.5)) - 6
+                for sx in (-30, 30):
+                    px = int(round(self.x)) + sx
+                    pygame.draw.circle(surface, (150, 10, 10), (px, tail_y), 11)
+                    pygame.draw.circle(surface, (255, 50, 40), (px, tail_y), 7)
+                    pygame.draw.circle(surface, (255, 190, 170), (px, tail_y), 3)
             
         # 3. Guardrail Sparks
         if self.is_sparking:
@@ -227,7 +276,8 @@ class TrafficCar:
     
     _textures = {}
 
-    def __init__(self, romaji: str, start_world_y: float, lane_idx: int, speed: float, color: str, font_latin: pygame.font.Font = None):
+    def __init__(self, romaji: str, start_world_y: float, lane_idx: int, speed: float, color: str, font_latin: pygame.font.Font = None, style: str = "beetle"):
+        self.style = style
         self.romaji = romaji
         self.world_y = start_world_y
         self.speed_kmh = speed
@@ -252,8 +302,8 @@ class TrafficCar:
         self.match_anim_timer = 0.0
         self.to_remove = False
         
-        raw_sprite = self._get_texture(color)
-        self.sprite = self._build_traffic_sprite(raw_sprite, romaji)
+        raw_sprite = self._get_texture(color, style)
+        self.sprite = self._build_traffic_sprite(raw_sprite, romaji, style)
         # Precomputed vehicle chassis drop shadow (ground contact on asphalt)
         self.shadow_surf = pygame.Surface((int(self.WIDTH + 16), int(self.HEIGHT + 16)), pygame.SRCALPHA)
         pygame.draw.rect(self.shadow_surf, (0, 0, 0, 65), (0, 0, int(self.WIDTH + 9), int(self.HEIGHT + 9)), border_radius=22)
@@ -271,29 +321,55 @@ class TrafficCar:
             self.lane_change_speed = 0.5  # slow, readable swerve instead of a snap
 
     @classmethod
-    def _get_texture(cls, color: str) -> pygame.Surface:
-        if color not in cls._textures:
-            path = get_asset_path(f"sprites/traffic_{color}.png")
+    def _get_texture(cls, color: str, style: str = "beetle") -> pygame.Surface:
+        key = (color, style)
+        if key not in cls._textures:
+            if style == "kart":
+                path = get_asset_path(f"sprites/kart_traffic_{color}.png")
+            else:
+                path = get_asset_path(f"sprites/traffic_{color}.png")
             try:
                 raw = pygame.image.load(path).convert_alpha()
                 try:
-                    cls._textures[color] = pygame.transform.smoothscale(raw, (int(cls.WIDTH), int(cls.HEIGHT)))
+                    cls._textures[key] = pygame.transform.smoothscale(raw, (int(cls.WIDTH), int(cls.HEIGHT)))
                 except Exception:
-                    cls._textures[color] = pygame.transform.scale(raw, (int(cls.WIDTH), int(cls.HEIGHT)))
+                    cls._textures[key] = pygame.transform.scale(raw, (int(cls.WIDTH), int(cls.HEIGHT)))
             except Exception as e:
-                print(f"Warning: Traffic sprite {color} load failed: {e}")
+                print(f"Warning: Traffic sprite {color} ({style}) load failed: {e}")
                 s = pygame.Surface((int(cls.WIDTH), int(cls.HEIGHT)), pygame.SRCALPHA)
                 pygame.draw.rect(s, (40, 120, 220), (0, 0, int(cls.WIDTH), int(cls.HEIGHT)), border_radius=8)
-                cls._textures[color] = s
-        return cls._textures[color]
+                cls._textures[key] = s
+        return cls._textures[key]
 
     @classmethod
-    def _build_traffic_sprite(cls, base_sprite: pygame.Surface, romaji: str) -> pygame.Surface:
-        """High-contrast illuminated white decal plate with dark racing bezel and charcoal Romaji (10% larger)."""
+    def _build_traffic_sprite(cls, base_sprite: pygame.Surface, romaji: str, style: str = "beetle") -> pygame.Surface:
+        """High-contrast illuminated white decal plate with dark racing bezel and charcoal Romaji."""
         surf = base_sprite.copy()
-        if romaji:
+        if not romaji:
+            return surf
+
+        clean_ro = romaji.upper().strip()
+        cx = int(cls.WIDTH * 0.5)
+
+        if style == "kart":
+            # Mario Kart traffic helmet in cockpit with clean steel-bordered white decal
+            pygame.draw.circle(surf, (15, 20, 30), (cx, 66), 23)
+            pygame.draw.circle(surf, (75, 95, 125), (cx, 66), 22)
+            pygame.draw.circle(surf, (255, 255, 255), (cx, 66), 20)
+            pygame.draw.ellipse(surf, (25, 30, 45), (cx - 13, 49, 26, 12))
+            
+            if len(clean_ro) == 1:
+                fnt = get_latin_font(25)
+            elif len(clean_ro) == 2:
+                fnt = get_latin_font(21)
+            else:
+                fnt = get_latin_font(17)
+
+            txt = fnt.render(clean_ro, True, (12, 18, 30))
+            surf.blit(txt, txt.get_rect(center=(cx, 68)))
+        else:
             pw, ph = 54, 48
-            px = int(cls.WIDTH * 0.5) - pw // 2
+            px = cx - pw // 2
             py = 64 - ph // 2
             # Outer dark bezel
             pygame.draw.rect(surf, (15, 20, 30), (px, py, pw, ph), border_radius=5)
@@ -303,7 +379,6 @@ class TrafficCar:
             pygame.draw.rect(surf, (255, 255, 255), (px + 3, py + 3, pw - 6, ph - 6), border_radius=3)
             
             # Dynamic font sizing for perfect fit within decal plate (+10% larger characters)
-            clean_ro = romaji.upper().strip()
             if len(clean_ro) == 1:
                 fnt = get_latin_font(31)  # 28 * 1.10 = 31
             elif len(clean_ro) == 2:
@@ -313,7 +388,7 @@ class TrafficCar:
                 
             # Deep charcoal/navy Romaji on pure white plate for razor-sharp legibility at high speed
             txt = fnt.render(clean_ro, True, (12, 18, 30))
-            surf.blit(txt, txt.get_rect(center=(int(cls.WIDTH * 0.5), 64)))
+            surf.blit(txt, txt.get_rect(center=(cx, 64)))
         return surf
 
     def attempt_lane_change(self, new_lane_idx: int):

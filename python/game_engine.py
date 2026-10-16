@@ -331,6 +331,7 @@ class GameEngine:
         self.extras.reset(stage_num)
         self.player.hiragana_extras = (self.game_mode in ("hiragana", "katakana"))
         self.player.arcade_extras = (self.game_mode in ("hiragana", "katakana"))
+        self.player.set_style("kart" if self.game_mode == "katakana" else "beetle")
         if stage_num == 11:
             self.secret_deck = list(get_gauntlet_kana(self.game_mode))
             random.shuffle(self.secret_deck)
@@ -682,7 +683,8 @@ class GameEngine:
         spd = random.uniform(70.0, 130.0)
         col = random.choice(TRAFFIC_COLORS)
         
-        car = TrafficCar(pick_romaji, spawn_world_y, lane_idx, spd, col, self.font_latin)
+        style = "kart" if self.game_mode == "katakana" else "beetle"
+        car = TrafficCar(pick_romaji, spawn_world_y, lane_idx, spd, col, self.font_latin, style=style)
         self.extras.assign_behavior(self, car)
         self.traffic_cars.append(car)
 
