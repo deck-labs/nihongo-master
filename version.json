@@ -1,10 +1,10 @@
 {
-  "version": "1.5.14",
-  "tag_name": "v1.5.14",
-  "name": "Nihongo Master v1.5.14 - Katakana Mario Kart Style Vehicles",
+  "version": "1.5.15",
+  "tag_name": "v1.5.15",
+  "name": "Nihongo Master v1.5.15 - Clean Kart Decal Plates",
   "release_date": "2026-10-16",
   "appimage_filename": "Nihongo_Master.AppImage",
-  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.14/Nihongo_Master.AppImage",
-  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.14/Nihongo_Master-x86_64.AppImage",
-  "changelog": "v1.5.14: Katakana Racer now features authentic 'Mario Kart' style open-wheel racing go-karts for both the player and traffic rivals with driver helmet decals, while Hiragana Racer preserves the classic retro Beetle aesthetic."
+  "download_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.15/Nihongo_Master.AppImage",
+  "fallback_raw_url": "https://github.com/deck-labs/nihongo-master/releases/download/v1.5.15/Nihongo_Master-x86_64.AppImage",
+  "changelog": "v1.5.15: Removed simulated dark visor above character decals on Mario Kart style vehicles in Katakana Racer, centering Kana and Romaji on clean white decal plates for crystal-clear legibility."
 }

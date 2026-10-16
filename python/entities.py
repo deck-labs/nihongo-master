@@ -84,14 +84,13 @@ class PlayerCar:
 
         cx = int(self.WIDTH * 0.5)
         if self.style == "kart":
-            # Mario Kart driver helmet in cockpit with gold-bordered white decal
-            font = get_cjk_font(28)
+            # Mario Kart clean circular racing plate with gold border
+            font = get_cjk_font(31)
             pygame.draw.circle(surf, (15, 20, 30), (cx, 66), 23)
             pygame.draw.circle(surf, (255, 215, 0), (cx, 66), 22)
             pygame.draw.circle(surf, (252, 252, 255), (cx, 66), 20)
-            pygame.draw.ellipse(surf, (25, 30, 45), (cx - 13, 49, 26, 12))
             txt = font.render(self.current_kana, True, (190, 15, 20))
-            surf.blit(txt, txt.get_rect(center=(cx, 68)))
+            surf.blit(txt, txt.get_rect(center=(cx, 66)))
         else:
             font = get_cjk_font(33)
             pw, ph = 54, 48
@@ -352,21 +351,20 @@ class TrafficCar:
         cx = int(cls.WIDTH * 0.5)
 
         if style == "kart":
-            # Mario Kart traffic helmet in cockpit with clean steel-bordered white decal
+            # Mario Kart traffic clean steel-bordered white circular decal
             pygame.draw.circle(surf, (15, 20, 30), (cx, 66), 23)
             pygame.draw.circle(surf, (75, 95, 125), (cx, 66), 22)
             pygame.draw.circle(surf, (255, 255, 255), (cx, 66), 20)
-            pygame.draw.ellipse(surf, (25, 30, 45), (cx - 13, 49, 26, 12))
             
             if len(clean_ro) == 1:
-                fnt = get_latin_font(25)
+                fnt = get_latin_font(30)
             elif len(clean_ro) == 2:
-                fnt = get_latin_font(21)
+                fnt = get_latin_font(24)
             else:
-                fnt = get_latin_font(17)
+                fnt = get_latin_font(19)
 
             txt = fnt.render(clean_ro, True, (12, 18, 30))
-            surf.blit(txt, txt.get_rect(center=(cx, 68)))
+            surf.blit(txt, txt.get_rect(center=(cx, 66)))
         else:
             pw, ph = 54, 48
             px = cx - pw // 2
