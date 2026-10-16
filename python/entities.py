@@ -11,6 +11,100 @@ from game_config import (
     get_asset_path
 )
 
+def generate_wheel_spin_frames(raw_surf: pygame.Surface, style: str, target_size: tuple[int, int] = (90, 132), num_frames: int = 4) -> list[pygame.Surface]:
+    """
+    Generates cyclical spinning wheel animation frames for vehicle chassis.
+    For kart: rolls open-wheel herringbone tread patterns vertically across all 4 exposed tires.
+    For beetle: rolls fender rubber strips and rotates specular reflections on chrome hubcaps.
+    """
+    frames = []
+    if style == "kart":
+        tires = [
+            (0, 30, 50, 55),
+            (127, 30, 50, 55),
+            (0, 150, 50, 65),
+            (127, 150, 50, 65)
+        ]
+        pitch = 7.0
+        for f in range(num_frames):
+            shift = int(round((f / num_frames) * pitch))
+            frame_raw = raw_surf.copy()
+            for tx, ty, tw, th in tires:
+                sub = raw_surf.subsurface((tx, ty, tw, th)).copy()
+                rolled = pygame.Surface((tw, th), pygame.SRCALPHA)
+                rolled.blit(sub, (0, -shift))
+                rolled.blit(sub, (0, th - shift))
+                
+                # Mask with original alpha boundary so wheel silhouette never bleeds
+                for y in range(th):
+                    for x in range(tw):
+                        orig_c = sub.get_at((x, y))
+                        if orig_c.a < 50:
+                            rolled.set_at((x, y), (0, 0, 0, 0))
+                        else:
+                            r_c = rolled.get_at((x, y))
+                            rolled.set_at((x, y), (r_c.r, r_c.g, r_c.b, orig_c.a))
+                frame_raw.blit(rolled, (tx, ty))
+                
+            try:
+                scaled = pygame.transform.smoothscale(frame_raw, target_size)
+            except Exception:
+                scaled = pygame.transform.scale(frame_raw, target_size)
+            frames.append(scaled)
+    else:  # beetle
+        wheels = [
+            (0, 26, 26, 50, -1),
+            (151, 26, 26, 50, 1),
+            (0, 165, 26, 60, -1),
+            (151, 165, 26, 60, 1)
+        ]
+        pitch = 8.0
+        for f in range(num_frames):
+            shift = int(round((f / num_frames) * pitch))
+            frame_raw = raw_surf.copy()
+            for wx, wy, ww, wh, side in wheels:
+                sub = raw_surf.subsurface((wx, wy, ww, wh)).copy()
+                rolled = pygame.Surface((ww, wh), pygame.SRCALPHA)
+                rolled.blit(sub, (0, -shift))
+                rolled.blit(sub, (0, wh - shift))
+                
+                # Rotating specular reflection glint on chrome hubcap
+                hc_x = 7 if side == -1 else 19
+                hc_y = wh // 2
+                ang = (f / num_frames) * math.pi * 2.0
+                gx = hc_x + math.cos(ang) * 3.5
+                gy = hc_y + math.sin(ang) * 7.0
+                
+                glint_surf = pygame.Surface((ww, wh), pygame.SRCALPHA)
+                pygame.draw.circle(glint_surf, (255, 255, 255, 200), (int(gx), int(gy)), 3)
+                pygame.draw.circle(glint_surf, (255, 255, 255, 255), (int(gx), int(gy)), 1)
+                
+                for y in range(wh):
+                    for x in range(ww):
+                        orig_c = sub.get_at((x, y))
+                        if orig_c.a < 50:
+                            rolled.set_at((x, y), (0, 0, 0, 0))
+                        else:
+                            r_c = rolled.get_at((x, y))
+                            g_c = glint_surf.get_at((x, y))
+                            if orig_c.r > 120 and orig_c.g > 120 and orig_c.b > 120 and g_c.a > 0:
+                                nr = min(255, r_c.r + g_c.a // 2)
+                                ng = min(255, r_c.g + g_c.a // 2)
+                                nb = min(255, r_c.b + g_c.a // 2)
+                                rolled.set_at((x, y), (nr, ng, nb, orig_c.a))
+                            else:
+                                rolled.set_at((x, y), (r_c.r, r_c.g, r_c.b, orig_c.a))
+                                
+                frame_raw.blit(rolled, (wx, wy))
+            try:
+                scaled = pygame.transform.smoothscale(frame_raw, target_size)
+            except Exception:
+                scaled = pygame.transform.scale(frame_raw, target_size)
+            frames.append(scaled)
+            
+    return frames
+
+
 class PlayerCar:
     WIDTH = 90.0
     HEIGHT = 132.0
@@ -34,56 +128,70 @@ class PlayerCar:
         self.arcade_extras = False
         self.lean = 0.0
         self.style = "beetle"
+        self.wheel_dist = 0.0
         self._sprites = {}
         
-        # Load beetle sprite
+        # Load beetle animated frames
         spr_path = get_asset_path("sprites/player_car.png")
         try:
             raw = pygame.image.load(spr_path).convert_alpha()
-            try:
-                self._sprites["beetle"] = pygame.transform.smoothscale(raw, (int(self.WIDTH), int(self.HEIGHT)))
-            except Exception:
-                self._sprites["beetle"] = pygame.transform.scale(raw, (int(self.WIDTH), int(self.HEIGHT)))
+            self._sprites["beetle"] = generate_wheel_spin_frames(raw, "beetle", (int(self.WIDTH), int(self.HEIGHT)))
         except Exception as e:
             print(f"Warning: Player beetle sprite load failed: {e}")
             s = pygame.Surface((int(self.WIDTH), int(self.HEIGHT)), pygame.SRCALPHA)
             pygame.draw.rect(s, (220, 40, 40), (0, 0, int(self.WIDTH), int(self.HEIGHT)), border_radius=8)
-            self._sprites["beetle"] = s
+            self._sprites["beetle"] = [s] * 4
 
-        # Load kart sprite
+        # Load kart animated frames
         kart_path = get_asset_path("sprites/kart_player.png")
         try:
             raw_k = pygame.image.load(kart_path).convert_alpha()
-            try:
-                self._sprites["kart"] = pygame.transform.smoothscale(raw_k, (int(self.WIDTH), int(self.HEIGHT)))
-            except Exception:
-                self._sprites["kart"] = pygame.transform.scale(raw_k, (int(self.WIDTH), int(self.HEIGHT)))
+            self._sprites["kart"] = generate_wheel_spin_frames(raw_k, "kart", (int(self.WIDTH), int(self.HEIGHT)))
         except Exception as e:
             print(f"Warning: Player kart sprite load failed: {e}")
             self._sprites["kart"] = self._sprites["beetle"]
 
-        self.sprite = self._sprites[self.style]
-        self.composite_sprite = self._build_composite_sprite()
+        self._composite_frames = {}
+        self._rebuild_composite_frames()
+        self.sprite = self._sprites[self.style][0]
+        self.composite_sprite = self._composite_frames[self.style][0]
         # Precomputed vehicle chassis drop shadow (ground contact on asphalt)
         self.shadow_surf = pygame.Surface((int(self.WIDTH + 16), int(self.HEIGHT + 16)), pygame.SRCALPHA)
         pygame.draw.rect(self.shadow_surf, (0, 0, 0, 65), (0, 0, int(self.WIDTH + 9), int(self.HEIGHT + 9)), border_radius=22)
         pygame.draw.rect(self.shadow_surf, (0, 0, 0, 105), (3, 3, int(self.WIDTH + 2), int(self.HEIGHT + 2)), border_radius=20)
 
+    def _rebuild_composite_frames(self):
+        self._composite_frames = {}
+        for st, frames in self._sprites.items():
+            self._composite_frames[st] = [
+                self._build_composite_sprite(f, st) for f in frames
+            ]
+
     def set_style(self, style: str):
         """Switch vehicle style between classic 'beetle' and 'kart'."""
         if style in self._sprites and self.style != style:
             self.style = style
-            self.sprite = self._sprites[self.style]
-            self.composite_sprite = self._build_composite_sprite()
+            frames = self._composite_frames.get(self.style, [])
+            if frames:
+                frame_idx = int(self.wheel_dist) % len(frames)
+                self.composite_sprite = frames[frame_idx]
+                self.sprite = self._sprites[self.style][frame_idx]
 
-    def _build_composite_sprite(self) -> pygame.Surface:
+    def _build_composite_sprite(self, base_surf: pygame.Surface = None, style: str = None) -> pygame.Surface:
         """High-contrast illuminated racing decal with pearl-white backing and crimson glyph."""
-        surf = self.sprite.copy()
+        active_style = style if style is not None else self.style
+        if base_surf is not None:
+            surf = base_surf.copy()
+        elif active_style in self._sprites and self._sprites[active_style]:
+            surf = self._sprites[active_style][0].copy()
+        else:
+            surf = pygame.Surface((int(self.WIDTH), int(self.HEIGHT)), pygame.SRCALPHA)
+            
         if not self.current_kana:
             return surf
 
         cx = int(self.WIDTH * 0.5)
-        if self.style == "kart":
+        if active_style == "kart":
             # Mario Kart clean circular racing plate with gold border (consistent 33pt Kana glyph matching Hiragana Racer)
             font = get_cjk_font(33)
             pygame.draw.circle(surf, (15, 20, 30), (cx, 66), 25)
@@ -110,7 +218,11 @@ class PlayerCar:
     def update_kana(self, kana: str):
         if self.current_kana != kana:
             self.current_kana = kana
-            self.composite_sprite = self._build_composite_sprite()
+            self._rebuild_composite_frames()
+            frames = self._composite_frames.get(self.style, [])
+            if frames:
+                frame_idx = int(self.wheel_dist) % len(frames)
+                self.composite_sprite = frames[frame_idx]
 
     def handle_input(self, steer_axis: float, turbo_down: bool, brake_down: bool, delta: float):
         # Turbo takes precedence over brake to prevent accidental or phantom brake locking
@@ -148,6 +260,15 @@ class PlayerCar:
             self.lean += (target - self.lean) * min(1.0, 10.0 * delta)
         else:
             self.lean = 0.0
+
+        # Wheel spinning animation proportional to forward velocity
+        self.wheel_dist += self.speed_kmh * delta * 0.18
+        frames = self._composite_frames.get(self.style, [])
+        if frames:
+            frame_idx = int(self.wheel_dist) % len(frames)
+            self.composite_sprite = frames[frame_idx]
+            if self.style in self._sprites and self._sprites[self.style]:
+                self.sprite = self._sprites[self.style][frame_idx]
 
     def check_road_bounds(self, road_edges: tuple[float, float]):
         r_left, r_right = road_edges
@@ -274,6 +395,7 @@ class TrafficCar:
     LANE_FRACTIONS = [0.125, 0.375, 0.625, 0.875]
     
     _textures = {}
+    _composite_cache = {}
 
     def __init__(self, romaji: str, start_world_y: float, lane_idx: int, speed: float, color: str, font_latin: pygame.font.Font = None, style: str = "beetle"):
         self.style = style
@@ -301,8 +423,15 @@ class TrafficCar:
         self.match_anim_timer = 0.0
         self.to_remove = False
         
-        raw_sprite = self._get_texture(color, style)
-        self.sprite = self._build_traffic_sprite(raw_sprite, romaji, style)
+        self.wheel_dist = random.uniform(0.0, 4.0)
+        key = (color, style, romaji)
+        if key not in self._composite_cache:
+            base_frames = self._get_texture(color, style)
+            self._composite_cache[key] = [
+                self._build_traffic_sprite(bf, romaji, style) for bf in base_frames
+            ]
+        self.frames = self._composite_cache[key]
+        self.sprite = self.frames[int(self.wheel_dist) % len(self.frames)]
         # Precomputed vehicle chassis drop shadow (ground contact on asphalt)
         self.shadow_surf = pygame.Surface((int(self.WIDTH + 16), int(self.HEIGHT + 16)), pygame.SRCALPHA)
         pygame.draw.rect(self.shadow_surf, (0, 0, 0, 65), (0, 0, int(self.WIDTH + 9), int(self.HEIGHT + 9)), border_radius=22)
@@ -320,7 +449,7 @@ class TrafficCar:
             self.lane_change_speed = 0.5  # slow, readable swerve instead of a snap
 
     @classmethod
-    def _get_texture(cls, color: str, style: str = "beetle") -> pygame.Surface:
+    def _get_texture(cls, color: str, style: str = "beetle") -> list[pygame.Surface]:
         key = (color, style)
         if key not in cls._textures:
             if style == "kart":
@@ -329,15 +458,12 @@ class TrafficCar:
                 path = get_asset_path(f"sprites/traffic_{color}.png")
             try:
                 raw = pygame.image.load(path).convert_alpha()
-                try:
-                    cls._textures[key] = pygame.transform.smoothscale(raw, (int(cls.WIDTH), int(cls.HEIGHT)))
-                except Exception:
-                    cls._textures[key] = pygame.transform.scale(raw, (int(cls.WIDTH), int(cls.HEIGHT)))
+                cls._textures[key] = generate_wheel_spin_frames(raw, style, (int(cls.WIDTH), int(cls.HEIGHT)))
             except Exception as e:
                 print(f"Warning: Traffic sprite {color} ({style}) load failed: {e}")
                 s = pygame.Surface((int(cls.WIDTH), int(cls.HEIGHT)), pygame.SRCALPHA)
                 pygame.draw.rect(s, (40, 120, 220), (0, 0, int(cls.WIDTH), int(cls.HEIGHT)), border_radius=8)
-                cls._textures[key] = s
+                cls._textures[key] = [s] * 4
         return cls._textures[key]
 
     @classmethod
@@ -441,6 +567,9 @@ class TrafficCar:
             elif self.wobble_timer > 0.0:
                 self.wobble_timer -= delta
                 self.world_y += self.speed_kmh * 3.0 * delta
+                self.wheel_dist += self.speed_kmh * delta * 0.18
+                if self.frames:
+                    self.sprite = self.frames[int(self.wheel_dist) % len(self.frames)]
                 if self.wobble_timer <= 0.0:
                     self.to_remove = True
             return
@@ -450,6 +579,11 @@ class TrafficCar:
             
         # Move along track
         self.world_y += self.speed_kmh * 3.0 * delta
+        
+        # Wheel spinning animation
+        self.wheel_dist += self.speed_kmh * delta * 0.18
+        if self.frames:
+            self.sprite = self.frames[int(self.wheel_dist) % len(self.frames)]
 
     def update_screen_pos(self, track_distance: float, road_edges: tuple[float, float], player_screen_y: float = None, screen_h: float = None):
         # Screen Y

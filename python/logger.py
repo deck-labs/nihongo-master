@@ -19,7 +19,7 @@ import faulthandler
 from collections import deque
 
 LOGGER_NAME = "NihongoMaster"
-DEFAULT_APP_VERSION = "1.5.16"
+DEFAULT_APP_VERSION = "1.5.17"
 
 # Ring buffer for recent in-memory log entries (captures context leading to a crash)
 _RECENT_LOG_BUFFER = deque(maxlen=150)
